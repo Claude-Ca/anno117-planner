@@ -1,6 +1,6 @@
 # Installation de l'environnement de développement
 
-Ce document décrit pas à pas la mise en place d'un poste Windows pour travailler sur ce projet (monorepo TypeScript : `core`, `ui`, `product`). Toutes les commandes se lancent dans **PowerShell**, de préférence dans le terminal intégré de Visual Studio Code (`` Ctrl+` ``).
+Ce document décrit pas à pas la mise en place d'un poste Windows pour travailler sur Anno 117 Planner (monorepo TypeScript : application de bureau React + Electron, packages `core`, `product` et `game-data`). Toutes les commandes se lancent dans **PowerShell**, de préférence dans le terminal intégré de Visual Studio Code (`` Ctrl+` ``).
 
 **Point de départ supposé :** Windows 10 ou 11 avec **Git** déjà installé (Git for Windows, Git Bash, extension Git, etc.). Tout le reste est installé ci-dessous.
 
@@ -16,6 +16,12 @@ Versions utilisées lors de la mise en place du projet. Les versions plus récen
 | pnpm | 12.15.0 |
 
 La version de Node exacte du projet est fixée par le fichier `.node-version` à la racine du dépôt.
+
+## Ce qui est installé sur le poste, et ce qui ne l'est pas
+
+Le poste ne reçoit que cinq outils : Git, VS Code, fnm, Node.js et pnpm. **Electron n'est pas installé sur la machine** : c'est une dépendance du projet, téléchargée dans le dépôt par `pnpm install`. Aucun droit administrateur n'est requis pour cette partie.
+
+Rust, Tauri et les outils de compilation C++ **ne sont pas nécessaires** à ce projet. S'ils sont déjà installés pour un autre projet, ils peuvent être conservés sans aucun conflit.
 
 ## 1. Visual Studio Code
 
@@ -38,8 +44,6 @@ code --install-extension vitest.explorer
 code --install-extension dsznajder.es7-react-js-snippets
 code --install-extension usernamehw.errorlens
 code --install-extension eamodio.gitlens
-code --install-extension tauri-apps.tauri-vscode
-code --install-extension rust-lang.rust-analyzer
 ```
 
 | Extension | Rôle |
@@ -50,10 +54,10 @@ code --install-extension rust-lang.rust-analyzer
 | ES7+ React/Redux snippets | Raccourcis pour les composants React |
 | Error Lens | Affiche les erreurs directement sur la ligne concernée |
 | GitLens | Historique Git annoté (facultatif) |
-| Tauri | Support du module `product` |
-| rust-analyzer | Support du module `product` |
 
 Si un identifiant est refusé, installez l'extension par son nom depuis le panneau Extensions de VS Code (`Ctrl+Shift+X`).
+
+Si les extensions **Tauri** et **rust-analyzer** sont déjà installées pour un autre projet, vous pouvez les désactiver pour ce dossier de travail : panneau Extensions, clic sur l'extension, puis « Désactiver (espace de travail) ».
 
 ## 3. fnm (gestionnaire de versions de Node)
 
@@ -131,18 +135,7 @@ Deux messages peuvent apparaître et sont sans gravité :
 - `npm warn install-scripts ... pnpm` : si pnpm répond à `pnpm -v`, rien à faire. En cas de comportement anormal, relancez `npm install -g --allow-scripts=pnpm`.
 - « New major version of npm available » : la mise à jour de npm n'est pas nécessaire.
 
-## 6. Rust et outils C++ (uniquement pour le module `product`)
-
-Cette étape n'est **pas nécessaire** pour travailler sur `core` et `ui`, qui s'exécutent dans le navigateur. Elle ne devient utile qu'au moment de construire l'installateur Windows avec Tauri. Vous n'aurez pas à écrire de Rust.
-
-```powershell
-winget install Rustlang.Rustup
-winget install Microsoft.VisualStudio.2022.BuildTools --override "--wait --passive --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-```
-
-WebView2 est déjà présent sur Windows 11 et sur la plupart des Windows 10 à jour. Les prérequis officiels et leurs éventuelles évolutions sont décrits ici : <https://tauri.app/start/prerequisites/>. Ces commandes n'ont pas encore été validées dans le cadre de ce projet : en cas de difficulté, la documentation de Tauri fait foi.
-
-## 7. Récupérer et lancer le projet
+## 6. Récupérer et lancer le projet
 
 ```powershell
 git clone <URL_DU_DEPOT> anno117-planner
@@ -152,7 +145,9 @@ pnpm install
 code .
 ```
 
-## 8. Vérification
+`pnpm install` télécharge toutes les dépendances du projet, y compris Electron une fois le module `apps/desktop` créé.
+
+## 7. Vérification
 
 Depuis la racine du dépôt :
 
@@ -172,7 +167,7 @@ node -v
 pnpm -v
 ```
 
-## 9. Dépannage
+## 8. Dépannage
 
 | Symptôme | Cause et solution |
 |---|---|
@@ -182,22 +177,23 @@ pnpm -v
 | « L'exécution de scripts est désactivée sur ce système » | Lancez `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, puis rouvrez le terminal. |
 | `winget` n'est pas reconnu | Installez ou mettez à jour « Programme d'installation d'application » (App Installer) depuis le Microsoft Store. |
 | `code` n'est pas reconnu | Fermez et rouvrez PowerShell après l'installation de VS Code. |
-| « Ignored build scripts » après `pnpm install` | Message informatif de pnpm. Les outils du projet (Vitest notamment) fonctionnent sans ces scripts. |
+| « Ignored build scripts » après `pnpm install` | Message informatif de pnpm : certains paquets ont des scripts d'installation qu'il n'exécute pas sans autorisation. Pour Vitest, c'est sans conséquence. |
+| Electron ne se lance pas, ou son binaire est introuvable après `pnpm install` | pnpm a probablement bloqué le script d'installation d'Electron, qui télécharge son exécutable. Lancez `pnpm approve-builds`, autorisez `electron`, puis relancez `pnpm install` (ou `pnpm rebuild electron`). La syntaxe exacte pouvant évoluer selon la version de pnpm, suivez les indications affichées. |
 
 ## Pourquoi pas Docker
 
-Docker n'apporte pas d'avantage pour ce projet : l'installateur Windows de Tauri ne peut pas être construit dans un conteneur Linux, le rechargement à chaud de Vite est lent sur un dossier Windows monté, et la couche supplémentaire complique le diagnostic des erreurs. fnm offre l'essentiel de l'isolation. L'installateur Windows sera construit par GitHub Actions sur un runner Windows.
+Docker n'apporte pas d'avantage pour ce projet : l'installateur Windows doit être construit sous Windows, le rechargement à chaud de Vite est lent sur un dossier Windows monté dans un conteneur, et la couche supplémentaire complique le diagnostic des erreurs. fnm offre l'essentiel de l'isolation. L'installateur Windows sera construit par GitHub Actions sur un runner Windows.
 
-## Annexe : création initiale du squelette
+## Annexe : squelette du dépôt
 
-Pour mémoire, commandes utilisées pour initialiser le dépôt (à ne pas rejouer sur un dépôt cloné) :
+Pour mémoire, commandes d'initialisation du dépôt et structure cible (à ne pas rejouer sur un dépôt cloné) :
 
 ```powershell
 mkdir anno117-planner
 cd anno117-planner
 git init -b main
 Set-Content .node-version "24.22.1"
-mkdir packages\core\src, packages\ui, apps\product, data
+mkdir apps\desktop, packages\core\src, packages\game-data, packages\product, documents
 
 # Après création des fichiers package.json, tsconfig.json et pnpm-workspace.yaml :
 pnpm --filter @anno117/core add -D typescript vitest
