@@ -243,4 +243,4 @@ export function computeIsland(catalog: Catalog, island: IslandInput): IslandRepo
   }
 
   return { totalPopulation, buildings };
-  }
+}
