@@ -10,8 +10,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@anno117/core": "workspace:*"
+ "dependencies": {
+    "@anno117/core": "workspace:*",
+    "@anno117/game-data": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
