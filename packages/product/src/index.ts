@@ -1,4 +1,6 @@
 export { simulateProduction } from "./simulate-production";
+export { simulateGameProduction } from "./simulate-game-production";
+export type { SimulateGameProductionInput } from "./simulate-game-production";
 
 export type {
   ProductionSimulationResult,
