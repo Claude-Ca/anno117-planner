@@ -2,7 +2,7 @@ export type GoodId = string;
 export type BuildingId = string;
 export type TierId = string;
 
-/** Un flux de marchandise, en unités par minute. */
+/** Un flux de marchandise, en unités par minute. Les quantités doivent être finies et positives ou nulles. */
 export interface Flow {
   good: GoodId;
   perMinute: number;
@@ -28,7 +28,11 @@ export interface Catalog {
   tiers: PopulationTier[];
 }
 
-/** Ce que le joueur saisit pour une île. */
+/**
+ * Paramètres saisis pour une île.
+ * Les quantités de maisons et de bâtiments construits sont des entiers positifs ou nuls.
+ * Les facteurs de productivité doivent être finis et strictement positifs.
+ */
 export interface IslandInput {
   name: string;
   houses: Record<TierId, number>;
