@@ -114,7 +114,7 @@ function validateIsland(catalog: Catalog, island: IslandInput): void {
   for (const [tierId, houses] of Object.entries(island.houses)) {
     if (!tierIds.has(tierId)) throw new Error(`Palier de population inconnu : « ${tierId} »`);
     assertNonNegativeNumber(houses, `Nombre de maisons pour « ${tierId} »`);
-    if (!Number.isInteger(houses)) {
+    if (!Number.isSafeInteger(houses)) {
       throw new RangeError(`Le nombre de maisons pour « ${tierId} » doit être un entier`);
     }
   }
@@ -123,7 +123,7 @@ function validateIsland(catalog: Catalog, island: IslandInput): void {
   for (const [buildingId, count] of Object.entries(island.built)) {
     if (!buildingIds.has(buildingId)) throw new Error(`Bâtiment construit inconnu : « ${buildingId} »`);
     assertNonNegativeNumber(count, `Nombre de bâtiments construits pour « ${buildingId} »`);
-    if (!Number.isInteger(count)) {
+    if (!Number.isSafeInteger(count)) {
       throw new RangeError(`Le nombre de bâtiments construits pour « ${buildingId} » doit être un entier`);
     }
   }
