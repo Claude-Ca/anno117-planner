@@ -36,6 +36,15 @@ const find = (report: ReturnType<typeof computeIsland>, id: string) =>
   report.buildings.find((b) => b.buildingId === id)!;
 
 describe("computeIsland", () => {
+
+  it("rejette un nom d’île vide ou composé d’espaces", () => {
+  for (const name of ["", "   "]) {
+    expect(() =>
+      computeIsland(catalog, { ...island, name }),
+    ).toThrow("island.name doit être une chaîne non vide");
+  }
+  });
+
   it("remonte la demande à travers toute la chaîne", () => {
     const report = computeIsland(catalog, island);
     expect(report.totalPopulation).toBe(200);

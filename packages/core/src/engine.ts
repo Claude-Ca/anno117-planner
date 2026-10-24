@@ -94,9 +94,9 @@ function validateIsland(catalog: Catalog, island: IslandInput): void {
   if (island === null || typeof island !== "object") {
     throw new TypeError("Les paramètres de l’île doivent être un objet valide");
   }
-  if (typeof island.name !== "string") {
-    throw new TypeError("Le nom de l’île doit être une chaîne de caractères");
-  }
+ 
+  assertNonEmptyString(island.name, "island.name");
+
   if (island.houses === null || typeof island.houses !== "object" || Array.isArray(island.houses)) {
     throw new TypeError("houses doit être un objet associant les paliers à des nombres de maisons");
   }
