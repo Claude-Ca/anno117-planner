@@ -1,8 +1,9 @@
+
 import { computeIsland } from "@anno117/core";
 import type {
-  BuildingReport,
   Catalog,
   IslandInput,
+  IslandReport,
 } from "@anno117/core";
 
 export interface SimulateProductionInput {
@@ -10,10 +11,8 @@ export interface SimulateProductionInput {
   island: IslandInput;
 }
 
-export interface ProductionSimulationResult {
+export interface ProductionSimulationResult extends IslandReport {
   islandName: string;
-  totalPopulation: number;
-  buildings: BuildingReport[];
 }
 
 export function simulateProduction(
@@ -23,7 +22,6 @@ export function simulateProduction(
 
   return {
     islandName: input.island.name,
-    totalPopulation: report.totalPopulation,
-    buildings: report.buildings,
+    ...report,
   };
 }

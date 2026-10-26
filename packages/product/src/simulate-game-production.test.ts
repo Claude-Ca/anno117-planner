@@ -62,16 +62,28 @@ describe("simulateGameProduction", () => {
 
     expect(result.islandName).toBe("Test Island");
     expect(result.totalPopulation).toBe(4);
-    expect(result.buildings).toEqual([
-      {
-        buildingId: "bakery",
-        good: "bread",
-        demandPerMinute: 2,
-        required: 1,
-        built: 0,
-        delta: 1,
-      },
-    ]);
+    expect(result.recipes).toEqual([
+  {
+    recipeId: "bakery-recipe",
+    buildingId: "bakery",
+    assignedBuildings: 0,
+    effectiveOutputs: [{ good: "bread", perMinute: 0 }],
+    effectiveInputs: [],
+  },
+]);
+
+expect(result.goods).toEqual([
+  {
+    good: "bread",
+    demandPerMinute: 2,
+    allocatedProductionPerMinute: 0,
+    deficitPerMinute: 2,
+    surplusPerMinute: 0,
+    unresolved: false,
+  },
+]);
+
+expect(result.unresolvedAllocations).toEqual([]);
   });
 
   it("rejects an invalid game catalog", () => {

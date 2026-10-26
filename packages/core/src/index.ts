@@ -1,13 +1,18 @@
+
 export { computeIsland } from "./engine";
+
 export type {
-  Building,
   BuildingId,
-  BuildingReport,
   Catalog,
   Flow,
+  GoodBalance,
   GoodId,
   IslandInput,
   IslandReport,
   PopulationTier,
+  ProductionBuilding,
+  Recipe,
+  RecipeId,
+  RecipeReport,
   TierId,
 } from "./types";

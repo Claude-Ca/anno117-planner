@@ -1,58 +1,80 @@
+
 export type GoodId = string;
 export type BuildingId = string;
+export type RecipeId = string;
 export type TierId = string;
 
-/** Un flux de marchandise, en unités par minute. Les quantités doivent être finies et positives ou nulles. */
+/** Flux de marchandise en unités par minute, à 100 % de productivité. */
 export interface Flow {
   good: GoodId;
   perMinute: number;
 }
 
-/** Un bâtiment de production : un produit en sortie, des intrants en entrée (à 100 %). */
-export interface Building {
+/** Bâtiment physique du catalogue. */
+export interface ProductionBuilding {
   id: BuildingId;
-  output: Flow;
-  inputs: Flow[];
 }
 
-/** Un palier de population et ce que consomme chaque habitant, par minute. */
+/** Recette associée à un bâtiment, avec intrants et sorties multiples. */
+export interface Recipe {
+  id: RecipeId;
+  buildingId: BuildingId;
+  inputs: Flow[];
+  outputs: Flow[];
+}
+
+/** Un palier de population et sa consommation par habitant. */
 export interface PopulationTier {
   id: TierId;
   residentsPerHouse: number;
   consumptionPerResident: Flow[];
 }
 
-/** Le catalogue du jeu : sera chargé depuis les fichiers JSON de data/. */
+/** Catalogue exploitable par le moteur de calcul. */
 export interface Catalog {
-  buildings: Building[];
+  buildings: ProductionBuilding[];
+  recipes: Recipe[];
   tiers: PopulationTier[];
 }
 
 /**
- * Paramètres saisis pour une île.
- * Les quantités de maisons et de bâtiments construits sont des entiers positifs ou nuls.
- * Les facteurs de productivité doivent être finis et strictement positifs.
+ * Paramètres d'une île.
+ * built représente le parc physique, indépendamment de son utilisation.
  */
 export interface IslandInput {
   name: string;
   houses: Record<TierId, number>;
   built: Record<BuildingId, number>;
-  /** Facteur de productivité par bâtiment (1 = 100 %, valeur par défaut). */
+  /** Facteur de productivité par bâtiment ; 1 = 100 %. */
   productivity?: Record<BuildingId, number>;
+  /** Nombre de bâtiments affectés manuellement à chaque recette. */
+  recipeAssignments?: Record<RecipeId, number>;
 }
 
-export interface BuildingReport {
-  buildingId: BuildingId;
+/** Bilan d'une marchandise dans l'île. */
+export interface GoodBalance {
   good: GoodId;
   demandPerMinute: number;
-  /** Nombre de bâtiments nécessaires, fractionnaire. */
-  required: number;
-  built: number;
-  /** required - built : positif = il en manque, négatif = excédent. */
-  delta: number;
+  allocatedProductionPerMinute: number;
+  deficitPerMinute: number;
+  surplusPerMinute: number;
+  /** Vrai si une allocation non résolue empêche un bilan fiable. */
+  unresolved: boolean;
 }
 
+/** Bilan d'une recette et de ses bâtiments affectés. */
+export interface RecipeReport {
+  recipeId: RecipeId;
+  buildingId: BuildingId;
+  assignedBuildings: number;
+  effectiveOutputs: Flow[];
+  effectiveInputs: Flow[];
+}
+
+/** Rapport de calcul d'une île. */
 export interface IslandReport {
   totalPopulation: number;
-  buildings: BuildingReport[];
+  recipes: RecipeReport[];
+  goods: GoodBalance[];
+  unresolvedAllocations: string[];
 }
