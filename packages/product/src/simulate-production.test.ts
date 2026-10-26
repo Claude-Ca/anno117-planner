@@ -1,22 +1,23 @@
+
 import { describe, expect, it } from "vitest";
 import type { Catalog, IslandInput } from "@anno117/core";
 import { simulateProduction } from "./simulate-production";
 
 const catalog: Catalog = {
-  buildings: [
+  buildings: [{ id: "bakery" }],
+  recipes: [
     {
-      id: "bakery",
-      output: { good: "bread", perMinute: 2 },
+      id: "baking",
+      buildingId: "bakery",
       inputs: [],
+      outputs: [{ good: "bread", perMinute: 2 }],
     },
   ],
   tiers: [
     {
       id: "citizens",
       residentsPerHouse: 2,
-      consumptionPerResident: [
-        { good: "bread", perMinute: 0.5 },
-      ],
+      consumptionPerResident: [{ good: "bread", perMinute: 0.5 }],
     },
   ],
 };
@@ -24,7 +25,8 @@ const catalog: Catalog = {
 const island: IslandInput = {
   name: "Test Island",
   houses: { citizens: 2 },
-  built: { bakery: 0 },
+  built: { bakery: 1 },
+  recipeAssignments: { baking: 1 },
 };
 
 describe("simulateProduction", () => {
@@ -33,16 +35,26 @@ describe("simulateProduction", () => {
 
     expect(result.islandName).toBe("Test Island");
     expect(result.totalPopulation).toBe(4);
-    expect(result.buildings).toEqual([
+    expect(result.recipes).toEqual([
       {
+        recipeId: "baking",
         buildingId: "bakery",
-        good: "bread",
-        demandPerMinute: 2,
-        required: 1,
-        built: 0,
-        delta: 1,
+        assignedBuildings: 1,
+        effectiveOutputs: [{ good: "bread", perMinute: 2 }],
+        effectiveInputs: [],
       },
     ]);
+    expect(result.goods).toEqual([
+      {
+        good: "bread",
+        demandPerMinute: 2,
+        allocatedProductionPerMinute: 2,
+        deficitPerMinute: 0,
+        surplusPerMinute: 0,
+        unresolved: false,
+      },
+    ]);
+    expect(result.unresolvedAllocations).toEqual([]);
   });
 
   it("propagates validation errors from the core engine", () => {

@@ -1,16 +1,16 @@
+
 import type {
-  Building,
-  BuildingReport,
+  BuildingId,
   Catalog,
   Flow,
+  GoodBalance,
   GoodId,
   IslandInput,
   IslandReport,
+  Recipe,
+  RecipeReport,
+  RecipeId,
 } from "./types";
-
-function addTo(map: Map<GoodId, number>, good: GoodId, amount: number): void {
-  map.set(good, (map.get(good) ?? 0) + amount);
-}
 
 function assertNonEmptyString(value: unknown, label: string): asserts value is string {
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -34,6 +34,14 @@ function assertPositiveNumber(value: unknown, label: string): asserts value is n
   if (value <= 0) throw new RangeError(`${label} doit être strictement positif`);
 }
 
+function addTo(map: Map<GoodId, number>, good: GoodId, amount: number): void {
+  const next = (map.get(good) ?? 0) + amount;
+  if (!Number.isFinite(next)) {
+    throw new RangeError(`Le calcul du flux pour « ${good} » dépasse les limites numériques`);
+  }
+  map.set(good, next);
+}
+
 function validateFlow(flow: Flow, label: string): void {
   if (flow === null || typeof flow !== "object") {
     throw new TypeError(`${label} doit être un flux valide`);
@@ -46,11 +54,15 @@ function validateCatalog(catalog: Catalog): void {
   if (catalog === null || typeof catalog !== "object") {
     throw new TypeError("Le catalogue doit être un objet valide");
   }
-  if (!Array.isArray(catalog.buildings) || !Array.isArray(catalog.tiers)) {
-    throw new TypeError("Le catalogue doit contenir des tableaux buildings et tiers");
+  if (
+    !Array.isArray(catalog.buildings) ||
+    !Array.isArray(catalog.recipes) ||
+    !Array.isArray(catalog.tiers)
+  ) {
+    throw new TypeError("Le catalogue doit contenir buildings, recipes et tiers sous forme de tableaux");
   }
 
-  const buildingIds = new Set<string>();
+  const buildingIds = new Set<BuildingId>();
   for (const building of catalog.buildings) {
     if (building === null || typeof building !== "object") {
       throw new TypeError("Chaque bâtiment doit être un objet valide");
@@ -60,14 +72,35 @@ function validateCatalog(catalog: Catalog): void {
       throw new Error(`Identifiant de bâtiment dupliqué : « ${building.id} »`);
     }
     buildingIds.add(building.id);
-    validateFlow(building.output, `building « ${building.id} ».output`);
-    assertPositiveNumber(building.output.perMinute, `Production de « ${building.id} »`);
-    if (!Array.isArray(building.inputs)) {
-      throw new TypeError(`Les intrants de « ${building.id} » doivent être un tableau`);
+  }
+
+  const recipeIds = new Set<RecipeId>();
+  for (const recipe of catalog.recipes) {
+    if (recipe === null || typeof recipe !== "object") {
+      throw new TypeError("Chaque recette doit être un objet valide");
     }
-    building.inputs.forEach((input, index) =>
-      validateFlow(input, `building « ${building.id} ».inputs[${index}]`),
-    );
+    assertNonEmptyString(recipe.id, "recipe.id");
+    if (recipeIds.has(recipe.id)) {
+      throw new Error(`Identifiant de recette dupliqué : « ${recipe.id} »`);
+    }
+    recipeIds.add(recipe.id);
+
+    assertNonEmptyString(recipe.buildingId, `recipe « ${recipe.id} ».buildingId`);
+    if (!buildingIds.has(recipe.buildingId)) {
+      throw new Error(`Bâtiment inconnu pour la recette « ${recipe.id} » : « ${recipe.buildingId} »`);
+    }
+    if (!Array.isArray(recipe.inputs) || !Array.isArray(recipe.outputs)) {
+      throw new TypeError(`Les intrants et sorties de « ${recipe.id} » doivent être des tableaux`);
+    }
+    if (recipe.inputs.length === 0 && recipe.outputs.length === 0) {
+      throw new Error(`La recette « ${recipe.id} » ne possède ni intrant ni sortie`);
+    }
+    recipe.inputs.forEach((flow, i) => validateFlow(flow, `recipe « ${recipe.id} ».inputs[${i}]`));
+    recipe.outputs.forEach((flow, i) => validateFlow(flow, `recipe « ${recipe.id} ».outputs[${i}]`));
+
+    for (const output of recipe.outputs) {
+      assertPositiveNumber(output.perMinute, `Sortie de « ${recipe.id} » pour « ${output.good} »`);
+    }
   }
 
   const tierIds = new Set<string>();
@@ -84,163 +117,283 @@ function validateCatalog(catalog: Catalog): void {
     if (!Array.isArray(tier.consumptionPerResident)) {
       throw new TypeError(`La consommation du palier « ${tier.id} » doit être un tableau`);
     }
-    tier.consumptionPerResident.forEach((flow, index) =>
-      validateFlow(flow, `tier « ${tier.id} ».consumptionPerResident[${index}]`),
+    tier.consumptionPerResident.forEach((flow, i) =>
+      validateFlow(flow, `tier « ${tier.id} ».consumptionPerResident[${i}]`),
     );
   }
 }
 
 function validateIsland(catalog: Catalog, island: IslandInput): void {
   if (island === null || typeof island !== "object") {
-    throw new TypeError("Les paramètres de l’île doivent être un objet valide");
+    throw new TypeError("Les paramètres de l'île doivent être un objet valide");
   }
- 
   assertNonEmptyString(island.name, "island.name");
 
-  if (island.houses === null || typeof island.houses !== "object" || Array.isArray(island.houses)) {
-    throw new TypeError("houses doit être un objet associant les paliers à des nombres de maisons");
+  for (const [field, value] of [
+    ["houses", island.houses],
+    ["built", island.built],
+  ] as const) {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      throw new TypeError(`${field} doit être un objet valide`);
+    }
   }
-  if (island.built === null || typeof island.built !== "object" || Array.isArray(island.built)) {
-    throw new TypeError("built doit être un objet associant les bâtiments à des quantités");
-  }
-  if (
-    island.productivity !== undefined &&
-    (island.productivity === null || typeof island.productivity !== "object" || Array.isArray(island.productivity))
-  ) {
-    throw new TypeError("productivity doit être un objet associant les bâtiments à des facteurs de productivité");
+
+  for (const [field, value] of [
+    ["productivity", island.productivity],
+    ["recipeAssignments", island.recipeAssignments],
+  ] as const) {
+    if (value !== undefined && (value === null || typeof value !== "object" || Array.isArray(value))) {
+      throw new TypeError(`${field} doit être un objet valide`);
+    }
   }
 
   const tierIds = new Set(catalog.tiers.map((tier) => tier.id));
-  for (const [tierId, houses] of Object.entries(island.houses)) {
-    if (!tierIds.has(tierId)) throw new Error(`Palier de population inconnu : « ${tierId} »`);
-    assertNonNegativeNumber(houses, `Nombre de maisons pour « ${tierId} »`);
-    if (!Number.isSafeInteger(houses)) {
-      throw new RangeError(`Le nombre de maisons pour « ${tierId} » doit être un entier`);
-    }
+  for (const [id, count] of Object.entries(island.houses)) {
+    if (!tierIds.has(id)) throw new Error(`Palier de population inconnu : « ${id} »`);
+    assertNonNegativeNumber(count, `Nombre de maisons pour « ${id} »`);
+    if (!Number.isSafeInteger(count)) throw new RangeError(`Le nombre de maisons pour « ${id} » doit être un entier`);
   }
 
   const buildingIds = new Set(catalog.buildings.map((building) => building.id));
-  for (const [buildingId, count] of Object.entries(island.built)) {
-    if (!buildingIds.has(buildingId)) throw new Error(`Bâtiment construit inconnu : « ${buildingId} »`);
-    assertNonNegativeNumber(count, `Nombre de bâtiments construits pour « ${buildingId} »`);
+  for (const [id, count] of Object.entries(island.built)) {
+    if (!buildingIds.has(id)) throw new Error(`Bâtiment construit inconnu : « ${id} »`);
+    assertNonNegativeNumber(count, `Nombre de bâtiments construits pour « ${id} »`);
+    if (!Number.isSafeInteger(count)) throw new RangeError(`Le nombre de bâtiments construits pour « ${id} » doit être un entier`);
+  }
+
+  for (const [id, factor] of Object.entries(island.productivity ?? {})) {
+    if (!buildingIds.has(id)) throw new Error(`Bâtiment de productivité inconnu : « ${id} »`);
+    assertPositiveNumber(factor, `Facteur de productivité pour « ${id} »`);
+  }
+
+  const recipes = new Map(catalog.recipes.map((recipe) => [recipe.id, recipe]));
+  const assignedByBuilding = new Map<BuildingId, number>();
+
+  for (const [recipeId, count] of Object.entries(island.recipeAssignments ?? {})) {
+    const recipe = recipes.get(recipeId);
+    if (!recipe) throw new Error(`Recette affectée inconnue : « ${recipeId} »`);
+    assertNonNegativeNumber(count, `Nombre de bâtiments affectés à « ${recipeId} »`);
     if (!Number.isSafeInteger(count)) {
-      throw new RangeError(`Le nombre de bâtiments construits pour « ${buildingId} » doit être un entier`);
+      throw new RangeError(`Le nombre de bâtiments affectés à « ${recipeId} » doit être un entier`);
+    }
+    assignedByBuilding.set(recipe.buildingId, (assignedByBuilding.get(recipe.buildingId) ?? 0) + count);
+  }
+
+  for (const [buildingId, assigned] of assignedByBuilding) {
+    if (assigned > (island.built[buildingId] ?? 0)) {
+      throw new Error(
+        `Affectations invalides pour « ${buildingId} » : ${assigned} affectés, ${island.built[buildingId] ?? 0} construits`,
+      );
+    }
+  }
+}
+
+function getRecipeFlows(recipe: Recipe, productivity: number): RecipeReport {
+  return {
+    recipeId: recipe.id,
+    buildingId: recipe.buildingId,
+    assignedBuildings: 0,
+    effectiveOutputs: recipe.outputs.map((flow) => ({
+      good: flow.good,
+      perMinute: flow.perMinute * productivity,
+    })),
+    effectiveInputs: recipe.inputs.map((flow) => ({
+      good: flow.good,
+      perMinute: flow.perMinute * productivity,
+    })),
+  };
+}
+
+function detectCycles(recipes: Recipe[]): {
+  messages: string[];
+  affectedGoods: Set<GoodId>;
+} {
+  const producers = new Map<GoodId, Recipe[]>();
+
+  for (const recipe of recipes) {
+    for (const output of recipe.outputs) {
+      const list = producers.get(output.good) ?? [];
+      list.push(recipe);
+      producers.set(output.good, list);
     }
   }
 
-  for (const [buildingId, factor] of Object.entries(island.productivity ?? {})) {
-    if (!buildingIds.has(buildingId)) throw new Error(`Bâtiment de productivité inconnu : « ${buildingId} »`);
-    assertPositiveNumber(factor, `Facteur de productivité pour « ${buildingId} »`);
-  }
-}
-
-/**
- * Ordonne les biens pour que chaque bien soit traité AVANT ses intrants.
- * Ainsi, quand on traite un bien, toute sa demande a déjà été cumulée.
- */
-function consumersFirst(producers: Map<GoodId, Building>): GoodId[] {
   const visited = new Set<GoodId>();
-  const onPath = new Set<GoodId>();
-  const order: GoodId[] = [];
+  const path: GoodId[] = [];
+  const active = new Set<GoodId>();
+  const cycles = new Set<string>();
+  const affectedGoods = new Set<GoodId>();
 
-  const visit = (good: GoodId): void => {
+  function visit(good: GoodId): void {
+    if (active.has(good)) {
+      const start = path.indexOf(good);
+      const cycle = path.slice(start);
+      cycle.push(good);
+
+      cycles.add(
+        `Cycle de production détecté : ${cycle.join(" → ")}`,
+      );
+
+      for (const cycleGood of cycle) {
+        affectedGoods.add(cycleGood);
+      }
+
+      return;
+    }
+
     if (visited.has(good)) return;
-    if (onPath.has(good)) throw new Error(`Cycle de production autour de « ${good} »`);
-    onPath.add(good);
-    for (const input of producers.get(good)?.inputs ?? []) visit(input.good);
-    onPath.delete(good);
-    visited.add(good);
-    order.push(good);
-  };
 
-  for (const good of producers.keys()) visit(good);
-  return order.reverse();
+    active.add(good);
+    path.push(good);
+
+    for (const recipe of producers.get(good) ?? []) {
+      for (const input of recipe.inputs) {
+        visit(input.good);
+      }
+    }
+
+    path.pop();
+    active.delete(good);
+    visited.add(good);
+  }
+
+  for (const good of producers.keys()) {
+    visit(good);
+  }
+
+  const queue = [...affectedGoods];
+
+  for (let index = 0; index < queue.length; index++) {
+    const affectedGood = queue[index];
+
+    for (const recipe of recipes) {
+      const dependsOnAffectedGood = recipe.inputs.some(
+        (input) => input.good === affectedGood,
+      );
+
+      if (!dependsOnAffectedGood) continue;
+
+      for (const output of recipe.outputs) {
+        if (affectedGoods.has(output.good)) continue;
+
+        affectedGoods.add(output.good);
+        queue.push(output.good);
+      }
+    }
+  }
+
+  return {
+    messages: [...cycles],
+    affectedGoods,
+  };
 }
 
-/** Calcule les besoins de production d’une île à partir du catalogue et de ses paramètres. */
+/** Calcule un bilan conservateur ; les allocations ambiguës sont explicitement signalées. */
 export function computeIsland(catalog: Catalog, island: IslandInput): IslandReport {
   validateCatalog(catalog);
   validateIsland(catalog, island);
 
-  // Un producteur par bien : hypothèse provisoire à réexaminer avec les données du jeu.
-  const producers = new Map<GoodId, Building>();
-  for (const building of catalog.buildings) {
-    const good = building.output.good;
-    if (producers.has(good)) throw new Error(`Plusieurs bâtiments produisent « ${good} »`);
-    producers.set(good, building);
-  }
-
-  // Demande initiale : consommation des habitants.
-  const demand = new Map<GoodId, number>();
   let totalPopulation = 0;
+  const demand = new Map<GoodId, number>();
+
   for (const tier of catalog.tiers) {
     const residents = (island.houses[tier.id] ?? 0) * tier.residentsPerHouse;
     totalPopulation += residents;
-    for (const need of tier.consumptionPerResident) {
-      addTo(demand, need.good, residents * need.perMinute);
+    if (!Number.isFinite(totalPopulation)) {
+      throw new RangeError("La population totale calculée dépasse les limites numériques autorisées");
+    }
+    for (const flow of tier.consumptionPerResident) {
+      addTo(demand, flow.good, residents * flow.perMinute);
     }
   }
 
-  if (!Number.isFinite(totalPopulation)) {
-    throw new RangeError("La population totale calculée dépasse les limites numériques autorisées");
-  }
-  for (const [good, amount] of demand) {
-    if (!Number.isFinite(amount)) {
-      throw new RangeError(`La demande calculée pour « ${good} » dépasse les limites numériques autorisées`);
+  const assignments = island.recipeAssignments ?? {};
+  const recipeReports: RecipeReport[] = catalog.recipes.map((recipe) => {
+    const assignedBuildings = assignments[recipe.id] ?? 0;
+
+    // Une recette inactive ne contribue à aucun flux.
+
+    if (assignedBuildings === 0) {
+      return {
+        recipeId: recipe.id,
+        buildingId: recipe.buildingId,
+        assignedBuildings: 0,
+        effectiveOutputs: recipe.outputs.map((flow) => ({
+          good: flow.good,
+          perMinute: 0,
+        })),
+        effectiveInputs: recipe.inputs.map((flow) => ({
+          good: flow.good,
+          perMinute: 0,
+        })),
+      };
     }
+
+    const productivity = island.productivity?.[recipe.buildingId] ?? 1;
+    const report = getRecipeFlows(recipe, productivity);
+    report.assignedBuildings = assignedBuildings;
+
+    for (const flow of report.effectiveOutputs) {
+      flow.perMinute *= assignedBuildings;
+    }
+    for (const flow of report.effectiveInputs) {
+      flow.perMinute *= assignedBuildings;
+    }
+
+    return report;
+  });
+
+
+  const activeRecipes = catalog.recipes.filter(
+  (recipe) => (assignments[recipe.id] ?? 0) > 0,
+);
+
+  const cycleDetection = detectCycles(activeRecipes);
+  const unresolvedAllocations = [...cycleDetection.messages];
+  const allocated = new Map<GoodId, number>();
+  const consumed = new Map<GoodId, number>();
+
+  for (const recipe of recipeReports) {
+    for (const flow of recipe.effectiveOutputs) addTo(allocated, flow.good, flow.perMinute);
+    for (const flow of recipe.effectiveInputs) addTo(consumed, flow.good, flow.perMinute);
   }
 
-  // Propagation de la demande de l’aval vers l’amont.
-  const buildings: BuildingReport[] = [];
-  for (const good of consumersFirst(producers)) {
-    const building = producers.get(good);
-    if (!building) continue;
+  const allGoods = new Set<GoodId>([
+  ...demand.keys(),
+  ...[...allocated.entries()]
+    .filter(([, amount]) => amount !== 0)
+    .map(([good]) => good),
+  ...[...consumed.entries()]
+    .filter(([, amount]) => amount !== 0)
+    .map(([good]) => good),
+]);
 
-    const productivity = island.productivity?.[building.id] ?? 1;
+  const goods: GoodBalance[] = [...allGoods].sort().map((good) => {
+    const requested = demand.get(good) ?? 0;
+    const produced = allocated.get(good) ?? 0;
+    const used = consumed.get(good) ?? 0;
+    const netDemand = requested + used;
+    const unresolved = cycleDetection.affectedGoods.has(good);
 
-    const effectiveOutputPerMinute =
-      building.output.perMinute * productivity;
-
-    if (
-      !Number.isFinite(effectiveOutputPerMinute) ||
-      effectiveOutputPerMinute <= 0
-    ) {
-      throw new RangeError(
-        `Capacité de production invalide pour « ${building.id} »`,
+    if (unresolved && (requested > 0 || used > 0 || produced > 0)) {
+      unresolvedAllocations.push(
+        `La couverture de « ${good} » ne peut pas être déterminée sans résoudre les allocations de production`,
       );
     }
-
-    const demandPerMinute = demand.get(good) ?? 0;
-    const required = demandPerMinute / effectiveOutputPerMinute;
-    const built = island.built[building.id] ?? 0;
-
-    buildings.push({
-      buildingId: building.id,
+    return {
       good,
-      demandPerMinute,
-      required,
-      built,
-      delta: required - built,
-    });
+      demandPerMinute: netDemand,
+      allocatedProductionPerMinute: produced,
+      deficitPerMinute: Math.max(0, netDemand - produced),
+      surplusPerMinute: Math.max(0, produced - netDemand),
+      unresolved,
+    };
+  });
 
-    // La productivité accélère la cadence : les intrants par unité produite restent constants.
-    for (const input of building.inputs) {
-      addTo(
-        demand,
-        input.good,
-        demandPerMinute * (input.perMinute / building.output.perMinute),
-      );
-    }
-  }
-
-  for (const [good, amount] of demand) {
-    if (!Number.isFinite(amount)) {
-      throw new RangeError(`La demande calculée pour « ${good} » dépasse les limites numériques autorisées`);
-    }
-  }
-  if (buildings.some((building) => !Number.isFinite(building.required) || !Number.isFinite(building.delta))) {
-    throw new RangeError("Le résultat du calcul dépasse les limites numériques autorisées");
-  }
-
-  return { totalPopulation, buildings };
+  return {
+    totalPopulation,
+    recipes: recipeReports,
+    goods,
+    unresolvedAllocations: [...new Set(unresolvedAllocations)],
+  };
 }

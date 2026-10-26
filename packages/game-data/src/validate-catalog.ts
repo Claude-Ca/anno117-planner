@@ -151,13 +151,25 @@ export function validateGameCatalog(
   });
 
   catalog.recipes.forEach((recipe, index) => {
-    const path = `recipes[${index}]`;
+  const path = `recipes[${index}]`;
 
-    if (!buildingIds.has(recipe.buildingId)) {
-      add(`${path}.buildingId`, `Bâtiment inconnu : ${recipe.buildingId}.`);
+  if (!buildingIds.has(recipe.buildingId)) {
+    add(`${path}.buildingId`, `Bâtiment inconnu : ${recipe.buildingId}.`);
+  } else {
+    const building = catalog.buildings.find(
+      (candidate) => candidate.id === recipe.buildingId,
+    );
+
+    if (building && !building.recipeIds.includes(recipe.id)) {
+      add(
+        `${path}.buildingId`,
+        `La recette "${recipe.id}" n'est pas référencée par le bâtiment "${recipe.buildingId}".`,
+      );
     }
+  }
 
-    checkSource(recipe.sourceId, `${path}.sourceId`);
+  checkSource(recipe.sourceId, `${path}.sourceId`);
+
 
     if (recipe.inputs.length === 0 && recipe.outputs.length === 0) {
       add(path, "Une recette doit avoir au moins une entrée ou une sortie.");
