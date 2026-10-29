@@ -223,7 +223,9 @@ redistribution.
 
 -   Anno Union --- Getting started:
     https://www.anno-union.com/getting-started-in-anno-117-pax-romana/
--   Ubisoft News --- Guide d'Albion:
+-   Ubisoft News --- 5 tips for getting started (conseils généraux):
+    https://news.ubisoft.com/en-gb/article/4fvALjiPTxYODChSgRb1Mk/anno-117-pax-romana-5-tips-for-getting-started
+-   Ubisoft News --- Guide d'Albion (particularités régionales):
     https://news.ubisoft.com/en-gb/article/2E5rwI4XBSJFJjUzcBxU2x/anno-117-pax-romana--a-guide-to-albion-part-1
 -   Anno Companion --- Goods: https://anno-companion.com/wiki/117/goods
 -   Anno Companion --- Fertilities and Lodes:
