@@ -1,8 +1,8 @@
 # Anno 117 Planner — Plan de développement par lots
 
-**Version :** 1.1
+**Version :** 1.2
 **Date :** 29 octobre 2026
-**Statut :** Plan actualisé — réalisation progressive
+**Statut :** Référence de reconstruction et de réalisation — audit des données en cours
 **Branche d’intégration :** `develop`
 **Technologies cibles :** Electron, React, TypeScript, Vite, pnpm, Vitest
 
@@ -632,34 +632,37 @@ La clôture de l’étape documentaire ne constitue pas une validation juridique
 
 ---
 
-## 10. Première action à réaliser
+## 10. État du projet et prochaine action
 
-La première action est de terminer l’étape documentaire sur `feature/update-documents`.
+### 10.1. Jalons documentaires
 
-Les quatre documents suivants sont désormais présents dans `docs/` :
+La première version de la mise à jour documentaire a été commitée sur `feature/update-documents` dans le commit `93cdb1d` le 29 octobre 2026. Ce commit constitue un jalon historique, pas une validation du catalogue ni une preuve d'intégration dans `develop`.
 
-- `catalog-scope.md`
-- `data-catalog-audit.md`
-- `data-sources.md`
-- `data-licensing.md`
+Les corrections de cohérence et de reconstructibilité sont suivies dans des commits ultérieurs sur la même branche. L'état de GitHub doit être consulté pour identifier le dernier commit réellement présent.
 
-Le présent plan doit être enregistré dans `docs/plan_de_developpement.md`.
+### 10.2. Documents de référence
 
-Avant de créer le commit :
+Le dossier `docs/` contient les documents nécessaires pour comprendre et reconstruire le projet :
 
-1. Vérifier les modifications de renommage du répertoire historique `documents/` vers `docs/`.
-2. Vérifier que les quatre documents historiques ont été conservés.
-3. Vérifier que les cinq documents de référence attendus sont présents.
-4. Exécuter `git diff --check`.
-5. Examiner `git status --short` et le diff complet.
-6. Confirmer qu’aucun fichier de code ni aucune donnée du catalogue n’a été modifié.
-7. Commiter les modifications documentaires.
-8. Faire relire les changements avant leur intégration dans `develop`.
+- `expression_de_besoin.md` : besoin produit et fonctionnalités attendues ;
+- `plan_de_developpement.md` : architecture cible, séquence de reconstruction et critères de sortie ;
+- `catalog-scope.md` : périmètre des données V1 ;
+- `data-catalog-audit.md` : inventaire, contrôles, anomalies et couverture ;
+- `data-sources.md` : sources, versions et provenance ;
+- `data-licensing.md` : conditions de réutilisation et décisions ouvertes ;
+- `anno117-planner-audit-catalogue.md` : synthèse et axes de travail de l'audit ;
+- `installation_environnement.md` et `guide_de_demarrage.md` : procédures de préparation et de travail, à vérifier et actualiser au besoin.
 
-Une fois cette étape intégrée, reprendre le séquencement prévu par le plan en vérifiant l’état réel de `feature/production-calculator-gpt` et de `develop`.
+### 10.3. Prochaine action
 
-Le travail déjà présent doit être conservé et son rattachement clarifié avant toute opération de branchement.
+Avant tout nouveau développement, vérifier l'état réel des branches `develop` et `feature/update-documents`, l'existence d'une Pull Request et les éventuels changements intervenus depuis le dernier audit documentaire.
 
-Le premier lot fonctionnel reste le lot 1, consacré à la stabilisation du moteur métier et de son API publique. La création ou l’évolution de l’application Electron suivra selon le séquencement défini.
+La prochaine étape fonctionnelle est le lot 1 : spécification, construction ou audit de conformité du moteur métier et de son API publique. Le travail doit suivre la procédure de reprise complète de la section 4 bis : si le dépôt est vide ou si l'implémentation actuelle est abandonnée, reconstruire à partir des documents et non à partir d'hypothèses sur le code antérieur ; si le code existe, l'inspecter et ne le conserver qu'après vérification.
 
-L’intégration complète du catalogue demeure soumise aux validations prévues au lot 4.
+Le lot 4 relatif au catalogue peut avancer sur l'audit documentaire et la validation des sources, mais aucune donnée ne doit être intégrée ou redistribuée avant validation explicite de sa couverture, de sa cohérence et des conditions de réutilisation.
+
+### 10.4. Règle de continuité
+
+Le présent plan doit rester utilisable sans accès aux conversations précédentes. Toute décision qui modifie le périmètre, l'architecture, les règles métier, les sources ou les critères d'acceptation doit être consignée dans le document de référence approprié, puis répercutée dans les documents dépendants.
+
+En cas de reprise complète, ignorer les hypothèses implicites liées aux anciennes branches, commits, packages ou fonctionnalités. Repartir des exigences documentées, vérifier l'état réel du dépôt et suivre les lots dans l'ordre défini.
