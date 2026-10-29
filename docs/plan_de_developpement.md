@@ -12,9 +12,11 @@
 
 Le développement d’Anno 117 Planner est organisé en étapes documentaires, lots techniques et lots fonctionnels indépendants. Chaque étape doit apporter un résultat cohérent, vérifiable et intégrable sans compromettre les fonctionnalités déjà validées.
 
+**La documentation constitue la référence permettant de reconstruire l’application depuis un dépôt vide.** Aucun lot ne doit supposer qu’un module, un contrat, un écran, un jeu de données ou un test existe déjà. Avant chaque lot, l’état réel du dépôt doit être inspecté ; les éléments existants peuvent être réutilisés uniquement après vérification de leur conformité aux exigences décrites ici et dans les documents associés. En cas de reprise complète, les travaux antérieurs sont des éléments d’information, pas des prérequis.
+
 Le projet vise à fournir un outil de planification de production pour Anno 117: Pax Romana, avec une architecture indépendante du moteur de calcul, un catalogue de données structuré et une application de bureau.
 
-Le périmètre fonctionnel de référence est défini dans l’expression de besoin. Le catalogue doit être documenté, audité et validé avant que son intégration complète soit engagée.
+Le périmètre fonctionnel de référence est défini dans `docs/expression_de_besoin.md` et précisé par `docs/catalog-scope.md`. Le catalogue doit être documenté, audité et validé avant que son intégration complète soit engagée. Les documents de référence doivent permettre à une équipe de comprendre le produit attendu, ses règles métier, ses données, ses limites et les critères d'acceptation sans dépendre de l'historique des conversations ou de l'état actuel du code.
 
 Le développement suit un cycle Git commun :
 
@@ -120,7 +122,7 @@ L’étape préalable est documentaire. Elle ne remplace pas les lots fonctionne
 
 Mettre à jour la documentation de référence avant de poursuivre l’intégration des données du jeu.
 
-Cette étape doit fournir une vision explicite du périmètre du catalogue, de son état d’avancement, de ses sources et des questions de réutilisation restant à résoudre.
+Cette étape doit fournir une vision explicite du périmètre du catalogue, de son état d’avancement, de ses sources et des questions de réutilisation restant à résoudre. Elle doit également rendre le projet compréhensible et reconstructible indépendamment de l'implémentation actuellement présente dans le dépôt.
 
 ### 4.2. Périmètre
 
@@ -130,9 +132,10 @@ Créer ou actualiser les documents suivants dans `docs/` :
 - `data-catalog-audit.md` : inventaire, contrôles de cohérence, anomalies et couverture ;
 - `data-sources.md` : registre des sources, provenance et versions des données ;
 - `data-licensing.md` : principes de réutilisation, licences et décisions à finaliser ;
-- `plan_de_developpement.md` : plan de développement actualisé.
+- `plan_de_developpement.md` : plan de développement actualisé ;
+- `anno117-planner-audit-catalogue.md` : synthèse de cadrage de l'audit.
 
-Conserver les documents historiques du projet et vérifier leur emplacement après le renommage du répertoire `documents/` en `docs/`.
+Conserver les documents historiques du projet dans `docs/` : expression de besoin, guide de démarrage et installation de l'environnement. Le plan de développement est réécrit et doit devenir le document opératoire permettant de reprendre le projet sans présumer de l'existence du code actuel.
 
 La documentation doit notamment préciser :
 
@@ -156,26 +159,84 @@ La documentation doit notamment préciser :
 - Modification de la licence du projet.
 - Décision juridique non étayée sur les droits de réutilisation.
 
-### 4.4. Critères de sortie
+### 4.4. État de réalisation de l'étape documentaire
+
+La mise à jour documentaire initiale a été commitée sur `feature/update-documents` dans le commit `93cdb1d` (29 octobre 2026). Ce commit constitue un jalon historique ; il ne signifie ni que le catalogue est validé, ni que cette branche a été intégrée dans `develop`.
+
+Les documents de référence du catalogue sont :
+
+- `docs/catalog-scope.md` ;
+- `docs/data-catalog-audit.md` ;
+- `docs/data-sources.md` ;
+- `docs/data-licensing.md`.
+
+Le document complémentaire `docs/anno117-planner-audit-catalogue.md` synthétise le cadrage de l'audit. Le plan de développement est `docs/plan_de_developpement.md`. Les documents historiques conservés sont `docs/expression_de_besoin.md`, `docs/guide_de_demarrage.md` et `docs/installation_environnement.md`.
+
+Les corrections documentaires ultérieures doivent être enregistrées dans de nouveaux commits. L'état réel de la branche et son intégration dans `develop` doivent être vérifiés dans GitHub ; ne pas déduire qu'une étape est intégrée du seul fait qu'elle est commitée ou poussée.
+
+### 4.5. Critères de sortie
 
 - Les quatre documents de référence du catalogue sont présents dans `docs/`.
-- Le plan de développement est actualisé et cohérent avec les autres documents.
-- Les documents historiques ont été conservés.
+- Le document de cadrage global de l'audit est présent.
+- Le plan de développement est cohérent avec les autres documents et permet une reprise depuis un dépôt vide.
+- Les documents historiques sont conservés et leurs objectifs restent compréhensibles.
 - Les sources et versions examinées sont identifiables.
-- Les anomalies connues et les limites de l’audit sont documentées.
+- Les anomalies connues et les limites de l'audit sont documentées.
 - Les questions de réutilisation non résolues restent explicitement ouvertes.
 - `git diff --check` ne signale pas de problème de mise en forme.
-- Les modifications ont été relues.
 - Le diff confirme que seuls les changements documentaires prévus sont présents.
-- Les changements sont commités et intégrés dans `develop` après validation.
+- Les modifications sont relues, commités et intégrées dans `develop` après validation.
 
-### 4.5. Condition de passage aux travaux sur le catalogue
+### 4.6. Condition de passage aux travaux sur le catalogue
 
-La fin de cette étape autorise la poursuite du travail d’audit et de préparation du catalogue. Elle ne vaut pas autorisation de redistribuer les données.
+La fin de cette étape autorise la poursuite du travail d'audit et de préparation du catalogue. Elle ne vaut pas autorisation de redistribuer les données.
 
-L’intégration d’un catalogue complet reste conditionnée à la validation de sa couverture, de sa cohérence et des conditions de réutilisation applicables.
+L'intégration d'un catalogue complet reste conditionnée à la validation de sa couverture, de sa cohérence et des conditions de réutilisation applicables.
 
 ---
+
+## 4 bis. Reprise complète depuis la documentation
+
+Cette procédure s'applique si le dépôt est vide, si l'implémentation actuelle est abandonnée ou si une nouvelle équipe doit reconstruire l'application sans s'appuyer sur les travaux antérieurs.
+
+### 4 bis.1. Sources de vérité
+
+Lire dans cet ordre :
+
+1. `docs/expression_de_besoin.md` : objectifs, utilisateurs, fonctionnalités et limites du produit ;
+2. `docs/catalog-scope.md` : périmètre des données, régions, catégories et exclusions ;
+3. `docs/data-sources.md` : provenance, versions et statut des sources ;
+4. `docs/data-catalog-audit.md` et `docs/anno117-planner-audit-catalogue.md` : constats, anomalies, limites et travaux d'audit ;
+5. `docs/data-licensing.md` : conditions de réutilisation et décisions ouvertes ;
+6. le présent plan : architecture cible, séquence des lots et critères de sortie ;
+7. `docs/installation_environnement.md` et `docs/guide_de_demarrage.md` : environnement et procédures de travail, à actualiser si les outils ont évolué.
+
+En cas de contradiction, ne pas choisir silencieusement une version. Consigner l'écart, déterminer quel document porte la décision concernée, puis mettre à jour les documents liés avant de coder.
+
+### 4 bis.2. Ordre de reconstruction
+
+Repartir d'un dépôt propre et reconstruire dans l'ordre des lots 1 à 8. Pour chaque lot, produire d'abord une conception suffisamment précise (responsabilités, contrats, flux, erreurs, critères d'acceptation), puis l'implémentation et les tests. Ne pas créer à l'avance des abstractions pour des besoins non spécifiés.
+
+- Lot 1 : moteur métier autonome et testé ;
+- Lot 2 : application desktop Electron/React/Vite ;
+- Lot 3 : cas d'usage et orchestration du moteur ;
+- Lot 4 : modèle, audit final et intégration contrôlée du catalogue ;
+- Lot 5 : interface de planification connectée aux cas d'usage ;
+- Lot 6 : français/anglais et thèmes clair/sombre ;
+- Lot 7 : persistance et export des scénarios ;
+- Lot 8 : planification multi-îles.
+
+Le lot 4 peut avancer en parallèle sur l'audit documentaire, mais aucune donnée non validée ne doit être présentée comme une donnée officielle ou intégrée par défaut. Des jeux de données synthétiques clairement identifiés peuvent être utilisés pour développer et tester les lots précédents.
+
+### 4 bis.3. Règles de reconstruction
+
+- Ne pas supposer l'existence d'un package, d'un script, d'un test ou d'un contrat.
+- Vérifier les versions des outils et dépendances avant de figer les commandes d'installation.
+- Créer les fichiers et packages minimaux nécessaires, puis vérifier le build, les tests et le typage à chaque étape.
+- Maintenir une séparation nette entre données vérifiées, données synthétiques et données en cours d'audit.
+- Documenter toute décision technique qui n'est pas déjà déterminée par les documents de référence.
+- Ne pas reprendre automatiquement une architecture antérieure si elle contredit les exigences documentées.
+- À chaque fin de lot, mettre à jour les instructions, les critères de sortie et les décisions qui ont évolué.
 
 ## 5. Détail des lots fonctionnels
 
@@ -183,13 +244,14 @@ L’intégration d’un catalogue complet reste conditionnée à la validation d
 
 **Branche :** `feature/core-stabilization-gpt`
 
-**Objectif :** rendre le moteur de calcul plus robuste, explicite et testable avant de construire l’application autour de lui.
+**Objectif :** spécifier, construire et stabiliser un moteur de calcul robuste, explicite et testable, indépendamment de l'état antérieur du dépôt.
 
 #### Périmètre
 
-- Définir les exports publics de `packages/core/src/index.ts`.
-- Examiner les contrats des fonctions et types existants.
-- Ajouter la validation des entrées : valeurs finies, taux, productivité, quantités et bâtiments existants.
+- Définir les responsabilités, les concepts métier, les types et l'API publique du moteur à partir de l'expression de besoin et des règles documentées.
+- Créer `packages/core` et ses exports publics si le package n'existe pas ; si des éléments existent, les auditer avant de les conserver.
+- Définir les contrats des fonctions et types, sans dépendance à Electron, React ou aux fichiers de données concrets.
+- Implémenter la validation des entrées : valeurs finies, taux, productivité, quantités et bâtiments existants.
 - Définir les erreurs et comportements attendus pour les entrées invalides.
 - Compléter les tests unitaires pour les cas limites et les erreurs.
 - Vérifier la propagation des besoins, le calcul des bâtiments et les déficits.
