@@ -156,6 +156,7 @@ Une licence appliquée au contenu d'un wiki ne doit pas être interprétée comm
 |---|---|---|
 | [Anno Union](https://www.anno-union.com/getting-started-in-anno-117-pax-romana/) | Guide officiel et règles du jeu | Conditions de réutilisation à vérifier pour tout contenu repris |
 | [Ubisoft News](https://news.ubisoft.com/en-gb/article/4fvALjiPTxYODChSgRb1Mk/anno-117-pax-romana-5-tips-for-getting-started) | Contenu rédactionnel officiel | Conditions de réutilisation à vérifier |
+| [Ubisoft News — A guide to Albion, Part 1](https://news.ubisoft.com/en-gb/article/2E5rwI4XBSJFJjUzcBxU2x/anno-117-pax-romana--a-guide-to-albion-part-1) | Contenu rédactionnel officiel ciblé sur Albion | Conditions de réutilisation à vérifier |
 | [Anno Companion — Goods](https://anno-companion.com/wiki/117/goods) | Informations descriptives sur les biens | Licence et portée exacte à examiner |
 | [Anno Companion — Fertilities and Lodes](https://anno-companion.com/wiki/117/fertilities_and_lodes) | Informations sur les fertilités et gisements | Licence et portée exacte à examiner |
 | [Anno 117 Tools](https://anno117.tools/) | Catalogue et données communautaires | Conditions applicables aux données à établir |
