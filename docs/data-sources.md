@@ -83,6 +83,7 @@ Les sources suivantes ont été identifiées pendant l'audit. Les dates d'accès
 |---|---|---|---|---|
 | SRC-001 | [Anno Union — Getting Started in Anno 117: Pax Romana](https://www.anno-union.com/getting-started-in-anno-117-pax-romana/) | Officielle | Règles générales, progression de population et contraintes de production | Source identifiée ; recoupement à poursuivre |
 | SRC-002 | [Ubisoft News — 5 tips for getting started](https://news.ubisoft.com/en-gb/article/4fvALjiPTxYODChSgRb1Mk/anno-117-pax-romana-5-tips-for-getting-started) | Officielle | Recoupement de règles de jeu et conseils | Source identifiée ; recoupement à poursuivre |
+| SRC-011 | [Ubisoft News — A guide to Albion, Part 1](https://news.ubisoft.com/en-gb/article/2E5rwI4XBSJFJjUzcBxU2x/anno-117-pax-romana--a-guide-to-albion-part-1) | Officielle | Particularités de la région Albion et recoupement des règles régionales | Source identifiée ; recoupement à poursuivre |
 | SRC-003 | [Anno Companion — Goods](https://anno-companion.com/wiki/117/goods) | Communautaire descriptive | Classification des biens et de leurs usages | Source identifiée ; conditions de réutilisation à examiner |
 | SRC-004 | [Anno Companion — Fertilities and Lodes](https://anno-companion.com/wiki/117/fertilities_and_lodes) | Communautaire descriptive | Fertilités, gisements et contraintes géographiques | Source identifiée ; couverture à vérifier |
 | SRC-005 | [Anno 117 Tools](https://anno117.tools/) | Outil communautaire | Comparaison du catalogue et inventaire des éléments | Source identifiée ; périmètre exact à vérifier |
@@ -94,7 +95,17 @@ Les sources suivantes ont été identifiées pendant l'audit. Les dates d'accès
 
 Ce registre est initial. Il devra être complété avec les références exactes des fichiers utilisés, les dates de consultation et les versions réellement retenues.
 
-## 4. Fichiers de données communautaires examinés
+## 4. Sources officielles : rôle et périmètre
+
+Les sources officielles du registre ont des rôles complémentaires et ne doivent pas être confondues :
+
+- SRC-001 (Anno Union — Getting Started) : référence générale pour les principes de démarrage et les mécaniques présentées dans le guide ;
+- SRC-002 (Ubisoft News — 5 tips for getting started) : source officielle complémentaire de conseils généraux ;
+- SRC-011 (Ubisoft News — A guide to Albion, Part 1) : référence ciblée sur Albion, à utiliser pour vérifier les particularités régionales.
+
+Ces documents servent à recouper les règles et contraintes décrites. Ils ne remplacent pas à eux seuls un inventaire exhaustif des recettes et valeurs du catalogue. Leurs dates de consultation et les passages effectivement exploités restent à consigner.
+
+## 5. Fichiers de données communautaires examinés
 
 ### 4.1 `params-base.js`
 
@@ -184,7 +195,7 @@ Inventaire rapporté :
 
 Les chemins d'origine, la version du dépôt et les empreintes de ces fichiers doivent être ajoutés dès qu'ils sont disponibles.
 
-## 5. Règles d'attribution des données
+## 6. Règles d'attribution des données
 
 Chaque lot de données intégré au catalogue doit pouvoir être relié à une ou plusieurs sources.
 
@@ -203,7 +214,7 @@ Les transformations appliquées doivent être documentées : conversion d'unité
 
 Aucune transformation ne doit effacer silencieusement une incertitude ou une différence entre les sources.
 
-## 6. Schéma minimal du registre de provenance
+## 7. Schéma minimal du registre de provenance
 
 Le registre pourra évoluer vers un format structuré. Le schéma conceptuel minimal est le suivant :
 
@@ -226,7 +237,7 @@ Ce tableau décrit les informations à conserver. Il ne constitue pas une modifi
 
 Le schéma final devra rester compatible avec les types effectivement retenus dans `packages/game-data`.
 
-## 7. Statuts de validation recommandés
+## 8. Statuts de validation recommandés
 
 Les statuts suivants sont recommandés pour le suivi des sources et des lots de données :
 
@@ -239,7 +250,7 @@ Les statuts suivants sont recommandés pour le suivi des sources et des lots de 
 
 Ces statuts ne doivent pas être interprétés comme des conclusions juridiques définitives. Une source techniquement vérifiée peut rester exclue si les conditions de réutilisation ne permettent pas l'usage prévu.
 
-## 8. Actions restantes
+## 9. Actions restantes
 
 ### Priorité 1 — Identification des versions
 
@@ -270,7 +281,7 @@ Ces statuts ne doivent pas être interprétés comme des conclusions juridiques 
 - [ ] Documenter les restrictions et réserves éventuelles.
 - [ ] Exclure les données pour lesquelles les conditions de réutilisation ne sont pas établies ou compatibles avec l'usage prévu.
 
-## 9. Critères de validation
+## 10. Critères de validation
 
 Le registre sera considéré comme suffisamment complet pour accompagner une intégration lorsque :
 
@@ -282,7 +293,7 @@ Le registre sera considéré comme suffisamment complet pour accompagner une int
 - les incertitudes sont explicites ;
 - les conditions de réutilisation ont été examinées séparément de la validation technique.
 
-## 10. Conclusion
+## 11. Conclusion
 
 Plusieurs sources officielles et communautaires ont été identifiées pour soutenir la construction du catalogue d'Anno 117 Planner.
 
@@ -290,7 +301,7 @@ Leur rôle, leur couverture et leur version doivent toutefois être précisés a
 
 **Statut actuel : registre initial, à compléter.** L'inscription d'une source dans ce document n'autorise pas, à elle seule, l'intégration ou la redistribution de ses données.
 
-## 11. Document associé
+## 12. Document associé
 
 - `docs/catalog-scope.md` — périmètre fonctionnel du catalogue.
 - `docs/data-catalog-audit.md` — résultats de l'audit technique.
