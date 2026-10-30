@@ -1,104 +1,70 @@
 # Contrat du moteur de données
 
-**Version :** 1.0  
-**Statut :** proposition de travail — à valider  
-**Composant cible :** `packages/data-engine`
+**Version :** 1.1  
+**Statut :** contrat de travail — implémentation initiale en cours  
+**Composant :** `packages/data-engine`
 
 ## 1. Objet
 
-Le moteur de données transforme plusieurs ensembles locaux, cohérents et versionnés en un référentiel unique, validé et consommable par le `core`. Il constitue la frontière entre le modèle de données du jeu et le modèle métier du calculateur.
+Le moteur transforme les modules locaux de `@anno117/game-data` en un référentiel agrégé, validé et consommable par le `core`. Il constitue la frontière entre les données du jeu et le modèle métier du calculateur.
 
 ## 2. Responsabilités
 
-Le moteur doit :
-- charger les catalogues locaux déclarés ;
-- vérifier la version du schéma et du jeu ciblé ;
-- valider chaque ensemble et ses références croisées ;
-- agréger les ensembles sans perte ni mutation des données d'origine ;
-- exposer une représentation stable au `core` ;
-- produire des diagnostics localisables ;
-- échouer explicitement en présence d'une erreur bloquante.
+Le moteur doit charger les modules embarqués fournis par l'application, vérifier leur manifeste, valider les identifiants et références, agréger les données sans mutation, exposer les diagnostics et construire une projection vers `Catalog` du `core`.
 
-Il ne doit pas :
-- interroger Internet ou une API externe ;
-- importer automatiquement des données communautaires ;
-- décider de la stratégie inter-îles ;
-- effectuer les calculs de production ou d'optimisation ;
-- transformer une valeur absente ou inconnue en zéro ;
-- masquer les données non vérifiées.
+Il ne doit pas interroger Internet, importer des catalogues communautaires, effectuer les calculs de production, décider de la stratégie inter-îles, remplacer une donnée inconnue par zéro ou exposer des données non vérifiées au calcul.
 
-## 3. Entrée conceptuelle
+## 3. Modèle d'entrée
 
-Le moteur reçoit un manifeste et des modules de catalogue. Chaque module représente un domaine fonctionnel indépendant.
+Le catalogue est composé d'un manifeste et des modules fonctionnels suivants :
 
-Le manifeste identifie au minimum :
-- l'identifiant et la version du catalogue ;
-- la version du schéma ;
-- le périmètre de jeu (jeu de base, régions couvertes) ;
-- les modules constitutifs ;
-- la version du jeu observée ou ciblée.
+| Module | Contenu |
+|---|---|
+| `resources` | Biens et ressources |
+| `buildings` | Bâtiments et région d'appartenance |
+| `production` | Recettes, intrants et sorties |
+| `population` | Paliers et consommations |
+| `regions` | Régions couvertes |
+| `islandAvailability` | Fertilités, gisements et ressources propres à une île |
+| `evidence` | Observations et expérimentations internes |
 
-Les modules peuvent couvrir les ressources, bâtiments, recettes, population et besoins, régions, fertilités et gisements. Les références inter-modules utilisent des identifiants stables.
+Le manifeste identifie le catalogue, sa version, la version de schéma, la version du jeu et le périmètre de régions. Les références entre modules reposent sur des identifiants stables.
 
-## 4. Sortie
+## 4. Provenance et statut
 
-Le moteur expose :
-1. un référentiel agrégé complet pour les usages applicatifs ;
-2. une vue adaptée au contrat du `core`, sans métadonnées éditoriales inutiles au calcul ;
-3. des métadonnées de version et de couverture ;
-4. des diagnostics de validation, ou une erreur bloquante si le référentiel ne peut pas être utilisé de façon sûre.
+Chaque entité de catalogue possède un statut : `to-observe`, `observed`, `verified`, `derived`, `disputed` ou `excluded`. Elle référence une ou plusieurs preuves internes.
 
-La sortie doit être déterministe pour une même version de catalogue.
+Une preuve conserve sa méthode (`observation`, `experiment`, `derived`), sa date, la version du jeu et des notes. Une preuve dérivée référence ses preuves d'origine. Les sources externes d'étude ne sont pas des preuves de validation et ne sont pas intégrées au catalogue embarqué.
 
-## 5. Règles de validation
+Seules les entités au statut `verified` ou `derived`, avec références cohérentes, sont candidates à la projection vers le `core`. Les statuts de travail et contestés restent visibles dans le référentiel agrégé mais sont exclus des calculs.
 
-Les contrôles minimaux couvrent :
-- unicité des identifiants dans leur domaine ;
-- existence et cohérence des références croisées ;
-- cohérence entre bâtiment et recettes associées ;
-- validité des nombres et des unités ;
-- distinction entre valeur nulle, absente, inconnue et non applicable ;
-- statut de vérification et provenance interne des données ;
-- absence de références orphelines après filtrage du périmètre V1.
+## 5. Validation et diagnostics
 
-Les contrôles bloquants empêchent l'exposition du catalogue au `core`. Les avertissements peuvent signaler une couverture incomplète sans invalider les éléments indépendants déjà exploitables, à condition que cette politique soit explicite.
+Les diagnostics comportent une sévérité, un code, un chemin et un message. Les erreurs bloquantes empêchent le chargement. La validation couvre au minimum :
+- structure du manifeste et présence des modules ;
+- unicité des identifiants ;
+- références vers ressources, bâtiments, recettes, régions et preuves ;
+- cohérence bâtiment/recette ;
+- valeurs numériques et débits strictement positifs ;
+- statut et provenance des entités ;
+- dépendances des données dérivées.
 
-## 6. Agrégation
+Une couverture incomplète n'est pas automatiquement une erreur : le catalogue V1 peut être progressif. En revanche, aucune référence incohérente ne doit être masquée.
 
-L'agrégation assemble les modules à partir de leurs identifiants et ne doit pas :
-- modifier les objets sources ;
-- dupliquer une entité référencée ;
-- fusionner des éléments sur la seule base de leur libellé ;
-- résoudre silencieusement un conflit ;
-- choisir arbitrairement entre deux valeurs contradictoires.
+## 6. Agrégation et projection
 
-Tout conflit doit produire un diagnostic et nécessiter une correction du catalogue ou une décision documentée.
+Le référentiel agrégé conserve les modules et métadonnées. La projection vers le `core` ne contient que les bâtiments, recettes, biens référencés et paliers admissibles. Le modèle du `core` reste indépendant de la structure JSON et des modules.
 
-## 7. Interface avec le core
+La projection ne doit pas muter les données d'entrée. Elle doit être déterministe. Les disponibilités régionales et insulaires restent conservées dans le référentiel ; elles ne sont pas encore consommées par le contrat actuel du `core`.
 
-Le moteur de données est seul responsable de l'adaptation vers `Catalog` défini par `@anno117/core`. Le core reçoit des données déjà validées et ne dépend pas de `game-data`, de JSON ou de la structure des modules.
+## 7. Embarquement
 
-Le contrat exact sera aligné sur les capacités réellement prises en charge par le core. Les données de régions et de disponibilités locales ne seront exposées au calcul que lorsque le core aura un contrat correspondant ; elles ne doivent pas être perdues du référentiel agrégé.
+Le package desktop importe les fichiers JSON locaux et fournit les modules à `loadGameData`. Le moteur ne réalise aucun accès filesystem ou réseau lui-même. La livraison d'une nouvelle version de l'application emporte la version correspondante du catalogue.
 
-## 8. Chargement local et cycle de vie
+## 8. Tests
 
-Le catalogue est embarqué dans le package applicatif. Le chargement initial est local, déterministe et sans accès réseau. Une instance de référentiel validé peut être réutilisée par les cas d'usage de l'application.
+Le plan détaillé et la matrice de tests sont maintenus dans [Plan de tests du catalogue](../plan-tests-catalogue.md). Les fixtures automatisées sont synthétiques et ne valent pas données de jeu. La validation du packaging et la campagne en jeu restent des étapes distinctes.
 
-La stratégie de mise à jour du catalogue est liée à la livraison d'une version de l'application. Aucun mécanisme de mise à jour distante n'est prévu pour la V1.
+## 9. État de réalisation
 
-## 9. Tests d'acceptation
-
-- Un catalogue complet et cohérent est chargé.
-- Un module manquant est signalé.
-- Un identifiant dupliqué est rejeté.
-- Une référence croisée inconnue est signalée.
-- Une incohérence recette/bâtiment est rejetée.
-- Une donnée non vérifiée n'est pas silencieusement considérée comme validée.
-- Une valeur absente n'est pas convertie en zéro.
-- L'agrégation est déterministe et ne mute pas les modules.
-- La conversion vers le core respecte son contrat.
-- Le chargement ne réalise aucun appel réseau.
-
-## 10. État
-
-Ce document fixe les responsabilités et invariants de conception. Les structures TypeScript précises et les critères bloquants seront implémentés et testés au fil de la branche. Toute divergence devra être répercutée dans ce contrat.
+Le modèle modulaire, les types de provenance, le validateur initial, la projection et les tests unitaires de base sont présents sur la branche de feature. Le chargement des fichiers JSON dans l'application desktop, le raccordement du `core` et la campagne de vérification restent à réaliser. Les commandes et résultats de tests ne sont considérés comme validés qu'après exécution dans l'environnement du dépôt.
