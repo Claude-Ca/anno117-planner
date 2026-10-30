@@ -100,7 +100,10 @@ Il impose :
 - l'interdiction des force pushes ;
 - l'interdiction de supprimer les branches protégées ;
 - la fusion Squash comme seule méthode autorisée ;
-- aucun acteur de contournement déclaré dans le Ruleset.
+- aucun acteur de contournement déclaré dans le Ruleset ;
+- format des messages de commit contrôlé par une règle `commit_message_pattern` conforme à la nomenclature du chapitre 6.
+
+La règle de commit impose le format du type et du scope, tout en autorisant le marqueur de rupture `!`. Les titres de Squash Merge doivent donc suivre la même convention.
 
 Aucune approbation humaine obligatoire n'est imposée à ce stade : le dépôt a un contributeur principal et la revue du diff reste réalisée dans le processus de PR. Cette règle pourra être renforcée si d'autres contributeurs réguliers rejoignent le projet.
 
