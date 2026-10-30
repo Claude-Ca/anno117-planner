@@ -19,7 +19,9 @@ export interface GameDataInput {
 }
 
 export interface GameDataRepository {
-  readonly manifest: Readonly<GameDataManifest>;
+  readonly manifest: Readonly<Omit<GameDataManifest, "regions">> & {
+    readonly regions: readonly string[];
+  };
   readonly catalog: GameCatalog;
   readonly coreCatalog: Catalog;
 }
