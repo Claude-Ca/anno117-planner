@@ -4,23 +4,27 @@
 
 ```mermaid
 flowchart LR
-  JSON[Modules JSON versionnés<br/>packages/game-data/catalogs] --> UI[Desktop renderer<br/>imports locaux Vite]
-  UI --> DE[Data engine<br/>loadGameData]
-  DE --> V[Validation structurelle<br/>références et preuves]
-  V --> AG[Repository agrégé<br/>snapshot immuable]
-  AG --> CORE[Projection vérifiée<br/>@anno117/core]
-  CORE --> CALC[Calcul de production]
-  AG --> STATUS[Résumé et diagnostics<br/>dans l'interface]
+  JSON[Modules JSON versionnés<br/>packages/game-data/catalogs] --> DESK[Desktop<br/>imports locaux Vite]
+  DESK --> DE[Data engine<br/>loadGameData]
+  DE --> VAL[Validation structurelle<br/>références et preuves]
+  VAL --> REPO[DataRepository<br/>snapshot immuable]
+  REPO --> PRODUCT[Product<br/>simulateCatalogProduction]
+  PRODUCT --> CORE[Core<br/>computeIsland]
+  CORE --> RESULT[Rapport de production]
+  REPO --> STATUS[Résumé du catalogue<br/>et diagnostics]
 ```
 
 Le desktop importe les modules JSON à la compilation. Il n'effectue aucun appel réseau ni lecture de fichiers de données à l'exécution. Les données sont transmises à `loadGameData`, qui valide leur structure, construit un snapshot isolé et expose une projection conservatrice au moteur de calcul.
+
+Le cas d'usage `simulateCatalogProduction` reçoit le `DataRepository` validé et transmet sa projection `coreCatalog` au cas d'usage générique `simulateProduction`. Le chargement et la validation ne sont donc pas dupliqués dans la couche applicative.
 
 ## Responsabilités
 
 - **`packages/game-data`** : types canoniques, modules JSON, statuts de vérification et règles de validation.
 - **`packages/data-engine`** : agrégation des modules, validation bloquante, snapshot immuable et projection vers le contrat de `@anno117/core`.
+- **`packages/product`** : orchestration des cas d'usage ; `simulateCatalogProduction` consomme le référentiel validé et délègue le calcul.
 - **`packages/core`** : calcul métier, indépendant d'Electron et de React.
-- **`apps/desktop`** : chargement des données locales au travers des imports Vite et affichage de l'état du catalogue.
+- **`apps/desktop`** : chargement des données locales au travers des imports Vite et affichage de l'état du catalogue. Le flux de simulation utilisateur n'est pas encore exposé dans l'IHM.
 
 ## Règles de sûreté des données
 
@@ -35,8 +39,10 @@ Les régions Latium et Albion sont présentes comme périmètre de travail, au s
 - [x] Agrégation et projection vers le moteur de calcul.
 - [x] Chargement du catalogue dans le renderer desktop.
 - [x] Affichage du résumé des modules et des erreurs de validation.
-- [ ] Exécution locale de `pnpm test` et `pnpm typecheck`.
-- [ ] Build et démarrage du desktop compilé.
+- [x] API applicative connectant le référentiel modulaire au moteur (tests locaux à confirmer).
+- [x] Build, démarrage et fonctionnement hors ligne du desktop confirmés localement le 30/10/2026.
+- [ ] Vérification locale des nouveaux tests et du typecheck après raccordement de `packages/product`.
+- [ ] Affichage d'une erreur de validation dans l'IHM.
 - [ ] Constitution et validation du catalogue en jeu.
 
-La compilation et l'exécution locale restent à confirmer sur un poste de développement ; cette documentation ne prétend pas que ces contrôles ont déjà été exécutés.
+Les statuts ci-dessus distinguent les réalisations présentes dans le dépôt des vérifications locales effectivement rapportées.
