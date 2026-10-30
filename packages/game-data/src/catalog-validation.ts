@@ -24,7 +24,7 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
   for (const name of MODULE_NAMES) {
     if (!Array.isArray(modules[name])) add("MODULE_MISSING", `modules.${name}`, "Le module doit être un tableau.");
   }
-  if (diagnostics.some((d) => d.severity === "error")) return diagnostics;
+  if (!modules || typeof modules !== "object") return diagnostics;\n  if (diagnostics.some((d) => d.severity === "error")) return diagnostics;
 
   const ids = new Map<string, Set<string>>();
   for (const name of MODULE_NAMES) {
@@ -84,7 +84,7 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
   const resourceIds = ids.get("resources")!;
   const buildingIds = ids.get("buildings")!;
   const recipeIds = ids.get("production")!;
-  const regionIds = ids.get("regions")!;
+  const regionIds = ids.get("regions")!;\n  manifest.scope.regions.forEach((regionId, index) => {\n    if (!regionIds.has(regionId)) add("MANIFEST_REGION_UNKNOWN", `manifest.scope.regions[${index}]`, `Région non définie dans le module regions : ${regionId}.`);\n  });
   const checkFlows = (flows: Array<{ good: string; perMinute: number }>, path: string) => {
     if (!Array.isArray(flows)) { add("FLOWS_INVALID", path, "Le flux doit être un tableau."); return; }
     const seen = new Set<string>();
