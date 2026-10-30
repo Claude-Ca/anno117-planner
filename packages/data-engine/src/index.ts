@@ -1,81 +1,79 @@
 import type { Catalog } from "@anno117/core";
 import {
-  toCoreCatalog,
-  validateGameCatalog,
-  type GameCatalog,
+  validateModularCatalog,
+  type CatalogDiagnostic,
+  type CatalogModules,
+  type ModularGameCatalog,
+  type CoreCatalogProjection,
 } from "@anno117/game-data";
 
-export interface GameDataManifest {
-  id: string;
-  catalogVersion: string;
-  schemaVersion: string;
-  gameVersion: string;
-  regions: string[];
-}
-
-export interface GameDataInput {
-  manifest: GameDataManifest;
-  catalog: GameCatalog;
-}
-
-export interface GameDataRepository {
-  readonly manifest: Readonly<Omit<GameDataManifest, "regions">> & {
-    readonly regions: readonly string[];
-  };
-  readonly catalog: GameCatalog;
+export interface DataRepository {
+  readonly manifest: ModularGameCatalog["manifest"];
+  readonly modules: CatalogModules;
+  readonly diagnostics: readonly CatalogDiagnostic[];
+  /** Projection containing verified and derived records only. */
   readonly coreCatalog: Catalog;
 }
 
-/**
- * Builds the in-memory repository from bundled data.
- *
- * This function deliberately performs no filesystem or network access. The
- * desktop application is responsible for importing its bundled catalog module.
- */
-export function loadGameData(input: GameDataInput): GameDataRepository {
-  validateManifest(input.manifest);
+const usable = (status: string) => status === "verified" || status === "derived";
 
-  const errors = validateGameCatalog(input.catalog);
-  if (errors.length > 0) {
-    const details = errors
-      .map(({ path, message }) => `${path}: ${message}`)
-      .join("\n");
-    throw new Error(`Catalogue invalide :\n${details}`);
+/**
+ * Aggregates bundled modules, validates their references and creates a
+ * conservative projection for the calculation core. No filesystem or network
+ * access occurs here: the desktop bundle imports the JSON modules and passes
+ * them to this function.
+ */
+export function loadGameData(input: ModularGameCatalog): DataRepository {
+  const diagnostics = validateModularCatalog(input);
+  const blocking = diagnostics.filter((d) => d.severity === "error");
+  if (blocking.length) {
+    throw new Error(blocking.map((d) => `[${d.code}] ${d.path}: ${d.message}`).join("\n"));
   }
 
-  const coreCatalog = toCoreCatalog(input.catalog);
-
+  const coreCatalog = toCoreProjection(input.modules);
   return Object.freeze({
-    manifest: Object.freeze({
-      ...input.manifest,
-      regions: Object.freeze([...input.manifest.regions]),
-    }),
-    catalog: input.catalog,
-    coreCatalog,
+    manifest: deepFreeze(input.manifest),
+    modules: deepFreeze(input.modules),
+    diagnostics: Object.freeze([...diagnostics]),
+    coreCatalog: deepFreeze(coreCatalog),
   });
 }
 
-function validateManifest(manifest: GameDataManifest): void {
-  if (!manifest || typeof manifest !== "object") {
-    throw new TypeError("Le manifeste du catalogue est obligatoire.");
-  }
+function toCoreProjection(modules: CatalogModules): Catalog {
+  const resources = new Set(modules.resources.filter((x) => usable(x.status)).map((x) => x.id));
+  const buildings = modules.buildings.filter((x) => usable(x.status));
+  const buildingIds = new Set(buildings.map((x) => x.id));
+  const recipes = modules.production.filter((x) =>
+    usable(x.status) &&
+    buildingIds.has(x.buildingId) &&
+    x.inputs.every((f) => resources.has(f.good)) &&
+    x.outputs.every((f) => resources.has(f.good)),
+  );
+  const recipeIds = new Set(recipes.map((x) => x.id));
+  const tiers = modules.population.filter((x) =>
+    usable(x.status) && x.consumptionPerResident.every((f) => resources.has(f.good)),
+  );
 
-  for (const field of ["id", "catalogVersion", "schemaVersion", "gameVersion"] as const) {
-    if (typeof manifest[field] !== "string" || manifest[field].trim().length === 0) {
-      throw new TypeError(`Le champ manifest.${field} est obligatoire.`);
-    }
-  }
-
-  if (!Array.isArray(manifest.regions) || manifest.regions.length === 0) {
-    throw new TypeError("Le manifeste doit déclarer au moins une région.");
-  }
-
-  const uniqueRegions = new Set(manifest.regions);
-  if (uniqueRegions.size !== manifest.regions.length || manifest.regions.some((region) => !region.trim())) {
-    throw new Error("Les régions du manifeste doivent être non vides et uniques.");
-  }
+  return {
+    buildings: buildings
+      .filter((building) => recipes.some((recipe) => recipe.buildingId === building.id))
+      .map(({ id }) => ({ id })),
+    recipes: recipes.map(({ id, buildingId, inputs, outputs }) => ({
+      id, buildingId, inputs: inputs.map((x) => ({ ...x })), outputs: outputs.map((x) => ({ ...x })),
+    })),
+    tiers: tiers.map(({ id, residentsPerHouse, consumptionPerResident }) => ({
+      id, residentsPerHouse,
+      consumptionPerResident: consumptionPerResident.map((x) => ({ ...x })),
+    })),
+  };
 }
 
-export type { CatalogValidationError } from "@anno117/game-data";
-export type { GameCatalog } from "@anno117/game-data";
-export type { Catalog } from "@anno117/core";
+function deepFreeze<T>(value: T): T {
+  if (value && typeof value === "object" && !Object.isFrozen(value)) {
+    Object.freeze(value);
+    Object.values(value as Record<string, unknown>).forEach(deepFreeze);
+  }
+  return value;
+}
+
+export type { CatalogDiagnostic, ModularGameCatalog, CoreCatalogProjection };
