@@ -4,56 +4,53 @@ Planificateur de production et de gestion des ressources pour **Anno 117: Pax Ro
 
 ## Présentation
 
-Anno 117 Planner est un projet personnel visant à faciliter la planification des chaînes de production, l'optimisation des ressources et la gestion de plusieurs îles dans Anno 117: Pax Romana.
+Anno 117 Planner est un projet personnel visant à aider le joueur à comprendre ses besoins en ressources, dimensionner ses moyens de production et préparer l'organisation de ses îles.
 
-L'objectif est de développer une application de bureau permettant notamment de :
+Le projet vise notamment à :
 
-- Calculer les besoins en marchandises à partir de la population.
-- Déterminer les capacités de production nécessaires.
-- Analyser les chaînes de production et les éventuels déficits.
-- Planifier la production et les transferts de ressources entre plusieurs îles.
-- Comparer différents scénarios d'organisation et de développement.
+- calculer les besoins en marchandises à partir de la population ;
+- déterminer les capacités de production nécessaires ;
+- analyser les chaînes de production et les éventuels déficits ;
+- préparer la planification à l'échelle de plusieurs îles.
 
-Ces fonctionnalités constituent les objectifs du projet. Leur disponibilité dépendra de l'avancement du développement.
+**Périmètre initial :** jeu de base, régions Latium et Albion. Le moteur de calcul initial raisonne localement, île par île ; il ne simule pas automatiquement la colonisation, le commerce ni les importations. Le joueur conserve la maîtrise de sa stratégie inter-îles. Les fonctionnalités décrites sont des objectifs de projet et ne sont pas nécessairement toutes implémentées.
 
-## Technologies
+## Technologies et architecture cible
 
-Le projet s'appuie sur les technologies suivantes :
+Le projet s'appuie sur :
 
-- **TypeScript** pour le typage et la maintenabilité du code.
-- **React** pour l'interface utilisateur.
-- **Electron** pour l'application de bureau.
-- **pnpm workspaces** pour l'organisation du monorepo.
-- **Vitest** pour les tests unitaires.
+- **TypeScript** pour le typage et la maintenabilité ;
+- **React** pour l'interface utilisateur ;
+- **Electron** pour l'application de bureau ;
+- **pnpm workspaces** pour l'organisation du monorepo ;
+- **Vitest** pour les tests automatisés.
 
-## Architecture
+L'architecture cible sépare le moteur métier, la logique applicative, les données du jeu et l'application desktop :
 
-Le dépôt est organisé autour d'un monorepo destiné à accueillir les composants suivants :
+- `packages/core` — moteur métier indépendant de l'interface ;
+- `packages/product` — logique applicative et orchestration ;
+- `packages/game-data` — catalogue des marchandises, bâtiments et recettes ;
+- `apps/desktop` — application de bureau React/Electron.
 
-- `packages/core` : moteur métier indépendant de l'interface, calculs de production et règles de gestion.
-- `packages/product` : logique applicative et orchestration des fonctionnalités.
-- `packages/game-data` : catalogue des marchandises, bâtiments et recettes de production.
-- `apps/desktop` : application de bureau basée sur React et Electron.
+Cette architecture est une cible évolutive : consulter le dépôt et le [plan de développement](docs/30-plans/plan-de-developpement.md) pour distinguer les éléments prévus de ceux effectivement présents.
 
-L'architecture cible sera mise en place progressivement. Tous les modules et fonctionnalités décrits ne sont pas nécessairement présents dans l'état actuel du dépôt.
+## Documentation
 
-## Objectifs techniques
+La documentation est structurée par domaine et soumise à une politique documentaire commune.
 
-Le développement vise les caractéristiques suivantes :
+| Domaine | Documentation |
+|---|---|
+| Gouvernance | [Décisions, règles et revues](docs/00-gouvernance/README.md) |
+| Fonctionnel | [Expression du besoin et spécifications](docs/10-fonctionnel/README.md) |
+| Technique | [Architecture, contrats et données](docs/20-technique/README.md) |
+| Plans | [Plan de développement et pilotage](docs/30-plans/README.md) |
+| Manuel | [Installation et guides](docs/40-manuel/README.md) |
 
-- Application de bureau compatible avec Windows.
-- Planification multi-îles.
-- Séparation entre moteur métier, données du jeu et interface.
-- Tests automatisés.
-- Interface en français et en anglais.
-- Thèmes clair et sombre.
-- Architecture modulaire et évolutive.
+Commencer par le [sommaire documentaire](docs/README.md) et la [politique documentaire](docs/00-gouvernance/politique-documentaire.md).
 
 ## Développement
 
-Le projet est actuellement à un stade préliminaire.
-
-Les instructions d'installation, de lancement et de test seront documentées au fur et à mesure de la mise en place de l'application et de ses scripts de développement.
+Les procédures d'installation et de démarrage sont disponibles dans [la documentation développeur](docs/40-manuel/README.md). Les scripts et commandes doivent être vérifiés dans l'état courant du dépôt avant utilisation.
 
 ## Licence et droits d'utilisation
 
@@ -61,7 +58,7 @@ Les instructions d'installation, de lancement et de test seront documentées au 
 
 Ce dépôt est un projet propriétaire. Aucun droit de copie, de redistribution, de modification, de réutilisation ou d'exploitation de son contenu n'est accordé sans autorisation préalable et écrite du titulaire des droits, sous réserve des dispositions légales applicables.
 
-Consultez [`LICENCE.md`](LICENCE.md) pour les conditions détaillées.
+Consultez [LICENCE.md](LICENCE.md) pour les conditions détaillées.
 
 ## Marques et propriété intellectuelle de tiers
 

@@ -4,7 +4,7 @@
 
 Ce guide permet à un développeur de préparer son environnement, de lancer Anno 117 Planner et de vérifier ses modifications avant de les proposer à l’intégration.
 
-Il complète le [plan de développement](plan_de_developpement.md), qui décrit les lots fonctionnels et leur ordre de réalisation.
+Il complète le [plan de développement](../30-plans/plan-de-developpement.md), qui décrit les lots fonctionnels et leur ordre de réalisation.
 
 Le projet est une application desktop indépendante destinée à la planification de production dans *Anno 117: Pax Romana*. Elle n’est ni affiliée à Ubisoft ni approuvée par Ubisoft.
 
@@ -84,10 +84,10 @@ Le projet utilise un monorepo pnpm.
 |---|---|
 | `apps/desktop` | Application desktop Electron, interface React et outils Vite |
 | `packages/core` | Logique métier et calculs de production indépendants de l’interface |
-| `packages/ui` | Composants d’interface mutualisables |
-| `documents` | Expression du besoin, plan de développement et documentation technique |
+| `packages/product` | Cas d’usage et orchestration applicative, selon l’état de réalisation du lot 3 |
+| `packages/game-data` | Catalogue structuré des données du jeu, après audit et validation |\n| `docs` | Expression du besoin, plan de développement et documentation technique |
 
-Le catalogue des données du jeu et la couche d’orchestration applicative pourront être structurés dans les lots ultérieurs, conformément au plan de développement.
+L’architecture cible distingue également packages/product et packages/game-data. L’existence réelle de chaque répertoire et son niveau d’achèvement doivent être vérifiés dans la branche utilisée. La documentation de référence se trouve dans docs/.
 
 ### Principe d’architecture
 
@@ -95,7 +95,7 @@ La logique métier doit rester indépendante d’Electron et de React. Les calcu
 
 Les modifications propres à l’interface ou au système desktop ne doivent pas introduire de dépendance du cœur métier vers Electron.
 
-## 5. Démarrer l’application en développement
+## 5. Démarrer l’application en développement\n\n**Applicabilité :** les commandes de cette section ne sont utilisables que si le lot 2 (socle desktop Electron/Vite) est présent et configuré dans la branche courante. Vérifiez apps/desktop/package.json et les scripts du workspace avant de les exécuter. Sur une branche antérieure à ce lot, ces commandes peuvent ne pas exister.
 
 Depuis la racine du dépôt :
 
@@ -109,7 +109,7 @@ Le mode développement est à privilégier pour travailler sur l’interface et 
 
 Pour arrêter l’application, fermez la fenêtre ou interrompez le processus dans le terminal si nécessaire.
 
-## 6. Construire l’application
+## 6. Construire l’application\n\n**Applicabilité :** cette procédure suppose que le socle desktop du lot 2 est présent et que les scripts correspondants sont configurés.
 
 Pour générer les fichiers de production du desktop :
 
@@ -133,7 +133,7 @@ Cette commande lance Electron à partir du package desktop et utilise son point 
 
 Elle permet de vérifier le lancement de la version compilée, indépendamment du serveur de développement.
 
-## 7. Vérifier le code
+## 7. Vérifier le code\n\nLes commandes ci-dessous sont des commandes de workspace attendues. Vérifier les scripts réellement déclarés dans les fichiers package.json de la branche courante ; ne pas supposer qu'un script existe s'il n'est pas configuré.
 
 Les vérifications doivent être exécutées avant de proposer une modification à l’intégration.
 
@@ -303,8 +303,8 @@ Ces commandes permettent de distinguer les modifications non indexées, les fich
 
 Avant d’intervenir sur une fonctionnalité, consulter :
 
-- [`expression_de_besoin.md`](expression_de_besoin.md) : objectifs et exigences du projet.
-- [`plan_de_developpement.md`](plan_de_developpement.md) : lots prévus, ordre de réalisation et avancement.
+- [`expression_de_besoin.md`](../10-fonctionnel/expression-de-besoin.md) : objectifs et exigences du projet.
+- [`plan_de_developpement.md`](../30-plans/plan-de-developpement.md) : lots prévus, ordre de réalisation et avancement.
 - Le `README.md` et les fichiers `package.json` des packages concernés, lorsqu’ils sont disponibles.
 
 En cas de divergence entre ce guide et la configuration réelle du dépôt, vérifier les scripts, les dépendances et les fichiers de configuration avant de modifier les commandes de référence.

@@ -25,7 +25,7 @@ L’application poursuit les objectifs suivants :
 3. Déterminer le nombre de bâtiments de production nécessaires pour couvrir les besoins calculés.
 4. Prendre en compte les paramètres qui influencent la productivité.
 5. Identifier les déficits de production et les besoins qui ne sont pas couverts.
-6. Permettre, dans une évolution ultérieure, de répartir les besoins et les moyens de production sur plusieurs îles.
+6. Permettre de répartir les besoins et les moyens de production sur plusieurs îles. Cette fonctionnalité fait partie du périmètre fonctionnel de la V1 ; sa réalisation est planifiée dans le lot 8 du plan de développement.
 7. Fournir des données de production structurées, maintenables et vérifiables.
 8. Offrir une interface de bureau utilisable en français et en anglais, avec un thème clair et un thème sombre.
 
@@ -83,11 +83,11 @@ Les données utilisées devront être vérifiables. Les valeurs de production et
 
 ### 3.7 Planification multi-îles
 
-Une évolution fonctionnelle devra permettre de représenter plusieurs îles et de répartir entre elles les besoins et les moyens de production.
+La V1 doit permettre de représenter plusieurs îles et de répartir entre elles les besoins et les moyens de production. Cette fonctionnalité est réalisée dans le lot 8 du plan de développement, après la mise en place des fondations nécessaires.
 
 La modélisation des transferts de ressources, des stocks locaux, des contraintes de transport et des arbitrages de production reste à définir.
 
-Cette fonctionnalité ne doit pas être considérée comme acquise dans le moteur actuel : elle constitue une cible d’évolution.
+Cette fonctionnalité ne doit pas être considérée comme déjà implémentée dans le moteur actuel : elle constitue une exigence produit V1 dont la conception et la réalisation restent à effectuer.
 
 ### 3.8 Interface utilisateur
 
@@ -157,7 +157,7 @@ Cette première étape doit notamment permettre de :
 7. compléter les tests automatisés sur les cas nominaux et les cas limites ;
 8. définir une API publique claire pour le package `packages/core`.
 
-Le travail doit s’appuyer sur le code existant et ses tests. Il ne s’agit pas de réécrire le moteur sans analyse préalable.
+Si une implémentation existe, le travail doit commencer par l'auditer et vérifier sa conformité au besoin. En cas de reprise depuis un dépôt vide ou de reconstruction complète, le moteur doit être spécifié puis développé à partir des exigences et critères de ce document ; aucune implémentation antérieure n'est un prérequis.
 
 ## 6. Contraintes techniques connues
 
@@ -175,7 +175,7 @@ Les commandes réellement configurées dans le dépôt et la compatibilité effe
 
 ## 7. Documentation du projet
 
-Un répertoire `documents/` doit centraliser la documentation de référence.
+Le répertoire `docs/` centralise la documentation de référence.
 
 Il a vocation à accueillir progressivement :
 
