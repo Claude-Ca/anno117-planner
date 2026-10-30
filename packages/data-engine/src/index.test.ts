@@ -58,9 +58,11 @@ describe("loadGameData", () => {
     expect(report.recipes[0]?.recipeId).toBe("planks-recipe");
   });
 
-  it("returns immutable snapshots", () => {
-    const result = loadGameData(fixture());
+  it("returns immutable snapshots without freezing caller input", () => {
+    const input = fixture();
+    const result = loadGameData(input);
     expect(Object.isFrozen(result.modules.resources)).toBe(true);
     expect(Object.isFrozen(result.coreCatalog.recipes[0]!.inputs)).toBe(true);
+    expect(Object.isFrozen(input.modules.resources)).toBe(false);
   });
 });
