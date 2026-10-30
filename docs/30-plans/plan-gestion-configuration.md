@@ -245,7 +245,7 @@ Toute Pull Request vers `develop` ou `main` doit respecter les critères suivant
 
 Pour une PR de release, la version cible et les notes de version doivent en plus être explicites.
 
-Pour une PR `fix/*) vers `main`, la PR de merge-back vers `develop` doit être ouverte après la fusion du correctif dans `main` et suivie jusqu'à sa fusion.
+Pour une PR `fix/*` vers `main`, la PR de merge-back vers `develop` doit être ouverte après la fusion du correctif dans `main` et suivie jusqu'à sa fusion.
 
 ## 8. État initial et actions de mise en place
 
