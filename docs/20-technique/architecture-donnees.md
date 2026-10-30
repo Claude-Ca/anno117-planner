@@ -1,93 +1,42 @@
-# Architecture des données — Anno 117 Planner
+# Architecture des données
 
-**Version :** 1.1  
-**Statut :** architecture cible — réalisation progressive
-
-## 1. Objectif
-
-Séparer les données du jeu, leur validation/agrégation et leur consommation par le moteur métier. Les catalogues sont versionnés et embarqués dans l'application. Aucun service externe n'est requis à l'exécution.
-
-## 2. Vue d'ensemble
+## Architecture cible et flux d'exécution
 
 ```mermaid
-flowchart TB
-  subgraph GD["packages/game-data — référentiel embarqué"]
-    R["Ressources"]
-    B["Bâtiments"]
-    P["Production / recettes"]
-    H["Population / besoins"]
-    G["Régions"]
-    I["Disponibilités par île"]
-    E["Preuves internes"]
-  end
-  subgraph DE["packages/data-engine — moteur de données"]
-    L["Chargement des modules locaux"]
-    V["Validation du manifeste, schémas et références"]
-    A["Agrégation immuable"]
-    X["Projection des seules données vérifiées vers le core"]
-    L --> V --> A --> X
-  end
-  C["packages/core — calcul métier"]
-  APP["apps/desktop — interface Electron / React"]
-  R --> L
-  B --> L
-  P --> L
-  H --> L
-  G --> L
-  I --> L
-  E --> L
-  X --> C
-  C --> APP
+flowchart LR
+  JSON[Modules JSON versionnés<br/>packages/game-data/catalogs] --> UI[Desktop renderer<br/>imports locaux Vite]
+  UI --> DE[Data engine<br/>loadGameData]
+  DE --> V[Validation structurelle<br/>références et preuves]
+  V --> AG[Repository agrégé<br/>snapshot immuable]
+  AG --> CORE[Projection vérifiée<br/>@anno117/core]
+  CORE --> CALC[Calcul de production]
+  AG --> STATUS[Résumé et diagnostics<br/>dans l'interface]
 ```
 
-## 3. Responsabilités
+Le desktop importe les modules JSON à la compilation. Il n'effectue aucun appel réseau ni lecture de fichiers de données à l'exécution. Les données sont transmises à `loadGameData`, qui valide leur structure, construit un snapshot isolé et expose une projection conservatrice au moteur de calcul.
 
-| Composant | Responsabilité |
-|---|---|
-| `game-data` | Modèle typé, modules versionnés et preuves internes |
-| `data-engine` | Validation, agrégation, diagnostics et projection vers le contrat du core |
-| `core` | Calcul métier à partir d'un catalogue déjà validé |
-| `product` | Orchestration des cas d'usage |
-| `desktop` | Interface, import local des modules et présentation |
+## Responsabilités
 
-Le `core` ne connaît ni les fichiers, ni leur organisation, ni les métadonnées de collecte.
+- **`packages/game-data`** : types canoniques, modules JSON, statuts de vérification et règles de validation.
+- **`packages/data-engine`** : agrégation des modules, validation bloquante, snapshot immuable et projection vers le contrat de `@anno117/core`.
+- **`packages/core`** : calcul métier, indépendant d'Electron et de React.
+- **`apps/desktop`** : chargement des données locales au travers des imports Vite et affichage de l'état du catalogue.
 
-## 4. Modules du catalogue
+## Règles de sûreté des données
 
-- `resources` : matières premières, biens intermédiaires, produits finis et services.
-- `buildings` : bâtiments et région d'appartenance.
-- `production` : recettes, intrants et sorties.
-- `population` : paliers, capacité résidentielle et besoins.
-- `regions` : Latium et Albion.
-- `islandAvailability` : fertilités, gisements et ressources naturelles propres à chaque île.
-- `evidence` : observations et expérimentations internes, utilisées comme preuves.
+Seules les ressources, bâtiments, recettes et catégories de population ayant le statut `verified` ou `derived` peuvent entrer dans la projection du moteur. Les éléments `to-observe`, `observed`, `disputed` et `excluded` restent exclus des calculs. Une erreur structurelle bloque le chargement et est affichée dans l'interface.
 
-Chaque entité a un identifiant stable, un statut de vérification et des références vers des preuves internes. Une donnée dérivée référence les observations dont elle dépend. Les sources secondaires restent des pistes d'étude dans la documentation, non des preuves embarquées.
+Les régions Latium et Albion sont présentes comme périmètre de travail, au statut `to-observe`. Elles ne constituent pas une validation des caractéristiques de jeu. Les autres modules sont initialisés mais vides : le catalogue de production doit être établi par observation indépendante.
 
-## 5. Statuts et projection
+## État de l'intégration
 
-Les statuts sont `to-observe`, `observed`, `verified`, `derived`, `disputed` et `excluded`. Le référentiel agrégé conserve l'ensemble des statuts. La projection destinée au `core` retient uniquement les données `verified` ou `derived` et dont les dépendances sont cohérentes.
+- [x] Modules JSON locaux et modèle typé.
+- [x] Validation structurelle et références internes.
+- [x] Agrégation et projection vers le moteur de calcul.
+- [x] Chargement du catalogue dans le renderer desktop.
+- [x] Affichage du résumé des modules et des erreurs de validation.
+- [ ] Exécution locale de `pnpm test` et `pnpm typecheck`.
+- [ ] Build et démarrage du desktop compilé.
+- [ ] Constitution et validation du catalogue en jeu.
 
-## 6. Cycle de chargement
-
-1. L'application importe le manifeste et les modules JSON locaux.
-2. `data-engine` valide le manifeste et les références.
-3. Les modules sont agrégés sans mutation et les diagnostics sont conservés.
-4. Le moteur construit une projection compatible avec `Catalog`.
-5. Le `core` effectue les calculs.
-
-Les erreurs sont localisées par code et chemin. Une valeur absente n'est jamais transformée silencieusement en zéro. Le moteur n'effectue aucun accès réseau.
-
-## 7. Limites actuelles
-
-Le modèle modulaire et l'agrégateur initial sont en cours d'implémentation. Le contrat du core actuel ne couvre pas encore les régions ni les disponibilités insulaires : ces informations restent dans le référentiel agrégé, en attendant une évolution fonctionnelle du core. Le chargement effectif des JSON par l'application desktop reste à raccorder.
-
-Aucune valeur de jeu n'est préremplie dans les modules. Le premier catalogue sera constitué à partir d'une nouvelle campagne et validé par observation et expérimentation.
-
-## 8. Documents associés
-
-- [Contrat du moteur de données](contrats/contrat-moteur-donnees.md)
-- [Plan de tests du catalogue](plan-tests-catalogue.md)
-- [Contrat du moteur de calcul](contrats/contrat-moteur-calcul.md)
-- [Périmètre du catalogue](donnees/perimetre-catalogue.md)
-- [Stratégie de validation en jeu](donnees/strategie-validation-en-jeu.md)
+La compilation et l'exécution locale restent à confirmer sur un poste de développement ; cette documentation ne prétend pas que ces contrôles ont déjà été exécutés.
