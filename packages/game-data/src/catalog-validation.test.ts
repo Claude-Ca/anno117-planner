@@ -38,7 +38,7 @@ describe("validateModularCatalog", () => {
     c.modules.resources[0]!.evidenceIds = [];
     expect(validateModularCatalog(c).some((d) => d.code === "EVIDENCE_REQUIRED")).toBe(true);
   });
-  it("requires derived records to identify their evidence dependencies", () => {
+  it("allows to-observe candidates without evidence", () => {\n    const c = fixture();\n    c.modules.resources[0]!.status = "to-observe";\n    c.modules.resources[0]!.evidenceIds = [];\n    expect(validateModularCatalog(c)).toEqual([]);\n  });\n  it("requires derived records to identify their evidence dependencies", () => {
     const c = fixture();
     c.modules.evidence[0]!.method = "derived";
     expect(validateModularCatalog(c).some((d) => d.code === "DERIVATION_UNGROUNDED")).toBe(true);
