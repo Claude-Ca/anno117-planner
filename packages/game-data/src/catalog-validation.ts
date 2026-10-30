@@ -1,6 +1,5 @@
 import type {
   CatalogDiagnostic,
-  CatalogModules,
   CatalogManifest,
   ModularGameCatalog,
   VerificationStatus,
@@ -16,15 +15,23 @@ const MODULE_NAMES = [
 
 export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiagnostic[] {
   const diagnostics: CatalogDiagnostic[] = [];
-  const add = (code: string, path: string, message: string, severity: "error" | "warning" = "error") =>
-    diagnostics.push({ severity, code, path, message });
-  const { manifest, modules } = catalog;
+  const add = (code: string, path: string, message: string) =>
+    diagnostics.push({ severity: "error" as const, code, path, message });
 
+  if (!catalog || typeof catalog !== "object") {
+    add("CATALOG_INVALID", "catalog", "Le catalogue doit être un objet.");
+    return diagnostics;
+  }
+  const { manifest, modules } = catalog;
   validateManifest(manifest, add);
+  if (!modules || typeof modules !== "object") {
+    add("MODULES_INVALID", "modules", "Les modules du catalogue sont obligatoires.");
+    return diagnostics;
+  }
   for (const name of MODULE_NAMES) {
     if (!Array.isArray(modules[name])) add("MODULE_MISSING", `modules.${name}`, "Le module doit être un tableau.");
   }
-  if (!modules || typeof modules !== "object") return diagnostics;\n  if (diagnostics.some((d) => d.severity === "error")) return diagnostics;
+  if (diagnostics.length) return diagnostics;
 
   const ids = new Map<string, Set<string>>();
   for (const name of MODULE_NAMES) {
@@ -32,9 +39,9 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
     const seen = new Set<string>();
     rows.forEach((row, index) => {
       const path = `modules.${name}[${index}]`;
-      if (!row.id?.trim()) add("ID_REQUIRED", `${path}.id`, "Identifiant obligatoire.");
+      if (!row || typeof row.id !== "string" || !row.id.trim()) add("ID_REQUIRED", `${path}.id`, "Identifiant obligatoire.");
       else if (seen.has(row.id)) add("ID_DUPLICATE", `${path}.id`, `Identifiant dupliqué : ${row.id}.`);
-      seen.add(row.id);
+      if (row && typeof row.id === "string") seen.add(row.id);
     });
     ids.set(name, seen);
   }
@@ -49,15 +56,15 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
       if (!evidenceIds.has(id)) add("EVIDENCE_UNKNOWN", `${path}[${i}]`, `Preuve inconnue : ${id}.`);
     });
   };
-  const checkStatus = (status: string, path: string) => {
-    if (!STATUSES.includes(status as VerificationStatus)) add("STATUS_INVALID", path, "Statut de vérification inconnu.");
-  };
 
   modules.evidence.forEach((e, i) => {
     const p = `modules.evidence[${i}]`;
-    if (!e.gameVersion.trim() || !e.notes.trim()) add("EVIDENCE_INCOMPLETE", p, "Version du jeu et notes obligatoires.");
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(e.observedAt) || Number.isNaN(Date.parse(e.observedAt))) {
-      add("DATE_INVALID", `${p}.observedAt`, "Date attendue au format YYYY-MM-DD.");
+    if (!e.gameVersion?.trim() || !e.notes?.trim()) add("EVIDENCE_INCOMPLETE", p, "Version du jeu et notes obligatoires.");
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(e.observedAt ?? "")
+      ? new Date(`${e.observedAt}T00:00:00.000Z`)
+      : null;
+    if (!date || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== e.observedAt) {
+      add("DATE_INVALID", `${p}.observedAt`, "Date attendue au format YYYY-MM-DD et réellement valide.");
     }
     if (e.method === "derived" && (!e.basedOn?.length || e.basedOn.some((id) => !evidenceIds.has(id)))) {
       add("DERIVATION_UNGROUNDED", `${p}.basedOn`, "Une donnée dérivée doit référencer des preuves existantes.");
@@ -76,15 +83,19 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
     ...modules.islandAvailability.map((x, i) => ({ x, p: `modules.islandAvailability[${i}]` })),
   ];
   entities.forEach(({ x, p }) => {
-    if (!x.name.trim()) add("NAME_REQUIRED", `${p}.name`, "Libellé obligatoire.");
-    checkStatus(x.status, `${p}.status`);
-    if (x.status !== "to-observe" && x.status !== "excluded") {\n      checkEvidence(x.evidenceIds, `${p}.evidenceIds`);\n    }
+    if (!x || typeof x.name !== "string" || !x.name.trim()) add("NAME_REQUIRED", `${p}.name`, "Libellé obligatoire.");
+    if (!STATUSES.includes(x.status)) add("STATUS_INVALID", `${p}.status`, "Statut de vérification inconnu.");
+    if (x.status !== "to-observe" && x.status !== "excluded") checkEvidence(x.evidenceIds, `${p}.evidenceIds`);
   });
 
   const resourceIds = ids.get("resources")!;
   const buildingIds = ids.get("buildings")!;
   const recipeIds = ids.get("production")!;
-  const regionIds = ids.get("regions")!;\n  manifest.scope.regions.forEach((regionId, index) => {\n    if (!regionIds.has(regionId)) add("MANIFEST_REGION_UNKNOWN", `manifest.scope.regions[${index}]`, `Région non définie dans le module regions : ${regionId}.`);\n  });
+  const regionIds = ids.get("regions")!;
+  manifest.scope.regions.forEach((regionId, index) => {
+    if (!regionIds.has(regionId)) add("MANIFEST_REGION_UNKNOWN", `manifest.scope.regions[${index}]`, `Région non définie dans le module regions : ${regionId}.`);
+  });
+
   const checkFlows = (flows: Array<{ good: string; perMinute: number }>, path: string) => {
     if (!Array.isArray(flows)) { add("FLOWS_INVALID", path, "Le flux doit être un tableau."); return; }
     const seen = new Set<string>();
@@ -100,7 +111,9 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
   modules.buildings.forEach((b, i) => {
     const p = `modules.buildings[${i}]`;
     if (!regionIds.has(b.regionId)) add("REGION_UNKNOWN", `${p}.regionId`, `Région inconnue : ${b.regionId}.`);
-    b.recipeIds.forEach((id, j) => { if (!recipeIds.has(id)) add("RECIPE_UNKNOWN", `${p}.recipeIds[${j}]`, `Recette inconnue : ${id}.`); });
+    b.recipeIds.forEach((id, j) => {
+      if (!recipeIds.has(id)) add("RECIPE_UNKNOWN", `${p}.recipeIds[${j}]`, `Recette inconnue : ${id}.`);
+    });
   });
   modules.production.forEach((r, i) => {
     const p = `modules.production[${i}]`;
@@ -127,7 +140,7 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
 
 function validateManifest(
   manifest: CatalogManifest,
-  add: (code: string, path: string, message: string, severity?: "error" | "warning") => void,
+  add: (code: string, path: string, message: string) => void,
 ): void {
   for (const key of ["id", "catalogVersion", "schemaVersion", "gameVersion"] as const) {
     if (!manifest?.[key]?.trim()) add("MANIFEST_REQUIRED", `manifest.${key}`, "Champ obligatoire.");
