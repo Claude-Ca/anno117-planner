@@ -1,6 +1,6 @@
 # Contrat fonctionnel du moteur de calcul — Anno 117 Planner
 
-**Version :** 0.1  
+**Version :** 0.2  
 **Date :** 30 octobre 2026  
 **Statut :** proposition de travail — à valider par le propriétaire du projet  
 **Périmètre :** lot 1, moteur métier indépendant de l'interface et du catalogue final
@@ -54,7 +54,7 @@ Le moteur doit distinguer une valeur égale à zéro, une valeur absente, une va
 
 ## 5. Flux, unités et précision
 
-Le moteur a besoin d'une unité de temps commune pour comparer recettes et besoins. Le choix reste à arbitrer : minute, heure ou autre unité explicite.
+L'unité de temps commune retenue est la **minute**. Les débits de recettes et les besoins devront être convertis dans cette unité avant comparaison.
 
 Pour toute recette, le contrat devra préciser si les quantités d'entrée et de sortie représentent les quantités par cycle, comment la durée est interprétée, comment les conversions de débit sont réalisées, quelle précision est conservée pendant les calculs et à quel stade un arrondi est autorisé.
 
@@ -71,7 +71,7 @@ Tant que ces choix ne sont pas validés, aucun résultat chiffré d'exemple ne d
 
 Le besoin exprimé et la capacité calculée doivent être comparables dans une même unité et sur une même période. La capacité dépend au minimum des quantités de sortie et de la durée de cycle. Les effets de productivité ne peuvent être appliqués que si le facteur, sa portée, sa formule de cumul et ses bornes éventuelles sont définis.
 
-L'expression de besoin indique que les installations étant indivisibles, un nombre fractionnaire de bâtiments doit être arrondi de manière à couvrir le besoin, sous réserve des règles métier restant à formaliser. Cette intention doit être transformée en règle et en tests précis.
+Les installations étant indivisibles, le nombre de bâtiments requis est arrondi à l'entier supérieur afin de couvrir le besoin. Cette règle doit être couverte par des tests de référence.
 
 **Décisions requises :**
 - traitement de plusieurs sorties par recette ;
@@ -83,7 +83,7 @@ L'expression de besoin indique que les installations étant indivisibles, un nom
 
 ## 7. Propagation des besoins amont
 
-Le moteur doit pouvoir décomposer les besoins finaux en besoins intermédiaires en remontant les recettes du catalogue. La stratégie de sélection des recettes et de répartition des quantités entre producteurs doit être décidée avant de figer l'API publique.
+Le moteur doit pouvoir décomposer les besoins finaux en besoins intermédiaires en remontant les recettes du catalogue. Le moteur doit pouvoir combiner plusieurs recettes et répartir les quantités entre producteurs pour optimiser la réponse au besoin. Les critères exacts d'optimisation (par exemple, nombre de bâtiments, surplus, complexité ou autres contraintes de production) restent à arbitrer avant de figer l'API publique.
 
 Le contrat doit traiter explicitement les biens sans recette productrice connue, les recettes à entrées multiples, les recettes à sorties multiples, les producteurs multiples d'un même bien, les cycles dans le graphe de production, les recettes invalides ou incomplètes et les besoins qui ne peuvent être entièrement couverts.
 
@@ -128,7 +128,7 @@ Les cas suivants doivent disposer d'entrées explicites et de résultats attendu
 | CORE-011 | Entrée numérique invalide | Erreur structurée attendue |
 | CORE-012 | Besoin non entièrement couvert | Distinction demande, capacité et déficit |
 
-Les résultats chiffrés seront ajoutés lorsque les unités, conventions de flux et règles métier correspondantes auront été arbitrées.
+Les résultats chiffrés seront ajoutés lorsque les conventions de flux, la précision interne et les critères d'optimisation correspondants auront été arbitrés.
 
 ## 12. Critères de sortie du lot 1
 
