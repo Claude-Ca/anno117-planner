@@ -1,6 +1,6 @@
 # Registre des décisions fonctionnelles — Anno 117 Planner
 
-**Version :** 0.2  
+**Version :** 0.3  
 **Date :** 30 octobre 2026  
 **Statut :** registre évolutif — décisions validées et décisions encore à arbitrer
 
@@ -27,14 +27,14 @@ Aucune proposition ou hypothèse ne doit être codée comme une règle validée.
 | DEC-005 | Unités de consommation | Quelle unité et quelle période décrivent les taux de consommation des habitants ? | Moteur, catalogue | À arbitrer |
 | DEC-006 | Précision numérique | Quelle précision interne et quelle stratégie de représentation numérique sont requises ? | Moteur, tests, affichage | À arbitrer |
 | DEC-007 | Arrondis | Les quantités nécessitant un nombre entier d'installations sont arrondies à l'entier supérieur ; le stade d'arrondi des autres valeurs reste à préciser. | Moteur, résultats, tests | **Partiellement validée — entier supérieur pour le dimensionnement** |
-| DEC-008 | Recettes multiples | Le moteur doit combiner les recettes pour optimiser la couverture du besoin ; les critères d'optimisation et les contraintes restent à définir. | Moteur, UI, données, tests | **Partiellement validée — combinaison/optimisation retenue** |
+| DEC-008 | Recettes multiples et optimisation | Combiner les recettes et optimiser selon l'ordre global, complexité de chaîne, nombre de bâtiments, puis surplus ; les métriques exactes restent à définir. | Moteur, UI, données, tests | **Partiellement validée — ordre de priorité retenu** |
 | DEC-009 | Recettes multi-sorties | Comment prendre en compte les coproduits lorsqu'une recette produit plusieurs biens ? | Moteur, données, tests | À arbitrer |
 | DEC-010 | Productivité | Quels modificateurs sont pris en charge en V1 et comment se cumulent-ils ? | Moteur, données | À arbitrer |
 | DEC-011 | Main-d'œuvre et entretien | Sont-ils des contraintes de calcul, des indicateurs ou hors périmètre du moteur initial ? | Moteur, cas d'usage | À arbitrer |
 | DEC-012 | Erreurs et résultats partiels | Quelles entrées invalident une requête et quels cas retournent un résultat partiel avec diagnostics ? | Moteur, cas d'usage, UI | À arbitrer |
 | DEC-013 | Stocks et bâtiments existants | Sont-ils pris en compte dans la première version des cas d'usage ? Dans quel ordre par rapport aux besoins ? | Lot 3, modèle de scénario | À arbitrer |
-| DEC-014 | Contraintes géographiques | Quelles contraintes sont bloquantes, averties ou ignorées en V1 ? | Catalogue, cas d'usage, multi-îles | À arbitrer |
-| DEC-015 | Transferts entre îles | Les transferts sont-ils modélisés et avec quelles limites, coûts ou capacités ? | Lot 8, scénario | À arbitrer |
+| DEC-014 | Contraintes géographiques et disponibilité locale | Les ressources disponibles sur chaque île doivent conditionner la faisabilité des recettes ; la représentation des disponibilités, fertilités et autres contraintes reste à définir. | Catalogue, moteur, scénario multi-îles | **Partiellement validée — disponibilité locale à prendre en compte** |
+| DEC-015 | Transferts entre îles | Une ressource absente localement peut-elle être importée depuis une autre île, et selon quelles limites/capacités ? | Lot 8, scénario | À arbitrer — la disponibilité locale est requise, les règles de transfert restent à définir |
 | DEC-016 | Sauvegarde et export | Quels formats, quelles données et quelle stratégie de versionnement sont attendus ? | Lot 7 | À arbitrer |
 | DEC-017 | Plateforme et distribution | Quelles versions de Windows et quel format de livraison sont ciblés ? | Desktop, livraison | À arbitrer |
 | DEC-018 | Qualité | Quels contrôles et seuils sont requis pour déclarer la V1 livrable ? | CI, tests, livraison | À arbitrer |
