@@ -1,6 +1,6 @@
 # Contrat fonctionnel du moteur de calcul — Anno 117 Planner
 
-**Version :** 0.2  
+**Version :** 0.3  
 **Date :** 30 octobre 2026  
 **Statut :** proposition de travail — à valider par le propriétaire du projet  
 **Périmètre :** lot 1, moteur métier indépendant de l'interface et du catalogue final
@@ -17,7 +17,7 @@ Le moteur (packages/core) doit recevoir des données et paramètres explicites, 
 
 Il ne doit pas dépendre de React ou Electron, charger lui-même des données depuis Internet ou un fichier utilisateur, décider silencieusement qu'une donnée absente vaut zéro, masquer les incertitudes du catalogue ni simuler un mécanisme qui n'a pas été spécifié.
 
-Les cas d'usage, la gestion des scénarios, la persistance et l'interface relèvent d'autres modules. Les stocks, bâtiments existants, transferts entre îles et contraintes géographiques ne sont pas présumés pris en charge par le contrat initial du lot 1 : leur périmètre doit être arbitré et relié aux lots concernés.
+Les cas d'usage, la gestion des scénarios, la persistance et l'interface relèvent d'autres modules. La disponibilité des ressources et contraintes propres à chaque île doit néanmoins être prise en compte dans la faisabilité des recettes. Les stocks, bâtiments existants et règles de transfert entre îles nécessitent encore un périmètre explicite et doivent être reliés aux lots concernés.
 
 ## 3. Vocabulaire
 
@@ -83,9 +83,9 @@ Les installations étant indivisibles, le nombre de bâtiments requis est arrond
 
 ## 7. Propagation des besoins amont
 
-Le moteur doit pouvoir décomposer les besoins finaux en besoins intermédiaires en remontant les recettes du catalogue. Le moteur doit pouvoir combiner plusieurs recettes et répartir les quantités entre producteurs pour optimiser la réponse au besoin. Les critères exacts d'optimisation (par exemple, nombre de bâtiments, surplus, complexité ou autres contraintes de production) restent à arbitrer avant de figer l'API publique.
+Le moteur doit pouvoir décomposer les besoins finaux en besoins intermédiaires en remontant les recettes du catalogue. Il doit pouvoir combiner plusieurs recettes et répartir les quantités entre producteurs pour optimiser la réponse au besoin, selon l'ordre de priorité validé : **D — optimisation globale, C — complexité de chaîne, A — nombre de bâtiments, B — surplus**. Cet ordre est lexicographique : un critère de priorité inférieure ne doit pas dégrader un critère supérieur. Les métriques concrètes de chaque critère restent à définir avant de figer l'API publique.
 
-Le contrat doit traiter explicitement les biens sans recette productrice connue, les recettes à entrées multiples, les recettes à sorties multiples, les producteurs multiples d'un même bien, les cycles dans le graphe de production, les recettes invalides ou incomplètes et les besoins qui ne peuvent être entièrement couverts.
+Le contrat doit traiter explicitement les biens sans recette productrice connue, les recettes à entrées multiples, les recettes à sorties multiples, les producteurs multiples d'un même bien, les cycles dans le graphe de production, les recettes invalides ou incomplètes et les besoins qui ne peuvent être entièrement couverts. La faisabilité doit également tenir compte des ressources disponibles sur l'île concernée : une recette qui nécessite une ressource absente localement ne peut pas être considérée comme réalisable sans mécanisme d'approvisionnement explicitement autorisé. Les règles de transfert entre îles restent à spécifier.
 
 Le moteur ne doit pas choisir arbitrairement un producteur ou ignorer un intrant. Les diagnostics doivent rendre visible toute limite ou tout résultat incomplet.
 
@@ -126,9 +126,9 @@ Les cas suivants doivent disposer d'entrées explicites et de résultats attendu
 | CORE-009 | Cycle dans le graphe | Détection et traitement |
 | CORE-010 | Donnée absente ou non vérifiée | Pas de conversion silencieuse en zéro |
 | CORE-011 | Entrée numérique invalide | Erreur structurée attendue |
-| CORE-012 | Besoin non entièrement couvert | Distinction demande, capacité et déficit |
+| CORE-012 | Besoin non entièrement couvert | Distinction demande, capacité et déficit |\n| CORE-013 | Intrant absent de l'île | Recette non réalisable localement en l'absence d'un approvisionnement autorisé |\n| CORE-014 | Plusieurs solutions possibles | Classement reproductible selon l'ordre d'optimisation validé |
 
-Les résultats chiffrés seront ajoutés lorsque les conventions de flux, la précision interne et les critères d'optimisation correspondants auront été arbitrés.
+Les résultats chiffrés seront ajoutés lorsque les conventions de flux, la précision interne et les métriques exactes d'optimisation correspondantes auront été arbitrées.
 
 ## 12. Critères de sortie du lot 1
 
