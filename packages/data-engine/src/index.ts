@@ -81,4 +81,4 @@ function deepFreeze<T>(value: T): T {
   return value;
 }
 
-export type { CatalogDiagnostic, DataRepository, ModularGameCatalog };
+export type { CatalogDiagnostic, ModularGameCatalog };
