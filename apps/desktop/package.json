@@ -1,4 +1,3 @@
-
 {
   "name": "@anno117/desktop",
   "version": "0.1.0",
@@ -12,6 +11,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@anno117/data-engine": "workspace:*",
+    "@anno117/game-data": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
