@@ -1,63 +1,56 @@
 import { describe, expect, it } from "vitest";
-import { loadGameData, type GameDataInput } from "./index";
+import { loadGameData } from "./index";
+import type { ModularGameCatalog } from "@anno117/game-data";
 
-function createInput(): GameDataInput {
+function fixture(): ModularGameCatalog {
+  const modules = ["resources", "buildings", "production", "population", "regions", "islandAvailability", "evidence"] as const;
+  const evidence = [{ id: "obs-1", method: "observation" as const, observedAt: "2026-10-30", gameVersion: "test", notes: "Observation synthétique." }];
   return {
     manifest: {
-      id: "anno117-base",
-      catalogVersion: "0.0.1-draft",
-      schemaVersion: "1",
-      gameVersion: "Anno 117: Pax Romana — version à relever",
-      regions: ["latium", "albion"],
+      id: "anno117-test", catalogVersion: "0.0.1", schemaVersion: "1",
+      gameVersion: "test", scope: { edition: "base-game", regions: ["latium"] },
+      modules: [...modules],
     },
-    catalog: {
-      sources: [{
-        id: "test-observation",
-        title: "Observation synthétique de test",
-        url: "https://example.invalid/observation",
-        accessedAt: "2026-10-30",
-      }],
-      goods: [
-        { id: "test-input", name: "Intrant de test", sourceId: "test-observation" },
-        { id: "test-output", name: "Produit de test", sourceId: "test-observation" },
+    modules: {
+      resources: [
+        { id: "wood", name: "Bois", category: "raw", status: "verified", evidenceIds: ["obs-1"] },
+        { id: "planks", name: "Planches", category: "intermediate", status: "verified", evidenceIds: ["obs-1"] },
       ],
-      buildings: [{
-        id: "test-building",
-        name: "Bâtiment de test",
-        recipeIds: ["test-recipe"],
-        sourceId: "test-observation",
-      }],
-      recipes: [{
-        id: "test-recipe",
-        buildingId: "test-building",
-        inputs: [{ good: "test-input", perMinute: 1 }],
-        outputs: [{ good: "test-output", perMinute: 2 }],
-        sourceId: "test-observation",
-      }],
-      tiers: [],
+      buildings: [{ id: "sawmill", name: "Scierie", regionId: "latium", recipeIds: ["planks-recipe"], status: "verified", evidenceIds: ["obs-1"] }],
+      production: [{ id: "planks-recipe", name: "Production de planches", buildingId: "sawmill", inputs: [{ good: "wood", perMinute: 2 }], outputs: [{ good: "planks", perMinute: 1 }], status: "verified", evidenceIds: ["obs-1"] }],
+      population: [],
+      regions: [{ id: "latium", name: "Latium", status: "verified", evidenceIds: ["obs-1"] }],
+      islandAvailability: [],
+      evidence,
     },
   };
 }
 
 describe("loadGameData", () => {
-  it("validates and exposes the bundled catalog and core view", () => {
-    const result = loadGameData(createInput());
-
-    expect(result.manifest.id).toBe("anno117-base");
-    expect(result.coreCatalog.recipes[0]?.id).toBe("test-recipe");
+  it("aggregates modular data and creates a core-compatible projection", () => {
+    const result = loadGameData(fixture());
+    expect(result.coreCatalog.recipes).toEqual([{
+      id: "planks-recipe", buildingId: "sawmill",
+      inputs: [{ good: "wood", perMinute: 2 }],
+      outputs: [{ good: "planks", perMinute: 1 }],
+    }]);
   });
 
-  it("rejects an unknown cross-catalog reference", () => {
-    const input = createInput();
-    input.catalog.recipes[0]!.outputs[0]!.good = "missing-good";
-
-    expect(() => loadGameData(input)).toThrow(/Catalogue invalide/);
+  it("rejects unknown cross-module references", () => {
+    const input = fixture();
+    input.modules.production[0]!.inputs[0]!.good = "missing";
+    expect(() => loadGameData(input)).toThrow(/RESOURCE_UNKNOWN/);
   });
 
-  it("rejects duplicate regions in the manifest", () => {
-    const input = createInput();
-    input.manifest.regions = ["latium", "latium"];
+  it("does not expose unverified records to the core", () => {
+    const input = fixture();
+    input.modules.production[0]!.status = "observed";
+    expect(loadGameData(input).coreCatalog.recipes).toEqual([]);
+  });
 
-    expect(() => loadGameData(input)).toThrow(/uniques/);
+  it("returns immutable snapshots", () => {
+    const result = loadGameData(fixture());
+    expect(Object.isFrozen(result.modules.resources)).toBe(true);
+    expect(Object.isFrozen(result.coreCatalog.recipes[0]!.inputs)).toBe(true);
   });
 });
