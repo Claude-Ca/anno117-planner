@@ -1,6 +1,6 @@
 # Anno 117 Planner — Plan de développement par lots
 
-**Version :** 1.3
+**Version :** 1.4
 **Date :** 30 octobre 2026
 **Statut :** Référence de reconstruction et de réalisation — audit des données en cours
 **Branche d’intégration :** `develop`
@@ -26,9 +26,11 @@ Le développement suit un cycle Git commun :
 4. Réaliser uniquement les modifications prévues.
 5. Ajouter ou mettre à jour les tests et la documentation concernés.
 6. Vérifier les critères de sortie.
-7. Effectuer une revue des modifications.
-8. Intégrer les changements dans `develop` après validation.
-9. Vérifier l’état de `develop` avant de commencer le travail suivant.
+7. Effectuer une revue des modifications et ouvrir une Pull Request vers la branche cible.
+8. Vérifier la réussite de la CI obligatoire, puis fusionner la PR en Squash.
+9. Vérifier l’état de la branche cible avant de commencer le travail suivant.
+
+Les règles détaillées de branches, de versionnement, de tags et de commits sont définies dans le [Plan de gestion de configuration](plan-gestion-configuration.md).
 
 Les lots doivent rester suffisamment limités pour permettre une revue et un diagnostic simples. Une étape documentaire ne doit pas introduire de modification fonctionnelle ou technique sans nécessité explicitement validée.
 
@@ -492,6 +494,8 @@ Ce lot nécessite une conception fonctionnelle spécifique avant le développeme
 
 ## 6. Processus Git standard pour chaque étape et chaque lot
 
+Les conventions normatives de GitFlow simplifié, de nommage des branches, des commits, de versionnement et de release sont définies dans le [Plan de gestion de configuration](plan-gestion-configuration.md). Le présent chapitre décrit leur application dans le déroulement des lots.
+
 ### 6.1. Préparation
 
 Avant de créer une branche :
@@ -506,7 +510,7 @@ Aucune modification non commitée ne doit être écrasée ou perdue.
 
 ### 6.2. Création de la branche
 
-Créer une branche dédiée à partir de `develop` à jour, avec le nom défini pour l’étape ou le lot.
+Créer une branche `feature/*` dédiée à partir de `develop` à jour. Les branches `fix/*` constituent l'exception : elles sont créées à partir de `main` et suivent le processus de correction et de merge-back décrit dans le [Plan de gestion de configuration](plan-gestion-configuration.md).
 
 Exemple :
 
@@ -547,7 +551,9 @@ Les commandes exactes doivent être celles réellement configurées dans le dép
 
 Pour une étape documentaire, la validation porte notamment sur la cohérence des documents, les liens internes, les chemins, les références aux fichiers et l’absence de modifications hors périmètre.
 
-### 6.5. Merge vers `develop`
+### 6.5. Pull Request et merge vers `develop`
+
+L'intégration dans `develop` s'effectue exclusivement par Pull Request. La CI obligatoire doit être verte, la branche source à jour avec sa cible et les conversations de revue résolues. La fusion se fait en Squash.
 
 Le merge est autorisé lorsque :
 
@@ -558,7 +564,7 @@ Le merge est autorisé lorsque :
 - la documentation est à jour ;
 - le diff correspond au périmètre prévu.
 
-Le mode de merge — merge commit ou squash — doit suivre la convention retenue pour le dépôt.
+Le mode de fusion doit respecter le Ruleset du dépôt : Squash uniquement pour `main` et `develop`.
 
 ### 6.6. Après le merge
 
@@ -662,17 +668,20 @@ L'état du dépôt a été contrôlé sur GitHub le 30 octobre 2026 :
 - le lot 3 (cas d'usage produit) est intégré via la PR #5 ;
 - le premier socle du lot 4 (catalogue de données) est intégré via la PR #6 ;
 - l'évolution du moteur de calcul relative au graphe de production est intégrée via la PR #7 ;
-- l'étape documentaire est intégrée via la PR #8.
+- l'étape documentaire est intégrée via la PR #8 ;
+- le raccordement du référentiel modulaire `DataRepository` à la couche `product` est intégré via la PR #9 (squash merge).
 
-La branche `feature/data-catalog-engine` est un prolongement de `develop` (base vérifiée : `fbbdfb218ca31887f445dd21c63583c0fddd9728`). Elle porte les évolutions modulaires du catalogue, le moteur d'agrégation et son chargement local dans le desktop. Ces évolutions ne sont pas encore intégrées dans `develop`.
+La PR #9 a été validée localement avec 54 tests réussis, le typecheck des cinq projets et le build Electron. Le workflow GitHub Actions « Tests, typecheck and build » a également réussi.
+
+Au moment de ce relevé, `develop` pointe sur le commit `2b1438952ca00a2efbd3b32a0cf3f0bc003cd198`. `main` pointe encore sur le commit initial `7450549f5e84f6df4cf8fac88bf98f7198c5c691` ; aucune release ni aucun tag Git n'ont encore été publiés. Le lot 4 reste ouvert pour la constitution et la validation des données réelles du jeu. Le lot 5 n'est pas encore commencé.
+
+La branche courante de configuration est `feature/configuration-rules`, créée depuis `develop`. Elle porte le plan de gestion de configuration, le Ruleset importable et l'extension du workflow CI à `main` et `develop`. Ces changements restent à valider par PR.
 
 ### Prochaine action
 
-La tâche technique immédiate sur `feature/data-catalog-engine` consiste à raccorder le référentiel modulaire `DataRepository` au cas d'usage de `packages/product`. L'API `simulateCatalogProduction` doit réutiliser `repository.coreCatalog` et déléguer le calcul à `simulateProduction`, sans reproduire la logique du `core`. Les tests dédiés et la documentation de ce raccordement sont ajoutés sur cette branche ; leur exécution locale reste requise avant de déclarer cette tâche validée.
+Finaliser et intégrer le [Plan de gestion de configuration](plan-gestion-configuration.md), importer le Ruleset défini dans `.github/rulesets/protect-main-develop.json`, puis vérifier le déclenchement et le caractère bloquant de la CI sur les PR vers les deux branches permanentes.
 
-Cette évolution termine le raccordement technique entre catalogue et couche applicative, mais ne clôt pas à elle seule le lot 4. La constitution du catalogue réel, la mesure de couverture Latium/Albion, la validation des données en jeu et l'examen des conditions de réutilisation restent ouverts. Aucune donnée non vérifiée ne doit être injectée dans le catalogue embarqué.
-
-Après validation de ce raccordement, le lot 5 (première interface de planification) pourra être préparé conformément à ses critères. Les ajustements graphiques et ergonomiques de l'IHM seront traités dans un cycle distinct ; ils ne doivent pas masquer les prérequis fonctionnels et les données encore manquantes.
+Une fois ce socle de gestion de configuration en place, le lot 5 (première interface de planification) pourra être préparé conformément à ses critères. Les ajustements graphiques et ergonomiques de l'IHM seront traités dans un cycle distinct.
 
 ### 10.4. Règle de continuité
 
