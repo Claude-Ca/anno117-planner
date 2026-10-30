@@ -1,6 +1,6 @@
 # Registre des décisions fonctionnelles — Anno 117 Planner
 
-**Version :** 0.3  
+**Version :** 0.4  
 **Date :** 30 octobre 2026  
 **Statut :** registre évolutif — décisions validées et décisions encore à arbitrer
 
@@ -33,8 +33,8 @@ Aucune proposition ou hypothèse ne doit être codée comme une règle validée.
 | DEC-011 | Main-d'œuvre et entretien | Sont-ils des contraintes de calcul, des indicateurs ou hors périmètre du moteur initial ? | Moteur, cas d'usage | À arbitrer |
 | DEC-012 | Erreurs et résultats partiels | Quelles entrées invalident une requête et quels cas retournent un résultat partiel avec diagnostics ? | Moteur, cas d'usage, UI | À arbitrer |
 | DEC-013 | Stocks et bâtiments existants | Sont-ils pris en compte dans la première version des cas d'usage ? Dans quel ordre par rapport aux besoins ? | Lot 3, modèle de scénario | À arbitrer |
-| DEC-014 | Contraintes géographiques et disponibilité locale | Les ressources disponibles sur chaque île doivent conditionner la faisabilité des recettes ; la représentation des disponibilités, fertilités et autres contraintes reste à définir. | Catalogue, moteur, scénario multi-îles | **Partiellement validée — disponibilité locale à prendre en compte** |
-| DEC-015 | Transferts entre îles | Une ressource absente localement peut-elle être importée depuis une autre île, et selon quelles limites/capacités ? | Lot 8, scénario | À arbitrer — la disponibilité locale est requise, les règles de transfert restent à définir |
+| DEC-014 | Disponibilité locale des ressources | La faisabilité d'une recette est évaluée localement sur l'île planifiée, selon les ressources naturelles et les productions locales disponibles. Le joueur décide lui-même de sa stratégie globale. | Catalogue, moteur, scénario d'île | **Validée — calcul local en première approche** |
+| DEC-015 | Colonisation et commerce inter-îles | Les importations dépendent de conditions de jeu, notamment la colonisation d'une autre île ou la mise en place du commerce. Le moteur initial doit-il simuler ces mécanismes ? | Lot 8, stratégie globale | **Hors périmètre du calcul local initial** — aucune importation supposée automatique |
 | DEC-016 | Sauvegarde et export | Quels formats, quelles données et quelle stratégie de versionnement sont attendus ? | Lot 7 | À arbitrer |
 | DEC-017 | Plateforme et distribution | Quelles versions de Windows et quel format de livraison sont ciblés ? | Desktop, livraison | À arbitrer |
 | DEC-018 | Qualité | Quels contrôles et seuils sont requis pour déclarer la V1 livrable ? | CI, tests, livraison | À arbitrer |
