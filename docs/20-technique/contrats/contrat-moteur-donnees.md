@@ -1,16 +1,16 @@
 # Contrat du moteur de données
 
-**Version :** 1.1  
-**Statut :** contrat de travail — implémentation initiale en cours  
+**Version :** 1.2  
+**Statut :** contrat de travail — intégration modulaire disponible, validation locale en cours  
 **Composant :** `packages/data-engine`
 
 ## 1. Objet
 
-Le moteur transforme les modules locaux de `@anno117/game-data` en un référentiel agrégé, validé et consommable par le `core`. Il constitue la frontière entre les données du jeu et le modèle métier du calculateur.
+Le moteur transforme les modules locaux de `@anno117/game-data` en un référentiel agrégé, validé et consommable par les couches applicatives et le `core`. Il constitue la frontière entre les données du jeu et le modèle métier du calculateur.
 
 ## 2. Responsabilités
 
-Le moteur doit charger les modules embarqués fournis par l'application, vérifier leur manifeste, valider les identifiants et références, agréger les données sans mutation, exposer les diagnostics et construire une projection vers `Catalog` du `core`.
+Le moteur vérifie le manifeste, valide les identifiants et références, agrège les données sans mutation, expose les diagnostics et construit une projection vers `Catalog` du `core`.
 
 Il ne doit pas interroger Internet, importer des catalogues communautaires, effectuer les calculs de production, décider de la stratégie inter-îles, remplacer une donnée inconnue par zéro ou exposer des données non vérifiées au calcul.
 
@@ -41,6 +41,7 @@ Seules les entités au statut `verified` ou `derived`, avec références cohére
 ## 5. Validation et diagnostics
 
 Les diagnostics comportent une sévérité, un code, un chemin et un message. Les erreurs bloquantes empêchent le chargement. La validation couvre au minimum :
+
 - structure du manifeste et présence des modules ;
 - unicité des identifiants ;
 - références vers ressources, bâtiments, recettes, régions et preuves ;
@@ -53,18 +54,42 @@ Une couverture incomplète n'est pas automatiquement une erreur : le catalogue V
 
 ## 6. Agrégation et projection
 
-Le référentiel agrégé conserve les modules et métadonnées. La projection vers le `core` ne contient que les bâtiments, recettes, biens référencés et paliers admissibles. Le modèle du `core` reste indépendant de la structure JSON et des modules.
+Le résultat de `loadGameData(input)` est un `DataRepository` immuable qui expose :
 
-La projection ne doit pas muter les données d'entrée. Elle doit être déterministe. Les disponibilités régionales et insulaires restent conservées dans le référentiel ; elles ne sont pas encore consommées par le contrat actuel du `core`.
+- `manifest` : manifeste du catalogue ;
+- `modules` : snapshot des modules agrégés ;
+- `diagnostics` : diagnostics non bloquants éventuels ;
+- `coreCatalog` : projection destinée au contrat de `@anno117/core`.
 
-## 7. Embarquement
+La projection ne contient que les bâtiments, recettes et paliers admissibles, ainsi que les flux qui référencent des ressources admissibles. Les bâtiments sans recette admissible sont écartés de la projection. Le modèle du `core` reste indépendant de la structure JSON et des modules.
+
+La projection ne doit pas muter les données d'entrée. Elle est construite de manière déterministe. Les disponibilités régionales et insulaires restent conservées dans le référentiel ; elles ne sont pas encore consommées par le contrat actuel du `core`.
+
+## 7. Consommation par la couche applicative
+
+`packages/product` expose le cas d'usage :
+
+```ts
+simulateCatalogProduction({
+  repository: dataRepository,
+  island,
+});
+```
+
+Le paramètre `repository` est un `DataRepository` obtenu par `loadGameData`. Le cas d'usage transmet uniquement `repository.coreCatalog` à `simulateProduction`, puis retourne le rapport de l'île. Il ne recharge pas le catalogue, ne contourne pas sa validation et ne duplique pas les règles de calcul du `core`.
+
+La responsabilité de créer et conserver le référentiel appartient à la couche qui charge les données (actuellement le desktop). Plusieurs simulations peuvent réutiliser le même référentiel immuable.
+
+Le desktop affiche actuellement le résumé du catalogue ; l'appel de `simulateCatalogProduction` depuis un flux de planification de l'IHM sera réalisé dans le lot consacré à l'interface.
+
+## 8. Embarquement
 
 Le package desktop importe les fichiers JSON locaux et fournit les modules à `loadGameData`. Le moteur ne réalise aucun accès filesystem ou réseau lui-même. La livraison d'une nouvelle version de l'application emporte la version correspondante du catalogue.
 
-## 8. Tests
+## 9. Tests
 
-Le plan détaillé et la matrice de tests sont maintenus dans [Plan de tests du catalogue](../plan-tests-catalogue.md). Les fixtures automatisées sont synthétiques et ne valent pas données de jeu. La validation du packaging et la campagne en jeu restent des étapes distinctes.
+Le plan détaillé et la matrice de tests sont maintenus dans [Plan de tests du catalogue](../plan-tests-catalogue.md). Les fixtures automatisées sont synthétiques et ne valent pas données de jeu. La validation du packaging, du démarrage hors ligne et la campagne en jeu restent des contrôles distincts.
 
-## 9. État de réalisation
+## 10. État de réalisation
 
-Le modèle modulaire, les types de provenance, le validateur initial, la projection et les tests unitaires de base sont présents sur la branche de feature. Le chargement des fichiers JSON dans l'application desktop, le raccordement du `core` et la campagne de vérification restent à réaliser. Les commandes et résultats de tests ne sont considérés comme validés qu'après exécution dans l'environnement du dépôt.
+Le modèle modulaire, les types de provenance, le validateur, la projection, les tests du moteur de données et l'import du catalogue dans le desktop sont présents sur la branche de fonctionnalité. Le cas d'usage applicatif consomme maintenant le `DataRepository` et délègue au moteur de calcul. Les nouveaux tests de raccordement doivent encore être exécutés localement. La campagne de vérification des données en jeu et l'utilisation du cas d'usage dans un écran de planification restent à réaliser.
