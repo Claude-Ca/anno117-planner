@@ -1,4 +1,3 @@
-
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -9,6 +8,7 @@
     "skipLibCheck": true,
     "types": ["node"],
     "jsx": "react-jsx",
+    "resolveJsonModule": true,
     "noEmit": true
   },
   "include": [
