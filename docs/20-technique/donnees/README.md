@@ -7,4 +7,4 @@
 - [Registre des sources et provenance](registre-sources-donnees.md)
 - [Licences et réutilisation des données](licences-et-reutilisation.md)
 
-La présence d'une donnée dans une source ou un audit ne signifie pas qu'elle est complète, vérifiée ou librement réutilisable. Les sources secondaires sont des pistes d'étude ; les données embarquées doivent être établies et validées indépendamment.
+Le catalogue embarqué est fondé sur des preuves internes d'observation ou d'expérimentation. Les sources secondaires restent des pistes d'étude et ne sont pas intégrées comme provenance des données vérifiées.
