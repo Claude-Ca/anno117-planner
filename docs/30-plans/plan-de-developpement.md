@@ -1,7 +1,7 @@
 # Anno 117 Planner — Plan de développement par lots
 
-**Version :** 1.2
-**Date :** 29 octobre 2026
+**Version :** 1.3
+**Date :** 30 octobre 2026
 **Statut :** Référence de reconstruction et de réalisation — audit des données en cours
 **Branche d’intégration :** `develop`
 **Technologies cibles :** Electron, React, TypeScript, Vite, pnpm, Vitest
@@ -653,13 +653,26 @@ Le dossier `docs/` contient les documents nécessaires pour comprendre et recons
 - `anno117-planner-audit-catalogue.md` : synthèse et axes de travail de l'audit ;
 - `installation_environnement.md` et `guide_de_demarrage.md` : procédures de préparation et de travail, à vérifier et actualiser au besoin.
 
-### 10.3. Prochaine action
+### 10.3. État Git vérifié et prochaine action — 30 octobre 2026
 
-Avant tout nouveau développement, vérifier l'état réel des branches `develop` et `feature/update-documents`, l'existence d'une Pull Request et les éventuels changements intervenus depuis le dernier audit documentaire.
+L'état du dépôt a été contrôlé sur GitHub le 30 octobre 2026 :
 
-La prochaine étape fonctionnelle est le lot 1 : spécification, construction ou audit de conformité du moteur métier et de son API publique. Le travail doit suivre la procédure de reprise complète de la section 4 bis : si le dépôt est vide ou si l'implémentation actuelle est abandonnée, reconstruire à partir des documents et non à partir d'hypothèses sur le code antérieur ; si le code existe, l'inspecter et ne le conserver qu'après vérification.
+- le lot 1 (stabilisation du moteur) est intégré dans `develop` via la PR #2 ;
+- le lot 2 (socle Electron) est intégré via la PR #3 ;
+- le lot 3 (cas d'usage produit) est intégré via la PR #5 ;
+- le premier socle du lot 4 (catalogue de données) est intégré via la PR #6 ;
+- l'évolution du moteur de calcul relative au graphe de production est intégrée via la PR #7 ;
+- l'étape documentaire est intégrée via la PR #8.
 
-Le lot 4 relatif au catalogue peut avancer sur l'audit documentaire et la validation des sources, mais aucune donnée ne doit être intégrée ou redistribuée avant validation explicite de sa couverture, de sa cohérence et des conditions de réutilisation.
+La branche `feature/data-catalog-engine` est un prolongement de `develop` (base vérifiée : `fbbdfb218ca31887f445dd21c63583c0fddd9728`). Elle porte les évolutions modulaires du catalogue, le moteur d'agrégation et son chargement local dans le desktop. Ces évolutions ne sont pas encore intégrées dans `develop`.
+
+### Prochaine action
+
+La tâche technique immédiate sur `feature/data-catalog-engine` consiste à raccorder le référentiel modulaire `DataRepository` au cas d'usage de `packages/product`. L'API `simulateCatalogProduction` doit réutiliser `repository.coreCatalog` et déléguer le calcul à `simulateProduction`, sans reproduire la logique du `core`. Les tests dédiés et la documentation de ce raccordement sont ajoutés sur cette branche ; leur exécution locale reste requise avant de déclarer cette tâche validée.
+
+Cette évolution termine le raccordement technique entre catalogue et couche applicative, mais ne clôt pas à elle seule le lot 4. La constitution du catalogue réel, la mesure de couverture Latium/Albion, la validation des données en jeu et l'examen des conditions de réutilisation restent ouverts. Aucune donnée non vérifiée ne doit être injectée dans le catalogue embarqué.
+
+Après validation de ce raccordement, le lot 5 (première interface de planification) pourra être préparé conformément à ses critères. Les ajustements graphiques et ergonomiques de l'IHM seront traités dans un cycle distinct ; ils ne doivent pas masquer les prérequis fonctionnels et les données encore manquantes.
 
 ### 10.4. Règle de continuité
 

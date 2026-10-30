@@ -1,0 +1,14 @@
+[
+  {
+    "id": "latium",
+    "name": "Latium",
+    "status": "to-observe",
+    "evidenceIds": []
+  },
+  {
+    "id": "albion",
+    "name": "Albion",
+    "status": "to-observe",
+    "evidenceIds": []
+  }
+]

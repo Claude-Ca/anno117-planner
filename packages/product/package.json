@@ -10,8 +10,9 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
- "dependencies": {
+  "dependencies": {
     "@anno117/core": "workspace:*",
+    "@anno117/data-engine": "workspace:*",
     "@anno117/game-data": "workspace:*"
   },
   "devDependencies": {

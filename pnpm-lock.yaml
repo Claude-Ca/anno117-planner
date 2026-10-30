@@ -10,6 +10,12 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@anno117/data-engine':
+        specifier: workspace:*
+        version: link:../../packages/data-engine
+      '@anno117/game-data':
+        specifier: workspace:*
+        version: link:../../packages/game-data
       react:
         specifier: ^19.2.0
         version: 19.3.1
@@ -64,11 +70,30 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@24.19.2)(vite@7.3.7(@types/node@24.19.2)(lightningcss@1.33.0))
 
+  packages/data-engine:
+    dependencies:
+      '@anno117/core':
+        specifier: workspace:*
+        version: link:../core
+      '@anno117/game-data':
+        specifier: workspace:*
+        version: link:../game-data
+    devDependencies:
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@24.19.2)(vite@7.3.7(@types/node@24.19.2)(lightningcss@1.33.0))
+
   packages/product:
     dependencies:
       '@anno117/core':
         specifier: workspace:*
         version: link:../core
+      '@anno117/data-engine':
+        specifier: workspace:*
+        version: link:../data-engine
       '@anno117/game-data':
         specifier: workspace:*
         version: link:../game-data
