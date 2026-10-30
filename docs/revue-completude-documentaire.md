@@ -293,3 +293,29 @@ La première séance d'arbitrage devra donc figer les unités de calcul, les flu
 - `docs/data-catalog-audit.md` — résultats de l'audit structurel.
 - `docs/data-sources.md` — sources et provenance.
 - `docs/data-licensing.md` — droits et conditions de réutilisation.
+
+
+---
+
+## Addendum — travaux documentaires du 30 octobre 2026
+
+À la suite de la validation du propriétaire du projet, les quatre premiers axes de travail ont été engagés sur cette branche, sans modification du code applicatif.
+
+### Livrables ajoutés ou actualisés
+
+- `docs/contrat-moteur-calcul.md` : contrat conceptuel du moteur, responsabilités, données attendues, flux, capacité, propagation, erreurs et matrice de cas de référence.
+- `docs/registre-decisions-fonctionnelles.md` : registre initial des décisions ouvertes DEC-001 à DEC-020, avec dépendances et statut.
+- `docs/guide_de_demarrage.md` : correction de la structure documentaire (`docs/`) et alignement sur l'architecture cible (`packages/product`, `packages/game-data`) ; commandes desktop explicitement conditionnées à la présence du lot 2.
+- `docs/plan_de_developpement.md` : références vers le contrat du moteur et le registre des décisions, avec rappel de leur statut non approuvé.
+
+### État après ces travaux
+
+Les bases documentaires des quatre axes sont en place, mais cela ne signifie pas que le lot 1 est prêt à être implémenté sans arbitrage. Les unités, la précision, les arrondis, la gestion des recettes multiples, les coproduits, les modificateurs de productivité et la politique de résultats partiels restent à décider.
+
+La matrice de cas CORE-001 à CORE-012 décrit les familles de tests à préparer. Les résultats chiffrés de référence seront ajoutés après validation des conventions correspondantes ; aucun chiffre n'a été inventé pour masquer les décisions ouvertes.
+
+### Limites de vérification
+
+Les modifications ont été commitées sur `feature/update-documents` via GitHub. Aucune commande locale `pnpm test`, `pnpm -r typecheck` ou `git diff --check` n'a été exécutée dans l'environnement local du propriétaire pendant cette opération. Le propriétaire devra récupérer les derniers commits et vérifier le diff ainsi que les contrôles applicables.
+
+Le point 5 — préparation des lots suivants — reste volontairement en attente d'une décision commune.
