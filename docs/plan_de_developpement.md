@@ -187,7 +187,7 @@ Les corrections documentaires ultérieures doivent être enregistrées dans de n
 - Le diff confirme que seuls les changements documentaires prévus sont présents.
 - Les modifications sont relues, commités et intégrées dans `develop` après validation.
 
-### 4.6. Condition de passage aux travaux sur le catalogue
+### 4.6. Documents ajoutés après la première revue\n\nLa revue de complétude documentaire a identifié des décisions métier à prendre avant de figer les contrats techniques. Deux documents complémentaires sont maintenant présents sur cette branche :\n\n- `docs/contrat-moteur-calcul.md` décrit le contrat conceptuel du moteur, les responsabilités, les cas de référence et les sujets encore ouverts ;\n- `docs/registre-decisions-fonctionnelles.md` centralise les décisions à arbitrer et leurs dépendances.\n\nCes documents sont des bases de travail, pas des spécifications fonctionnelles approuvées. Le lot 1 ne doit pas être considéré comme complètement spécifié tant que les décisions nécessaires et les résultats attendus des cas de référence ne sont pas validés.\n\n### 4.7. Condition de passage aux travaux sur le catalogue
 
 La fin de cette étape autorise la poursuite du travail d'audit et de préparation du catalogue. Elle ne vaut pas autorisation de redistribuer les données.
 
