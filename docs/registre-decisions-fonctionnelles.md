@@ -1,8 +1,8 @@
 # Registre des décisions fonctionnelles — Anno 117 Planner
 
-**Version :** 0.1  
+**Version :** 0.2  
 **Date :** 30 octobre 2026  
-**Statut :** registre initial — décisions à arbitrer avec le propriétaire du projet
+**Statut :** registre évolutif — décisions validées et décisions encore à arbitrer
 
 ## 1. Objet et règles d'utilisation
 
@@ -23,11 +23,11 @@ Aucune proposition ou hypothèse ne doit être codée comme une règle validée.
 | DEC-001 | Entrée de planification | La V1 démarre-t-elle à partir d'objectifs de population, de besoins en biens, ou des deux ? | Expression de besoin, cas d'usage, UI | À arbitrer |
 | DEC-002 | Population | Comment saisir et agréger la population : nombre d'habitants, résidences ou résidences par niveau ? | Consommation, catalogue | À arbitrer |
 | DEC-003 | Besoins des habitants | Comment sélectionner les besoins par niveau et catégorie, y compris besoins optionnels et effets de progression ? | Consommation, données | À arbitrer |
-| DEC-004 | Unité de temps | Quelle unité commune est utilisée pour les débits internes : minute, heure ou autre ? | Moteur, catalogue, tests | À arbitrer |
+| DEC-004 | Unité de temps | Quelle unité commune est utilisée pour les débits internes ? | Moteur, catalogue, tests | **Validée — minute** |
 | DEC-005 | Unités de consommation | Quelle unité et quelle période décrivent les taux de consommation des habitants ? | Moteur, catalogue | À arbitrer |
 | DEC-006 | Précision numérique | Quelle précision interne et quelle stratégie de représentation numérique sont requises ? | Moteur, tests, affichage | À arbitrer |
-| DEC-007 | Arrondis | À quel stade arrondir les valeurs affichées et les nombres de bâtiments ? | Moteur, résultats, tests | À arbitrer |
-| DEC-008 | Recettes multiples | Lorsqu'un bien a plusieurs producteurs, le choix est-il manuel, automatique ou les deux ? Quelle règle de répartition s'applique ? | Moteur, UI, données | À arbitrer |
+| DEC-007 | Arrondis | Les quantités nécessitant un nombre entier d'installations sont arrondies à l'entier supérieur ; le stade d'arrondi des autres valeurs reste à préciser. | Moteur, résultats, tests | **Partiellement validée — entier supérieur pour le dimensionnement** |
+| DEC-008 | Recettes multiples | Le moteur doit combiner les recettes pour optimiser la couverture du besoin ; les critères d'optimisation et les contraintes restent à définir. | Moteur, UI, données, tests | **Partiellement validée — combinaison/optimisation retenue** |
 | DEC-009 | Recettes multi-sorties | Comment prendre en compte les coproduits lorsqu'une recette produit plusieurs biens ? | Moteur, données, tests | À arbitrer |
 | DEC-010 | Productivité | Quels modificateurs sont pris en charge en V1 et comment se cumulent-ils ? | Moteur, données | À arbitrer |
 | DEC-011 | Main-d'œuvre et entretien | Sont-ils des contraintes de calcul, des indicateurs ou hors périmètre du moteur initial ? | Moteur, cas d'usage | À arbitrer |
