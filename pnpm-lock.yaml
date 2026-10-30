@@ -91,6 +91,9 @@ importers:
       '@anno117/core':
         specifier: workspace:*
         version: link:../core
+      '@anno117/data-engine':
+        specifier: workspace:*
+        version: link:../data-engine
       '@anno117/game-data':
         specifier: workspace:*
         version: link:../game-data
