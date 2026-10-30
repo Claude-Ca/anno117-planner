@@ -10,6 +10,12 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@anno117/data-engine':
+        specifier: workspace:*
+        version: link:../../packages/data-engine
+      '@anno117/game-data':
+        specifier: workspace:*
+        version: link:../../packages/game-data
       react:
         specifier: ^19.2.0
         version: 19.3.1
