@@ -4,7 +4,6 @@ import {
   type CatalogDiagnostic,
   type CatalogModules,
   type ModularGameCatalog,
-  type CoreCatalogProjection,
 } from "@anno117/game-data";
 
 export interface DataRepository {
@@ -20,11 +19,14 @@ const usable = (status: string) => status === "verified" || status === "derived"
 /**
  * Aggregates bundled modules, validates their references and creates a
  * conservative projection for the calculation core. No filesystem or network
- * access occurs here: the desktop bundle imports the JSON modules and passes
- * them to this function.
+ * access occurs here: the desktop bundle imports its local JSON modules and
+ * passes the parsed modules to this function.
  */
 export function loadGameData(input: ModularGameCatalog): DataRepository {
-  const snapshot = JSON.parse(JSON.stringify(input)) as ModularGameCatalog;\n  const diagnostics = validateModularCatalog(snapshot);
+  // Work on an isolated JSON snapshot so freezing the repository never freezes
+  // or otherwise changes the caller's input object.
+  const snapshot = JSON.parse(JSON.stringify(input)) as ModularGameCatalog;
+  const diagnostics = validateModularCatalog(snapshot);
   const blocking = diagnostics.filter((d) => d.severity === "error");
   if (blocking.length) {
     throw new Error(blocking.map((d) => `[${d.code}] ${d.path}: ${d.message}`).join("\n"));
@@ -32,8 +34,8 @@ export function loadGameData(input: ModularGameCatalog): DataRepository {
 
   const coreCatalog = toCoreProjection(snapshot.modules);
   return Object.freeze({
-    manifest: deepFreeze(input.manifest),
-    modules: deepFreeze(input.modules),
+    manifest: deepFreeze(snapshot.manifest),
+    modules: deepFreeze(snapshot.modules),
     diagnostics: Object.freeze([...diagnostics]),
     coreCatalog: deepFreeze(coreCatalog),
   });
@@ -46,12 +48,11 @@ function toCoreProjection(modules: CatalogModules): Catalog {
   const recipes = modules.production.filter((x) =>
     usable(x.status) &&
     buildingIds.has(x.buildingId) &&
-    x.inputs.every((f) => resources.has(f.good)) &&
-    x.outputs.every((f) => resources.has(f.good)),
+    x.inputs.every((flow) => resources.has(flow.good)) &&
+    x.outputs.every((flow) => resources.has(flow.good)),
   );
-  const recipeIds = new Set(recipes.map((x) => x.id));
   const tiers = modules.population.filter((x) =>
-    usable(x.status) && x.consumptionPerResident.every((f) => resources.has(f.good)),
+    usable(x.status) && x.consumptionPerResident.every((flow) => resources.has(flow.good)),
   );
 
   return {
@@ -59,11 +60,15 @@ function toCoreProjection(modules: CatalogModules): Catalog {
       .filter((building) => recipes.some((recipe) => recipe.buildingId === building.id))
       .map(({ id }) => ({ id })),
     recipes: recipes.map(({ id, buildingId, inputs, outputs }) => ({
-      id, buildingId, inputs: inputs.map((x) => ({ ...x })), outputs: outputs.map((x) => ({ ...x })),
+      id,
+      buildingId,
+      inputs: inputs.map((flow) => ({ ...flow })),
+      outputs: outputs.map((flow) => ({ ...flow })),
     })),
     tiers: tiers.map(({ id, residentsPerHouse, consumptionPerResident }) => ({
-      id, residentsPerHouse,
-      consumptionPerResident: consumptionPerResident.map((x) => ({ ...x })),
+      id,
+      residentsPerHouse,
+      consumptionPerResident: consumptionPerResident.map((flow) => ({ ...flow })),
     })),
   };
 }
@@ -76,4 +81,4 @@ function deepFreeze<T>(value: T): T {
   return value;
 }
 
-export type { CatalogDiagnostic, ModularGameCatalog, CoreCatalogProjection };
+export type { CatalogDiagnostic, ModularGameCatalog };
