@@ -34,10 +34,27 @@ La couverture unitaire porte notamment sur les identifiants dupliqués, les réf
 | ENG-001 | Agrégation des modules | Intégration | Test automatisé |
 | ENG-002 | Données non vérifiées exclues de la projection | Intégration | Test automatisé |
 | ENG-003 | Catalogue projeté consommable par le cœur | Intégration | Test automatisé |
-| DESK-001 | Imports JSON locaux embarqués dans le build | Build | À exécuter localement |
-| DESK-002 | Catalogue chargé sans réseau | Manuel | À exécuter localement |
-| DESK-003 | Erreur de validation affichée dans l'interface | Manuel | À exécuter localement |
+| DESK-001 | Imports JSON locaux embarqués dans le build | Build | Réussi localement le 30/10/2026 |
+| DESK-002 | Démarrage du desktop compilé et affichage de l'interface | Manuel | Réussi localement le 30/10/2026 |
+| DESK-002b | Redémarrage du desktop sans connexion réseau | Manuel | À vérifier |
+| DESK-003 | Erreur de validation affichée dans l'interface | Manuel | À vérifier |
 | GAME-001 | Valeurs comparées au jeu de référence | Manuel | En attente de campagne |
+
+## Résultats de validation locale — 30/10/2026
+
+Exécution réalisée par le développeur sur la branche `feature/data-catalog-engine`, avec pnpm 12.15.0 et Vitest 5.0.5.
+
+| Commande | Résultat constaté |
+|---|---|
+| `pnpm install --frozen-lockfile` | Réussi ; lockfile accepté sans régénération |
+| `pnpm test` | Réussi ; 52 tests passés sur 4 packages |
+| `pnpm typecheck` | Réussi ; 5 projets contrôlés, aucune erreur TypeScript |
+| `pnpm --filter @anno117/desktop build` | Réussi ; main, preload et renderer compilés |
+| `pnpm --filter @anno117/desktop exec electron .` | Réussi ; fenêtre Electron et interface visibles |
+
+Détail des 52 tests : `core` 20, `game-data` 22, `data-engine` 5 et `product` 5.
+
+Le démarrage de la version compilée est confirmé. Le test de redémarrage sans réseau, la vérification de l'affichage d'une erreur de validation et la campagne de comparaison en jeu restent à réaliser. Aucun résultat n'est attribué à ces contrôles en attente.
 
 ## Procédure locale
 
@@ -65,4 +82,4 @@ Pour vérifier le fonctionnement hors ligne, démarrer la version compilée sans
 - Une erreur structurelle empêche la projection et est rendue visible.
 - Aucun élément non vérifié n'est envoyé au cœur de calcul.
 
-Les résultats restent à renseigner après exécution locale. Aucun test de build ou de démarrage n'est considéré comme réussi avant son exécution effective.
+Les résultats ci-dessus correspondent aux commandes effectivement exécutées et rapportées le 30/10/2026. Les contrôles explicitement indiqués « À vérifier » ou « En attente de campagne » ne sont pas considérés comme réussis.
