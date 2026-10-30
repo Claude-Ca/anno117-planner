@@ -1,121 +1,93 @@
 # Architecture des données — Anno 117 Planner
 
-**Version :** 1.0  
-**Statut :** proposition de travail — architecture à valider  
-**Branche :** `feature/data-catalog-engine`
+**Version :** 1.1  
+**Statut :** architecture cible — réalisation progressive
 
 ## 1. Objectif
 
-Cette architecture sépare les données du jeu, leur préparation et leur consommation par le moteur métier. Elle vise un fonctionnement entièrement local : les données nécessaires à l'application sont embarquées dans sa distribution et aucune interrogation d'un service externe n'est requise à l'exécution.
+Séparer les données du jeu, leur validation/agrégation et leur consommation par le moteur métier. Les catalogues sont versionnés et embarqués dans l'application. Aucun service externe n'est requis à l'exécution.
 
 ## 2. Vue d'ensemble
 
 ```mermaid
 flowchart TB
   subgraph GD["packages/game-data — référentiel embarqué"]
-    R["Catalogue des ressources"]
-    B["Catalogue des bâtiments"]
-    P["Catalogue des recettes"]
-    H["Catalogue population et besoins"]
-    G["Catalogue régions et disponibilités"]
+    R["Ressources"]
+    B["Bâtiments"]
+    P["Production / recettes"]
+    H["Population / besoins"]
+    G["Régions"]
+    I["Disponibilités par île"]
+    E["Preuves internes"]
   end
-
   subgraph DE["packages/data-engine — moteur de données"]
-    L["Chargement des modules"]
-    V["Validation des schémas et références"]
-    A["Agrégation du référentiel"]
-    X["Adaptateur vers le contrat du core"]
+    L["Chargement des modules locaux"]
+    V["Validation du manifeste, schémas et références"]
+    A["Agrégation immuable"]
+    X["Projection des seules données vérifiées vers le core"]
     L --> V --> A --> X
   end
-
   C["packages/core — calcul métier"]
-  APP["apps/desktop — application Electron / React"]
-
+  APP["apps/desktop — interface Electron / React"]
   R --> L
   B --> L
   P --> L
   H --> L
   G --> L
+  I --> L
+  E --> L
   X --> C
   C --> APP
 ```
 
-Le moteur de données est une dépendance du produit et un fournisseur de données du `core`. Le `core` ne connaît ni les fichiers, ni leur organisation, ni les sources de collecte.
-
 ## 3. Responsabilités
 
-| Composant | Responsabilité | Hors responsabilité |
-|---|---|---|
-| `game-data` | Définir et embarquer les catalogues, leurs identifiants et métadonnées | Calculer, optimiser ou charger des données distantes |
-| `data-engine` | Charger les ensembles, valider les références, agréger et exposer un référentiel cohérent | Déterminer une stratégie de production ou optimiser les bâtiments |
-| `core` | Calculer les besoins, flux, capacités et dimensionnements à partir d'un contrat stable | Connaître les formats et chemins des catalogues |
-| `product` | Orchestrer les cas d'usage de l'application | Porter les données brutes du jeu |
-| `desktop` | Présenter les résultats et recueillir les paramètres utilisateur | Réimplémenter les règles du moteur |
+| Composant | Responsabilité |
+|---|---|
+| `game-data` | Modèle typé, modules versionnés et preuves internes |
+| `data-engine` | Validation, agrégation, diagnostics et projection vers le contrat du core |
+| `core` | Calcul métier à partir d'un catalogue déjà validé |
+| `product` | Orchestration des cas d'usage |
+| `desktop` | Interface, import local des modules et présentation |
 
-## 4. Découpage fonctionnel des catalogues
+Le `core` ne connaît ni les fichiers, ni leur organisation, ni les métadonnées de collecte.
 
-Les ensembles sont séparés par domaine fonctionnel et reliés par des identifiants stables :
+## 4. Modules du catalogue
 
-- **Ressources et biens** : matières premières, produits intermédiaires et produits finis.
-- **Bâtiments** : identité, région, catégorie et caractéristiques nécessaires au modèle.
-- **Production** : recettes, entrées, sorties et durées de cycle.
-- **Population et besoins** : paliers, résidences et consommations.
-- **Régions** : Latium et Albion, avec leurs caractéristiques.
-- **Disponibilités insulaires** : fertilités, gisements et autres ressources naturelles locales.
+- `resources` : matières premières, biens intermédiaires, produits finis et services.
+- `buildings` : bâtiments et région d'appartenance.
+- `production` : recettes, intrants et sorties.
+- `population` : paliers, capacité résidentielle et besoins.
+- `regions` : Latium et Albion.
+- `islandAvailability` : fertilités, gisements et ressources naturelles propres à chaque île.
+- `evidence` : observations et expérimentations internes, utilisées comme preuves.
 
-Une information de référence ne doit être définie qu'à un seul endroit. Les autres ensembles la référencent par identifiant.
+Chaque entité a un identifiant stable, un statut de vérification et des références vers des preuves internes. Une donnée dérivée référence les observations dont elle dépend. Les sources secondaires restent des pistes d'étude dans la documentation, non des preuves embarquées.
 
-## 5. Cycle de chargement
+## 5. Statuts et projection
 
-1. Charger les modules locaux déclarés dans le manifeste du catalogue.
-2. Vérifier leur version et leur compatibilité avec le schéma attendu.
-3. Vérifier les identifiants uniques, les références croisées, les unités et les valeurs.
-4. Agréger les ensembles dans un référentiel immuable.
-5. Construire la vue compatible avec le contrat du `core`.
-6. Refuser le démarrage du calcul si une incohérence bloquante est détectée.
+Les statuts sont `to-observe`, `observed`, `verified`, `derived`, `disputed` et `excluded`. Le référentiel agrégé conserve l'ensemble des statuts. La projection destinée au `core` retient uniquement les données `verified` ou `derived` et dont les dépendances sont cohérentes.
 
-Les erreurs doivent être explicites et localisables (ensemble, identifiant, champ). Aucune valeur manquante ne doit être remplacée silencieusement par zéro.
+## 6. Cycle de chargement
 
-## 6. Provenance et niveau de confiance
+1. L'application importe le manifeste et les modules JSON locaux.
+2. `data-engine` valide le manifeste et les références.
+3. Les modules sont agrégés sans mutation et les diagnostics sont conservés.
+4. Le moteur construit une projection compatible avec `Catalog`.
+5. Le `core` effectue les calculs.
 
-La provenance d'étude et le statut de validation sont deux notions distinctes. Une source externe peut avoir servi à identifier une question à vérifier sans devenir la provenance d'une donnée intégrée.
+Les erreurs sont localisées par code et chemin. Une valeur absente n'est jamais transformée silencieusement en zéro. Le moteur n'effectue aucun accès réseau.
 
-Les données du catalogue applicatif doivent être issues d'observations ou d'expérimentations propres au projet, ou de calculs dérivés de telles observations. Les pistes issues de sources secondaires restent dans la documentation d'audit jusqu'à leur vérification indépendante.
+## 7. Limites actuelles
 
-Chaque donnée intégrée doit, selon sa nature, conserver :
-- une méthode d'établissement (observation, expérimentation, calcul dérivé) ;
-- un statut de vérification ;
-- la version du jeu observée ;
-- la date et les notes utiles ;
-- les références internes aux observations dont elle dépend.
+Le modèle modulaire et l'agrégateur initial sont en cours d'implémentation. Le contrat du core actuel ne couvre pas encore les régions ni les disponibilités insulaires : ces informations restent dans le référentiel agrégé, en attendant une évolution fonctionnelle du core. Le chargement effectif des JSON par l'application desktop reste à raccorder.
 
-Les valeurs non vérifiées ne sont pas présentées comme des valeurs de référence. Les valeurs dérivées conservent les liens vers leurs données d'entrée.
+Aucune valeur de jeu n'est préremplie dans les modules. Le premier catalogue sera constitué à partir d'une nouvelle campagne et validé par observation et expérimentation.
 
-## 7. Embarquement et fonctionnement hors ligne
-
-Les catalogues sont des ressources locales versionnées avec le code. Le moteur ne réalise aucun appel réseau et ne dépend d'aucun service communautaire à l'exécution.
-
-Une évolution des données est livrée avec une version de l'application. Le manifeste permet d'identifier la version du jeu et du schéma couverts.
-
-## 8. Principes de compatibilité
-
-- Le contrat public du `core` reste indépendant du modèle de stockage.
-- Les identifiants sont stables et ne dépendent pas des libellés traduits.
-- Les unités sont explicites ; les durées et débits suivent les conventions documentées par le contrat du `core`.
-- Les catalogues sont validés avant exposition.
-- L'agrégation ne modifie pas les données sources.
-- Le chargement est déterministe et reproductible.
-
-## 9. État de réalisation
-
-Cette architecture décrit la cible de la branche. Le dépôt contient déjà un premier package `game-data` avec types, validation et conversion vers le `core`. La branche doit faire évoluer cette base sans introduire de contrat concurrent. Le package `data-engine` et le découpage modulaire du catalogue seront introduits progressivement.
-
-Le premier catalogue de production restera volontairement incomplet tant que les valeurs n'auront pas été relevées ou vérifiées en jeu. Les inventaires provenant de sources secondaires constituent des pistes de vérification, pas des données approuvées à embarquer.
-
-## 10. Documents associés
+## 8. Documents associés
 
 - [Contrat du moteur de données](contrats/contrat-moteur-donnees.md)
+- [Plan de tests du catalogue](plan-tests-catalogue.md)
 - [Contrat du moteur de calcul](contrats/contrat-moteur-calcul.md)
 - [Périmètre du catalogue](donnees/perimetre-catalogue.md)
-- [Audit du catalogue](donnees/audit-catalogue-donnees.md)
-- [Registre des sources et provenance](donnees/registre-sources-donnees.md)
+- [Stratégie de validation en jeu](donnees/strategie-validation-en-jeu.md)
