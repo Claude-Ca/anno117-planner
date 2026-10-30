@@ -1,96 +1,68 @@
 # Plan de tests — catalogue et moteur de données
 
-**Version :** 1.0  
-**Statut :** plan de test de référence — exécution partielle à ce stade  
-**Périmètre :** `packages/game-data`, `packages/data-engine`, contrat avec `packages/core` et validation en jeu
+## Objectif
 
-## 1. Objectifs
+Valider la structure des modules, leurs références croisées, l'agrégation, la projection conservatrice vers le moteur métier et le chargement hors ligne dans le desktop. La validation technique ne remplace pas la campagne d'observation en jeu.
 
-Vérifier que les ensembles de données modulaires sont cohérents, que leur provenance est traçable, que l'agrégation est déterministe et que le `core` ne reçoit que des données admissibles. Vérifier également que l'application peut embarquer et charger le catalogue sans dépendance réseau.
+## Niveaux de test
 
-Les fixtures automatisées sont synthétiques : elles vérifient le comportement technique et ne constituent jamais des données du jeu.
-
-## 2. Niveaux de test
-
-| Niveau | Périmètre | Responsabilité |
+| Niveau | Périmètre | Contrôle |
 |---|---|---|
-| T1 — Unitaire | Validation d'un module, statuts, preuves, unités et identifiants | `game-data` |
-| T2 — Intégration | Références croisées et agrégation des modules | `data-engine` |
-| T3 — Contrat | Projection vers `Catalog` et compatibilité du `core` | `data-engine` + `core` |
-| T4 — Packaging | Chargement du catalogue embarqué, absence de réseau, version du manifeste | Application desktop |
-| T5 — Fonctionnel en jeu | Comparaison des valeurs observées à l'interface et aux mesures de campagne | Campagne de référence |
+| T1 | Validation unitaire | Schéma, identifiants, statuts, preuves et références |
+| T2 | Intégration des modules | Agrégation, snapshot immuable et diagnostic d'erreur |
+| T3 | Contrat du moteur | Projection des seules données vérifiées et appel du calcul métier |
+| T4 | Desktop | Build, démarrage de l'application compilée, chargement hors ligne |
+| T5 | Validation en jeu | Comparaison des données observées avec le jeu de référence |
 
-## 3. Matrice de tests automatisés
+## Tests automatisés présents
 
-| ID | Scénario | Résultat attendu | Niveau |
+Les tests des packages `game-data`, `data-engine`, `core` et `product` sont exécutés par Vitest via le script de workspace. Les jeux de données de test sont synthétiques et ne doivent pas être interprétés comme des données validées d'Anno 117.
+
+La couverture unitaire porte notamment sur les identifiants dupliqués, les références inconnues, les preuves manquantes, les dates impossibles, l'exclusion des données non vérifiées et l'intégration avec le cœur de calcul.
+
+## Matrice de validation
+
+| ID | Vérification | Type | État |
 |---|---|---|---|
-| CAT-001 | Manifeste complet et conforme | Accepté | T1 |
-| CAT-002 | Version ou identifiant obligatoire absent | Erreur localisée | T1 |
-| CAT-003 | Module obligatoire absent | Erreur bloquante | T1 |
-| CAT-004 | Identifiant dupliqué dans un module | Erreur bloquante | T1 |
-| CAT-005 | Référence vers ressource inconnue | Erreur bloquante | T2 |
-| CAT-006 | Bâtiment associé à une région inconnue | Erreur bloquante | T2 |
-| CAT-007 | Recette non référencée par son bâtiment | Erreur bloquante | T2 |
-| CAT-008 | Débit nul, négatif ou non fini | Erreur bloquante | T1 |
-| CAT-009 | Preuve interne absente ou inconnue | Erreur bloquante | T1 |
-| CAT-010 | Preuve dérivée sans dépendance | Erreur bloquante | T1 |
-| CAT-011 | Statut `observed` ou `disputed` | Non exposé au `core` | T3 |
-| CAT-012 | Statut `verified` ou `derived` avec références valides | Éligible à la projection | T3 |
-| CAT-013 | Ressource non vérifiée référencée par une recette | Recette exclue de la projection | T3 |
-| CAT-014 | Même entrée chargée deux fois | Résultat déterministe, sans mutation | T2 |
-| CAT-015 | Ordre des modules modifié | Même référentiel logique | T2 |
-| CAT-016 | Catalogue incomplet mais sans incohérence bloquante | Diagnostics de couverture, pas de valeur inventée | T2 |
-| CAT-017 | Contrat de sortie consommé par `computeIsland` | Compatibilité de type et résultat cohérent | T3 |
-| CAT-018 | Chargement de l'application hors ligne | Aucun appel réseau requis | T4 |
+| CAT-001 | Manifeste et modules requis | Unitaire | Test automatisé |
+| CAT-002 | Identifiants dupliqués | Unitaire | Test automatisé |
+| CAT-003 | Référence de ressource inconnue | Unitaire | Test automatisé |
+| CAT-004 | Preuve requise pour une donnée observée/vérifiée | Unitaire | Test automatisé |
+| CAT-005 | Élément `to-observe` sans preuve accepté | Unitaire | Test automatisé |
+| CAT-006 | Preuve dérivée sans fondement refusée | Unitaire | Test automatisé |
+| CAT-007 | Date impossible refusée | Unitaire | Test automatisé |
+| ENG-001 | Agrégation des modules | Intégration | Test automatisé |
+| ENG-002 | Données non vérifiées exclues de la projection | Intégration | Test automatisé |
+| ENG-003 | Catalogue projeté consommable par le cœur | Intégration | Test automatisé |
+| DESK-001 | Imports JSON locaux embarqués dans le build | Build | À exécuter localement |
+| DESK-002 | Catalogue chargé sans réseau | Manuel | À exécuter localement |
+| DESK-003 | Erreur de validation affichée dans l'interface | Manuel | À exécuter localement |
+| GAME-001 | Valeurs comparées au jeu de référence | Manuel | En attente de campagne |
 
-## 4. Tests de campagne en jeu
+## Procédure locale
 
-Les essais manuels sont réalisés sur une nouvelle campagne. Pour chaque mesure, consigner la version du jeu, le contexte, les éventuels bonus/modificateurs, l'unité affichée, la méthode et la répétition.
+À la racine du dépôt, sur la branche `feature/data-catalog-engine` :
 
-| ID | Scénario | Vérification attendue |
-|---|---|---|
-| GAME-001 | Identification des régions Latium et Albion | Identifiants et libellés confirmés |
-| GAME-002 | Observation des ressources naturelles d'une île | Disponibilités attachées à l'île observée, pas à la région entière |
-| GAME-003 | Construction d'un premier bâtiment | Identité, région et recette disponibles |
-| GAME-004 | Mesure d'une recette | Intrants, sorties et cadence reproduits |
-| GAME-005 | Mesure d'un besoin de population | Résidents, unité, besoin et période cohérents |
-| GAME-006 | Changement de condition ou modificateur | Effet isolé et documenté |
-| GAME-007 | Reproduction d'une mesure | Écart dans la tolérance définie ou anomalie ouverte |
-| GAME-008 | Comparaison avec le calculateur | Débits et bilans conformes aux observations |
-
-Aucune tolérance numérique n'est présumée ici : elle doit être définie selon la précision de l'interface et la méthode de mesure avant chaque série.
-
-## 5. Données de test et séparation des preuves
-
-- Les tests automatisés utilisent des identifiants et valeurs explicitement synthétiques.
-- Les données observées en jeu sont accompagnées de preuves internes.
-- Les informations issues de sources secondaires ne servent pas de fixtures de référence et ne sont pas embarquées comme données vérifiées.
-- Une donnée dérivée doit référencer les preuves dont elle dépend.
-- Une donnée contestée ou non vérifiée ne doit jamais alimenter silencieusement les calculs.
-
-## 6. Commandes de validation
-
-Depuis la racine du dépôt :
-
-```bash
+```powershell
 pnpm install --frozen-lockfile
 pnpm test
 pnpm typecheck
-pnpm --filter @anno117/game-data test
-pnpm --filter @anno117/data-engine test
-pnpm --filter @anno117/core test
+git diff --check
+pnpm --filter @anno117/desktop build
+pnpm --filter @anno117/desktop exec electron .
 ```
 
-Le packaging desktop et le contrôle d'absence d'accès réseau seront ajoutés aux tests d'intégration de l'application lorsque le chargement du catalogue y sera raccordé.
+La commande de lancement post-build doit être exécutée après la réussite du build. Vérifier visuellement que l'interface affiche « Catalogue chargé et structure validée », les comptes de modules et zéro élément utilisable par le moteur tant que les données n'ont pas été vérifiées.
 
-## 7. Critères de sortie
+Pour vérifier le fonctionnement hors ligne, démarrer la version compilée sans connexion réseau et confirmer que le résumé du catalogue apparaît. Le catalogue est empaqueté dans les ressources JavaScript produites par Vite ; il ne doit pas dépendre d'un chemin absolu du poste de développement.
 
-Le lot technique est prêt pour revue lorsque :
-- tous les tests T1 à T3 sont automatisés et passent ;
-- le contrat de projection est exercé par le `core` ;
-- les erreurs de validation sont localisables ;
-- les données non vérifiées ne sont pas exposées au calcul ;
-- le manifeste et les modules sont chargés depuis le bundle local ;
-- le plan de test et les résultats réellement exécutés sont à jour.
+## Critères d'acceptation technique
 
-La validation T4/T5 reste ouverte tant que l'intégration desktop et la campagne en jeu ne sont pas réalisées.
+- Les tests automatisés et le contrôle TypeScript terminent sans erreur.
+- Le build Electron Vite se termine sans erreur.
+- La version compilée démarre sans serveur Vite.
+- L'interface signale un chargement réussi du catalogue local.
+- Une erreur structurelle empêche la projection et est rendue visible.
+- Aucun élément non vérifié n'est envoyé au cœur de calcul.
+
+Les résultats restent à renseigner après exécution locale. Aucun test de build ou de démarrage n'est considéré comme réussi avant son exécution effective.
