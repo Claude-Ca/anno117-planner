@@ -24,13 +24,13 @@ const usable = (status: string) => status === "verified" || status === "derived"
  * them to this function.
  */
 export function loadGameData(input: ModularGameCatalog): DataRepository {
-  const diagnostics = validateModularCatalog(input);
+  const snapshot = JSON.parse(JSON.stringify(input)) as ModularGameCatalog;\n  const diagnostics = validateModularCatalog(snapshot);
   const blocking = diagnostics.filter((d) => d.severity === "error");
   if (blocking.length) {
     throw new Error(blocking.map((d) => `[${d.code}] ${d.path}: ${d.message}`).join("\n"));
   }
 
-  const coreCatalog = toCoreProjection(input.modules);
+  const coreCatalog = toCoreProjection(snapshot.modules);
   return Object.freeze({
     manifest: deepFreeze(input.manifest),
     modules: deepFreeze(input.modules),
