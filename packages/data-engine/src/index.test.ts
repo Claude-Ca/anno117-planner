@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadGameData } from "./index";
+import { computeIsland } from "@anno117/core";
 import type { ModularGameCatalog } from "@anno117/game-data";
 
 function fixture(): ModularGameCatalog {
@@ -46,6 +47,15 @@ describe("loadGameData", () => {
     const input = fixture();
     input.modules.production[0]!.status = "observed";
     expect(loadGameData(input).coreCatalog.recipes).toEqual([]);
+  });
+
+  it("provides a projection directly consumable by the core", () => {
+    const result = loadGameData(fixture());
+    const report = computeIsland(result.coreCatalog, {
+      name: "Test island", houses: {}, built: { sawmill: 1 },
+      recipeAssignments: { "planks-recipe": 1 },
+    });
+    expect(report.recipes[0]?.recipeId).toBe("planks-recipe");
   });
 
   it("returns immutable snapshots", () => {
