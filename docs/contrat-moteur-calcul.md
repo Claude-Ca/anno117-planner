@@ -1,6 +1,6 @@
 # Contrat fonctionnel du moteur de calcul — Anno 117 Planner
 
-**Version :** 0.3  
+**Version :** 0.4  
 **Date :** 30 octobre 2026  
 **Statut :** proposition de travail — à valider par le propriétaire du projet  
 **Périmètre :** lot 1, moteur métier indépendant de l'interface et du catalogue final
@@ -17,7 +17,7 @@ Le moteur (packages/core) doit recevoir des données et paramètres explicites, 
 
 Il ne doit pas dépendre de React ou Electron, charger lui-même des données depuis Internet ou un fichier utilisateur, décider silencieusement qu'une donnée absente vaut zéro, masquer les incertitudes du catalogue ni simuler un mécanisme qui n'a pas été spécifié.
 
-Les cas d'usage, la gestion des scénarios, la persistance et l'interface relèvent d'autres modules. La disponibilité des ressources et contraintes propres à chaque île doit néanmoins être prise en compte dans la faisabilité des recettes. Les stocks, bâtiments existants et règles de transfert entre îles nécessitent encore un périmètre explicite et doivent être reliés aux lots concernés.
+Les cas d'usage, la gestion des scénarios, la persistance et l'interface relèvent d'autres modules. Le calcul initial est local à l'île planifiée : la faisabilité des recettes dépend des ressources naturelles et des productions locales disponibles. Le joueur conserve la responsabilité de sa stratégie globale, notamment du choix de coloniser une nouvelle île ou de mettre en place le commerce. Le moteur initial ne doit pas supposer qu'une ressource absente peut être importée. Les stocks, bâtiments existants et une éventuelle simulation des transferts restent des sujets distincts à spécifier.
 
 ## 3. Vocabulaire
 
@@ -85,7 +85,7 @@ Les installations étant indivisibles, le nombre de bâtiments requis est arrond
 
 Le moteur doit pouvoir décomposer les besoins finaux en besoins intermédiaires en remontant les recettes du catalogue. Il doit pouvoir combiner plusieurs recettes et répartir les quantités entre producteurs pour optimiser la réponse au besoin, selon l'ordre de priorité validé : **D — optimisation globale, C — complexité de chaîne, A — nombre de bâtiments, B — surplus**. Cet ordre est lexicographique : un critère de priorité inférieure ne doit pas dégrader un critère supérieur. Les métriques concrètes de chaque critère restent à définir avant de figer l'API publique.
 
-Le contrat doit traiter explicitement les biens sans recette productrice connue, les recettes à entrées multiples, les recettes à sorties multiples, les producteurs multiples d'un même bien, les cycles dans le graphe de production, les recettes invalides ou incomplètes et les besoins qui ne peuvent être entièrement couverts. La faisabilité doit également tenir compte des ressources disponibles sur l'île concernée : une recette qui nécessite une ressource absente localement ne peut pas être considérée comme réalisable sans mécanisme d'approvisionnement explicitement autorisé. Les règles de transfert entre îles restent à spécifier.
+Le contrat doit traiter explicitement les biens sans recette productrice connue, les recettes à entrées multiples, les recettes à sorties multiples, les producteurs multiples d'un même bien, les cycles dans le graphe de production, les recettes invalides ou incomplètes et les besoins qui ne peuvent être entièrement couverts. La faisabilité est évaluée pour l'île planifiée. Une recette qui nécessite une ressource naturelle absente localement ne peut être retenue que si cette ressource peut elle-même être produite localement à partir d'intrants disponibles. Le calcul initial n'invente aucun approvisionnement inter-îles et ne simule ni la colonisation ni la mise en place du commerce. Ces choix de stratégie appartiennent au joueur ; une éventuelle modélisation des transferts pourra être spécifiée séparément.
 
 Le moteur ne doit pas choisir arbitrairement un producteur ou ignorer un intrant. Les diagnostics doivent rendre visible toute limite ou tout résultat incomplet.
 
