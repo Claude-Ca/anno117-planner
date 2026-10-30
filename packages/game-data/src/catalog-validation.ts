@@ -78,7 +78,7 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
   entities.forEach(({ x, p }) => {
     if (!x.name.trim()) add("NAME_REQUIRED", `${p}.name`, "Libellé obligatoire.");
     checkStatus(x.status, `${p}.status`);
-    checkEvidence(x.evidenceIds, `${p}.evidenceIds`);
+    if (x.status !== "to-observe" && x.status !== "excluded") {\n      checkEvidence(x.evidenceIds, `${p}.evidenceIds`);\n    }
   });
 
   const resourceIds = ids.get("resources")!;
