@@ -10,6 +10,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@anno117/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@anno117/product':
         specifier: workspace:*
         version: link:../../packages/product
