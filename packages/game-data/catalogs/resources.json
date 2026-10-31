@@ -1,1 +1,5 @@
-[]
+[
+  {"id":"sardines","name":"Sardines","status":"to-observe","evidenceIds":[],"category":"final"},
+  {"id":"porridge","name":"Porridge","status":"to-observe","evidenceIds":[],"category":"final"},
+  {"id":"oats","name":"Oats","status":"to-observe","evidenceIds":[],"category":"raw"}
+]
