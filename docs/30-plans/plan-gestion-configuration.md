@@ -87,7 +87,7 @@ Séquence de release :
 6. Tant que tous les contrôles ne sont pas concluants, ne pas créer le tag stable et ne pas annoncer la version comme publiée.
 7. Après validation complète, poser le tag stable sur le commit exact de `main` qui a été testé et validé, puis publier les notes de version et la GitHub Release.
 
-Si une validation échoue, aucun tag stable n'est créé. La correction est apportée dans le flux normal de développement, intégrée à `develop`,  puis une nouvelle PR de release vers `main` est préparée et le cycle de validation est rejoué. Il n'est pas permis de déplacer un tag déjà publié pour corriger une release.
+Si une validation échoue, aucun tag stable n'est créé. La correction est apportée dans le flux normal de développement, intégrée à `develop`, puis une nouvelle PR de release vers `main` est préparée et le cycle de validation est rejoué. Il n'est pas permis de déplacer un tag déjà publié pour corriger une release.
 
 Les Release Candidates peuvent être identifiées par des tags de préversion, par exemple `v1.0.0-rc.1`, `v1.0.0-rc.2`. Ces tags identifient des candidats explicitement non stables ; ils ne remplacent pas le tag stable et ne sont pas créés pour une version qui n'a pas au minimum passé les contrôles de build et de tests. Le tag stable `v1.0.0` n'est posé qu'après la validation complète, installation comprise.
 
