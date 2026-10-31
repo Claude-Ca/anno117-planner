@@ -8,13 +8,15 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "@anno117/data-engine": "workspace:*",
     "@anno117/game-data": "workspace:*",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "@anno117/product": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
@@ -24,6 +26,7 @@
     "electron": "^38.0.0",
     "electron-vite": "^6.0.0",
     "typescript": "^7.0.2",
-    "vite": "^7.1.0"
+    "vite": "^7.1.0",
+    "vitest": "^5.0.5"
   }
 }
