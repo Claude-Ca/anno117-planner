@@ -39,7 +39,28 @@ function loadSavedCatalog(fallback: ModularGameCatalog): ModularGameCatalog {
       "manifest" in parsed &&
       "modules" in parsed
     ) {
-      return parsed as ModularGameCatalog;
+      const saved = parsed as ModularGameCatalog;
+      const mergeById = <T extends { id: string }>(base: T[], personal: T[]): T[] => {
+        const personalById = new Map(personal.map((item) => [item.id, item]));
+        const merged = base.map((item) => ({ ...item, ...(personalById.get(item.id) ?? {}) }));
+        const baseIds = new Set(base.map((item) => item.id));
+        return [...merged, ...personal.filter((item) => !baseIds.has(item.id))];
+      };
+      return {
+        ...fallback,
+        ...saved,
+        modules: {
+          ...fallback.modules,
+          ...saved.modules,
+          resources: mergeById(fallback.modules.resources, saved.modules.resources),
+          buildings: mergeById(fallback.modules.buildings, saved.modules.buildings),
+          production: mergeById(fallback.modules.production, saved.modules.production),
+          population: mergeById(fallback.modules.population, saved.modules.population),
+          regions: mergeById(fallback.modules.regions, saved.modules.regions),
+          islandAvailability: mergeById(fallback.modules.islandAvailability, saved.modules.islandAvailability),
+          evidence: saved.modules.evidence ?? fallback.modules.evidence,
+        },
+      };
     }
   } catch {
     // A corrupt or unavailable local draft must never prevent the base catalog loading.
