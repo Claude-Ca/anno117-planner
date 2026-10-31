@@ -88,4 +88,17 @@ describe("validateModularCatalog", () => {
     c.modules.evidence[0]!.observedAt = "2026-02-30";
     expect(validateModularCatalog(c).some((d) => d.code === "DATE_INVALID")).toBe(true);
   });
+  it("rejects non-positive need consumption rates and non-finite effects", () => {
+    const c = fixture();
+    c.modules.population.push({
+      id: "liberti", name: "Liberti", residentsPerHouse: 10,
+      consumptionPerResident: [], status: "to-observe", evidenceIds: [],
+      needs: [{ id: "sardines", category: "food", goodId: "wood",
+        consumptionPerHousePerMinute: 0, effects: { population: Number.NaN } }],
+    });
+    const diagnostics = validateModularCatalog(c);
+    expect(diagnostics.some((d) => d.code === "NEED_RATE_INVALID")).toBe(true);
+    expect(diagnostics.some((d) => d.code === "NEED_EFFECT_INVALID")).toBe(true);
+  });
+
 });
