@@ -64,6 +64,15 @@ export function CatalogWorkbench({ initialCatalog }: CatalogWorkbenchProps) {
     [catalog],
   );
 
+  const statusCounts = useMemo(() => {
+    const entities = MODULE_LABELS.flatMap(({ key }) => catalog.modules[key] as CatalogEntity[]);
+    return {
+      candidate: entities.filter((entry) => entry.status === "candidate").length,
+      toObserve: entities.filter((entry) => entry.status === "to-observe").length,
+      verified: entities.filter((entry) => entry.status === "verified" || entry.status === "derived").length,
+    };
+  }, [catalog]);
+
   function updateStatus(moduleKey: EditableModule, entityId: string, status: VerificationStatus) {
     setCatalog((current) => {
       const next = structuredClone(current);
@@ -100,7 +109,7 @@ export function CatalogWorkbench({ initialCatalog }: CatalogWorkbenchProps) {
           <p className="eyebrow">03 · RÉFÉRENTIEL DE TRAVAIL</p>
           <h3>Catalogue personnel</h3>
           <p className="workbench-description">
-            Classez les données candidates et faites évoluer leur validation sans modifier le catalogue du moteur.
+            Consultez les éléments recensés, leur provenance et leur état de validation. Les données candidates ne sont pas utilisées par le moteur.
           </p>
         </div>
         <div className="workbench-actions">
@@ -111,7 +120,7 @@ export function CatalogWorkbench({ initialCatalog }: CatalogWorkbenchProps) {
 
       <div className="workbench-summary">
         <strong>{totalEntries}</strong> entrées suivies
-        <span>Les changements sont conservés localement et exportables dans un fichier partageable.</span>
+        <span>{statusCounts.candidate} candidates · {statusCounts.toObserve} à observer · {statusCounts.verified} vérifiées / dérivées</span>
       </div>
 
       {MODULE_LABELS.map(({ key, label }) => {
@@ -125,10 +134,12 @@ export function CatalogWorkbench({ initialCatalog }: CatalogWorkbenchProps) {
             </div>
             <div className="catalog-entries">
               {entries.map((entry) => (
-                <label className="catalog-entry" key={entry.id}>
+                <div className="catalog-entry" key={entry.id}>
                   <span className="catalog-entry-name">
                     <strong>{entry.name}</strong>
                     <small>{entry.id}</small>
+                    {entry.description && <small>{entry.description}</small>}
+                    {entry.sourceRefs?.length ? <small>Sources documentaires : {entry.sourceRefs.join(", ")}</small> : null}
                   </span>
                   <select
                     className="status-select"
@@ -140,7 +151,7 @@ export function CatalogWorkbench({ initialCatalog }: CatalogWorkbenchProps) {
                       <option key={option.value} value={option.value}>{option.label}</option>
                     ))}
                   </select>
-                </label>
+                </div>
               ))}
             </div>
           </div>
@@ -148,9 +159,8 @@ export function CatalogWorkbench({ initialCatalog }: CatalogWorkbenchProps) {
       })}
 
       <p className="workbench-note">
-        Ce catalogue est un espace de travail personnel distinct des données de référence utilisées par le moteur.
-        Les états « Candidate » et « À vérifier en jeu » ne rendent pas les valeurs fiables pour les calculs.
-        Le fichier JSON exporté contient aussi les sources et les éléments de preuve disponibles.
+        Les références SRC-* renvoient au registre documentaire du projet. Elles indiquent la provenance d'une information, pas une preuve d'observation en jeu.
+        Seuls les éléments validés selon les règles du catalogue peuvent alimenter le moteur de calcul.
       </p>
       <p className="save-message" role="status">{saveMessage || "Sauvegarde locale automatique active."}</p>
     </section>
