@@ -10,6 +10,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@anno117/product':
+        specifier: workspace:*
+        version: link:../../packages/product
       '@anno117/data-engine':
         specifier: workspace:*
         version: link:../../packages/data-engine
@@ -47,6 +50,9 @@ importers:
       vite:
         specifier: ^7.1.0
         version: 7.3.7(@types/node@24.19.2)(lightningcss@1.33.0)
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@24.19.2)(vite@7.3.7(@types/node@24.19.2)(lightningcss@1.33.0))
 
   packages/core:
     devDependencies:
