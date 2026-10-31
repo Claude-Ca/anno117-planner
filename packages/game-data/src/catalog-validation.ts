@@ -140,6 +140,16 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
       if (!resourceIds.has(need.goodId)) {
         add("RESOURCE_UNKNOWN", `${np}.goodId`, `Ressource inconnue : ${need.goodId}.`);
       }
+      if (need.status !== undefined && !STATUSES.includes(need.status)) {
+        add("NEED_STATUS_INVALID", `${np}.status`, "Statut de vérification du besoin inconnu.");
+      }
+      if (need.unlockAtHouses !== undefined &&
+          (!Number.isSafeInteger(need.unlockAtHouses) || need.unlockAtHouses < 1)) {
+        add("NEED_UNLOCK_INVALID", `${np}.unlockAtHouses`, "Le seuil de déblocage doit être un entier strictement positif.");
+      }
+      (need.buildingIds ?? []).forEach((buildingId, k) => {
+        if (!buildingIds.has(buildingId)) add("BUILDING_UNKNOWN", `${np}.buildingIds[${k}]`, `Bâtiment inconnu : ${buildingId}.`);
+      });
       if (need.consumptionPerHousePerMinute !== undefined &&
           (!Number.isFinite(need.consumptionPerHousePerMinute) || need.consumptionPerHousePerMinute <= 0)) {
         add("NEED_RATE_INVALID", `${np}.consumptionPerHousePerMinute`, "Le taux par résidence doit être fini et strictement positif.");
