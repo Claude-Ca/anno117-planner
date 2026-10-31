@@ -5,6 +5,7 @@
     "status": "to-observe",
     "evidenceIds": [],
     "residentsPerHouse": 10,
-    "consumptionPerResident": []
+    "consumptionPerResident": [],
+    "needs": []
   }
 ]
