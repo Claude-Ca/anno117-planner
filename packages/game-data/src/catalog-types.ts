@@ -44,9 +44,31 @@ export interface ProductionRecipe extends CatalogEntity {
   outputs: Flow[];
 }
 
+export type PopulationNeedCategory = "food" | "public-service" | "fashion" | "household";
+
+export interface PopulationNeed {
+  id: string;
+  category: PopulationNeedCategory;
+  /** Resource or service required to fulfil this need. */
+  goodId: string;
+  /** Consumption rate per residence, when measured. */
+  consumptionPerHousePerMinute?: number;
+  /** Effects applied while the need is fulfilled. */
+  effects?: {
+    population?: number;
+    income?: number;
+  };
+  /** Optional multiplicative modifier to the need's base consumption rate. */
+  consumptionModifier?: number;
+}
+
 export interface PopulationTier extends CatalogEntity {
+  /** Base residents per house, before fulfilled-need effects. */
   residentsPerHouse: number;
+  /** Legacy core-compatible rate, expressed per resident. */
   consumptionPerResident: Flow[];
+  /** Needs and their residence-level effects. Empty/omitted means not yet observed. */
+  needs?: PopulationNeed[];
 }
 
 export interface IslandAvailability extends CatalogEntity {
