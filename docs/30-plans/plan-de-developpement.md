@@ -677,11 +677,11 @@ Au dernier contrôle, `develop` pointe sur le commit `2b1438952ca00a2efbd3b32a0c
 
 La branche `feature/configuration-rules`, créée depuis `develop`, porte le plan de gestion de configuration, le Ruleset importable, ainsi que l'extension du workflow CI à `main` et `develop`. La PR #10 est ouverte vers `develop`. Sa CI a réussi sur le commit `9afc4b01370d52d503db4ee3a745eb71c43c0dce`. Le propriétaire du dépôt a confirmé l'import et l'activation du Ruleset le 31 octobre 2026 ; l'effectivité du blocage de fusion doit encore être vérifiée sur les branches protégées.
 
-La politique de versionnement retient `0.1.0` comme version de développement courante. La première release stable visée est `1.0.0), éventuellement précédée de candidates `1.0.0-rc.N). Le tag stable `v1.0.0) sera créé uniquement après réussite du build, des tests, de l'installation et de la validation fonctionnelle sur le commit exact de `main).
+La politique de versionnement retient `0.1.0` comme version de développement courante. La première release stable visée est `1.0.0`, éventuellement précédée de candidates `1.0.0-rc.N`. Le tag stable `v1.0.0` sera créé uniquement après réussite du build, des tests, de l'installation et de la validation fonctionnelle sur le commit exact de `main`.
 
 ### Prochaine action
 
-Finaliser et intégrer le [Plan de gestion de configuration](plan-gestion-configuration.md), puis vérifier que le Ruleset importé bloque effectivement les fusions non conformes vers `develop) et `main). La procédure de release et de pose du tag stable est désormais explicitée ; aucune release n'est engagée à ce stade.
+Finaliser et intégrer le [Plan de gestion de configuration](plan-gestion-configuration.md), puis vérifier que le Ruleset importé bloque effectivement les fusions non conformes vers `develop` et `main`. La procédure de release et de pose du tag stable est désormais explicitée ; aucune release n'est engagée à ce stade.
 
 Une fois ce socle de gestion de configuration validé et intégré, le lot 5 (première interface de planification) pourra être préparé conformément à ses critères. Les ajustements graphiques et ergonomiques de l'IHM seront traités dans un cycle distinct.
 
