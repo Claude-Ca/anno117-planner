@@ -206,3 +206,20 @@ button, input { font: inherit; }
   .session-actions { justify-content: flex-start; }
   .region-tab { flex: 1; min-width: 0; padding-inline: 12px; }
 }
+
+
+.needs-section-heading { margin-top: 30px; }
+.need-groups { display: flex; flex-direction: column; gap: 12px; }
+.need-group { min-width: 0; margin: 0; padding: 12px 14px; border: 1px solid #394250; border-radius: 8px; }
+.need-group legend { padding: 0 5px; color: #c9d5e5; font-size: 11px; font-weight: 700; }
+.need-option { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; cursor: pointer; }
+.need-option + .need-option { border-top: 1px solid #343b47; }
+.need-option input { flex: 0 0 auto; margin: 2px 0 0; accent-color: #b3c8e5; }
+.need-option span { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+.need-option strong { color: #e8ebf1; font-size: 12px; font-weight: 600; }
+.need-option small, .need-hint { color: #929cab; font-size: 10px; line-height: 1.45; }
+.need-hint { display: block; padding: 7px 0; }
+.measured-flow-table { margin-top: 22px; padding-top: 16px; border-top: 1px solid #363c48; }
+.measured-flow-table h4, .recommended-buildings h4 { margin: 0 0 7px; color: #b9c5d5; font-size: 12px; }
+.recommended-buildings { margin-top: 20px; padding-top: 16px; border-top: 1px solid #363c48; }
+.recommended-buildings ul { margin: 8px 0 0; padding-left: 18px; color: #c6d0de; font-size: 11px; line-height: 1.7; }

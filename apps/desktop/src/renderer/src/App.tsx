@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { loadGameData } from "@anno117/data-engine";
 import { simulateCatalogProduction, type ProductionSimulationResult } from "@anno117/product";
-import type { PopulationTier, ModularGameCatalog } from "@anno117/game-data";
+import type { PopulationTier, ModularGameCatalog, PopulationNeedCategory } from "@anno117/game-data";
 import type { DataRepository } from "@anno117/data-engine";
 import manifest from "../../../../../packages/game-data/catalogs/manifest.json";
 import resources from "../../../../../packages/game-data/catalogs/resources.json";
@@ -11,23 +11,35 @@ import population from "../../../../../packages/game-data/catalogs/population.js
 import regions from "../../../../../packages/game-data/catalogs/regions.json";
 import islandAvailability from "../../../../../packages/game-data/catalogs/island-availability.json";
 import evidence from "../../../../../packages/game-data/catalogs/evidence.json";
-import { createPopulationIslandInput } from "./population-planning";
+import { calculateTheoreticalNeeds, createPopulationIslandInput, type PopulationTierInput } from "./population-planning";
 import { CatalogWorkbench } from "./CatalogWorkbench";
 
-interface PopulationTierOption { id: string; name: string; residentsPerHouse: number; }
+interface PopulationTierOption extends PopulationTierInput {
+  id: string;
+  name: string;
+  residentsPerHouse: number;
+}
 interface CatalogLoadResult { repository: DataRepository | null; error: string | null; }
 type RegionId = "latium" | "albion";
-interface IslandSession { name: string; houseCounts: Record<string, string>; }
+interface IslandSession {
+  name: string;
+  houseCounts: Record<string, string>;
+  selectedNeeds?: Record<string, string>;
+}
 interface PlannerSession { version: 1; activeRegion: RegionId; islands: Record<RegionId, IslandSession>; savedAt?: string; }
+interface PlanningResult { simulation: ProductionSimulationResult | null; error: string | null; }
 const SESSION_KEY = "anno117-planner.session.v1";
 const DEFAULT_SESSION: PlannerSession = {
   version: 1, activeRegion: "latium",
   islands: {
-    latium: { name: "Nouvelle île — Latium", houseCounts: {} },
-    albion: { name: "Nouvelle île — Albion", houseCounts: {} },
+    latium: { name: "Nouvelle île — Latium", houseCounts: {}, selectedNeeds: {} },
+    albion: { name: "Nouvelle île — Albion", houseCounts: {}, selectedNeeds: {} },
   },
 };
 const initialCatalog = { manifest, modules: { resources, buildings, production, population, regions, islandAvailability, evidence } } as ModularGameCatalog;
+const CATEGORY_LABELS: Record<PopulationNeedCategory, string> = {
+  food: "Alimentation", "public-service": "Services publics", fashion: "Habillement", household: "Vie domestique",
+};
 
 function readSession(): PlannerSession {
   try {
@@ -37,7 +49,13 @@ function readSession(): PlannerSession {
       if (value && typeof value === "object" && "version" in value && value.version === 1 && "islands" in value) {
         const saved = value as PlannerSession;
         if (saved.islands?.latium && saved.islands?.albion) {
-          return { ...saved, activeRegion: saved.activeRegion === "albion" ? "albion" : "latium" };
+          return {
+            ...saved, activeRegion: saved.activeRegion === "albion" ? "albion" : "latium",
+            islands: {
+              latium: { ...saved.islands.latium, selectedNeeds: saved.islands.latium.selectedNeeds ?? {} },
+              albion: { ...saved.islands.albion, selectedNeeds: saved.islands.albion.selectedNeeds ?? {} },
+            },
+          };
         }
       }
     }
@@ -51,8 +69,12 @@ function loadRepository(): CatalogLoadResult {
 function getPopulationTiers(repository: DataRepository): PopulationTierOption[] {
   const ids = new Set(repository.coreCatalog.tiers.map((tier) => tier.id));
   return repository.modules.population.filter((tier: PopulationTier) => ids.has(tier.id))
-    .map((tier) => ({ id: tier.id, name: tier.name, residentsPerHouse: tier.residentsPerHouse }));
+    .map((tier) => ({
+      id: tier.id, name: tier.name, residentsPerHouse: tier.residentsPerHouse,
+      needs: tier.needs ?? [],
+    }));
 }
+
 export default function App() {
   const catalogResult = useMemo(loadRepository, []);
   const repository = catalogResult.repository;
@@ -62,11 +84,11 @@ export default function App() {
     try { return JSON.parse(localStorage.getItem(SESSION_KEY) ?? "null")?.savedAt ?? null; } catch { return null; }
   });
   const [saveMessage, setSaveMessage] = useState("Sauvegarde automatique activée.");
-  const [simulations, setSimulations] = useState<Partial<Record<RegionId, ProductionSimulationResult>>>({});
-  const [errors, setErrors] = useState<Partial<Record<RegionId, string>>>({});
   const activeRegion = session.activeRegion;
   const island = session.islands[activeRegion];
-  const resourceNames = new Map(repository?.modules.resources.map((resource) => [resource.id, resource.name]) ?? []);
+  const selectedNeeds = island.selectedNeeds ?? {};
+  const resourceNames = useMemo(() => new Map(repository?.modules.resources.map((resource) => [resource.id, resource.name]) ?? []), [repository]);
+  const buildingNames = useMemo(() => new Map(repository?.modules.buildings.map((building) => [building.id, building.name]) ?? []), [repository]);
 
   useEffect(() => {
     try {
@@ -77,7 +99,13 @@ export default function App() {
   }, [session]);
 
   function updateIsland(update: Partial<IslandSession>) {
-    setSession((current) => ({ ...current, islands: { ...current.islands, [activeRegion]: { ...current.islands[activeRegion], ...update } } }));
+    setSession((current) => ({
+      ...current,
+      islands: { ...current.islands, [activeRegion]: { ...current.islands[activeRegion], ...update } },
+    }));
+  }
+  function updateSelectedNeed(groupId: string, needId: string) {
+    updateIsland({ selectedNeeds: { ...selectedNeeds, [groupId]: needId } });
   }
   function saveSession() {
     try {
@@ -89,8 +117,6 @@ export default function App() {
   }
   function restoreSession() {
     setSession(readSession());
-    setSimulations({});
-    setErrors({});
     setSaveMessage("Dernière session locale restaurée.");
   }
   function exportSession() {
@@ -101,19 +127,25 @@ export default function App() {
     URL.revokeObjectURL(url);
     setSaveMessage("Export JSON de la session lancé.");
   }
-  function handleCalculate(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setErrors((current) => ({ ...current, [activeRegion]: undefined }));
-    setSimulations((current) => ({ ...current, [activeRegion]: undefined }));
-    if (!repository) { setErrors((current) => ({ ...current, [activeRegion]: "Le catalogue n'est pas disponible." })); return; }
+
+  const planning = useMemo<PlanningResult>(() => {
+    if (!repository) return { simulation: null, error: "Le catalogue n'est pas disponible." };
     try {
-      const input = createPopulationIslandInput(island.name, populationTiers, island.houseCounts);
-      setSimulations((current) => ({ ...current, [activeRegion]: simulateCatalogProduction({ repository, island: input }) }));
+      const input = createPopulationIslandInput(island.name, populationTiers, island.houseCounts, selectedNeeds);
+      return { simulation: simulateCatalogProduction({ repository, island: input }), error: null };
     } catch (error) {
-      setErrors((current) => ({ ...current, [activeRegion]: error instanceof Error ? error.message : String(error) }));
+      return { simulation: null, error: error instanceof Error ? error.message : String(error) };
     }
-  }
-  const simulation = simulations[activeRegion];
+  }, [repository, populationTiers, island]);
+  const simulation = planning.simulation;
+  const theoreticalNeeds = useMemo(
+    () => calculateTheoreticalNeeds(populationTiers, island.houseCounts, selectedNeeds),
+    [populationTiers, island.houseCounts, selectedNeeds],
+  );
+  const selectedBuildingIds = [...new Set(populationTiers.flatMap((tier) =>
+    (tier.needs ?? []).filter((need) => selectedNeeds[tier.id + ":" + (need.choiceGroupId ?? need.id)] === need.id)
+      .flatMap((need) => need.buildingIds ?? []),
+  ))];
 
   return <main className="app">
     <header className="app-header">
@@ -122,7 +154,7 @@ export default function App() {
     </header>
     <div className="page-content">
       <section className="page-intro">
-        <div><p className="eyebrow">LOT 6 · SESSION ET RÉGIONS</p><h2>Planifier vos îles</h2><p>Chaque onglet conserve son nom, sa population et ses résultats indépendamment.</p></div>
+        <div><p className="eyebrow">PLANIFICATION DE POPULATION</p><h2>Planifier vos îles</h2><p>Les besoins et les quantités théoriques sont recalculés à chaque modification de la population.</p></div>
         {repository && <div className="catalog-meta"><span>Catalogue {repository.manifest.catalogVersion}</span><span>{repository.manifest.scope.regions.join(" · ")}</span></div>}
       </section>
 
@@ -147,34 +179,62 @@ export default function App() {
 
       {catalogResult.error ? <section className="panel feedback-panel is-error" role="alert"><h3>Impossible de charger le catalogue</h3><pre className="diagnostics">{catalogResult.error}</pre></section>
       : repository && populationTiers.length === 0 ? <section className="panel empty-state"><div className="empty-icon" aria-hidden="true">∅</div><div>
-        <h3>Aucun palier de population disponible</h3><p>Le catalogue ne contient actuellement aucun palier de population exploitable par le moteur. La saisie sera activée lorsque les niveaux et leurs besoins auront été intégrés.</p>
-        <p className="subtle">Les onglets Latium et Albion sont déjà distincts ; la ventilation des paliers par région sera finalisée lorsque le catalogue portera cette information.</p>
+        <h3>Aucun palier de population disponible</h3><p>Le catalogue ne contient actuellement aucun palier de population exploitable par le moteur.</p>
       </div></section>
       : repository ? <div className="planner-grid">
         <section className="panel">
           <div className="panel-heading"><div><p className="eyebrow">01 · CONFIGURATION</p><h3>Population — {activeRegion === "latium" ? "Latium" : "Albion"}</h3></div></div>
-          <form onSubmit={handleCalculate}>
-            <label className="field-label" htmlFor="island-name">Nom de l'île</label>
-            <input id="island-name" className="text-input" value={island.name} onChange={(event) => updateIsland({ name: event.target.value })} maxLength={80} required />
-            <div className="section-heading"><div><h4>Maisons par palier</h4><p>Indiquez le nombre de maisons pour chaque niveau disponible.</p></div><span className="unit-label">Maisons</span></div>
-            <div className="tier-list">{populationTiers.map((tier) => <label className="tier-row" key={tier.id}>
-              <span className="tier-description"><strong>{tier.name}</strong><small>{tier.residentsPerHouse} habitants par maison</small></span>
-              <input className="number-input" type="number" min="0" step="1" inputMode="numeric" aria-label={"Nombre de maisons — " + tier.name}
-                value={island.houseCounts[tier.id] ?? "0"} onChange={(event) => updateIsland({ houseCounts: { ...island.houseCounts, [tier.id]: event.target.value } })} />
-            </label>)}</div>
-            <button className="primary-button" type="submit">Calculer les besoins</button>
-            {errors[activeRegion] && <p className="feedback-error" role="alert">{errors[activeRegion]}</p>}
-          </form>
+          <label className="field-label" htmlFor="island-name">Nom de l'île</label>
+          <input id="island-name" className="text-input" value={island.name} onChange={(event) => updateIsland({ name: event.target.value })} maxLength={80} required />
+          <div className="section-heading"><div><h4>Maisons par type d'habitant</h4><p>Les résultats se mettent à jour automatiquement.</p></div><span className="unit-label">Maisons</span></div>
+          <div className="tier-list">{populationTiers.map((tier) => <label className="tier-row" key={tier.id}>
+            <span className="tier-description"><strong>{tier.name}</strong><small>{tier.residentsPerHouse} habitants par maison</small></span>
+            <input className="number-input" type="number" min="0" step="1" inputMode="numeric" aria-label={"Nombre de maisons — " + tier.name}
+              value={island.houseCounts[tier.id] ?? "0"} onChange={(event) => updateIsland({ houseCounts: { ...island.houseCounts, [tier.id]: event.target.value } })} />
+          </label>)}</div>
+          {planning.error && <p className="feedback-error" role="alert">{planning.error}</p>}
+
+          <div className="section-heading needs-section-heading"><div><h4>Besoins à satisfaire</h4><p>Choisissez une ressource ou un service par groupe de besoin.</p></div></div>
+          {theoreticalNeeds.filter((row) => row.houses > 0).length === 0
+            ? <p className="subtle">Saisissez au moins une maison pour afficher les besoins disponibles.</p>
+            : <div className="need-groups">{theoreticalNeeds.filter((row) => row.houses > 0).map((row) => {
+              const tier = populationTiers.find((item) => item.id === row.tierId)!;
+              const groupKey = row.tierId + ":" + row.groupId;
+              const availableOptions = row.options.filter((option) => option.unlockAtHouses === undefined || row.houses >= option.unlockAtHouses);
+              return <fieldset className="need-group" key={groupKey}>
+                <legend>{tier.name} · {CATEGORY_LABELS[row.category]}</legend>
+                {availableOptions.length === 0 ? <small className="need-hint">Aucune option débloquée pour ce nombre de maisons.</small>
+                  : availableOptions.map((option) => <label className="need-option" key={option.id}>
+                    <input type="radio" name={groupKey} checked={selectedNeeds[groupKey] === option.id}
+                      onChange={() => updateSelectedNeed(groupKey, option.id)} />
+                    <span><strong>{resourceNames.get(option.goodId) ?? option.goodId}</strong>
+                      <small>{option.buildingIds?.map((id) => buildingNames.get(id) ?? id).join(" → ") ?? "Chaîne de fourniture à préciser"}</small></span>
+                  </label>)}
+              </fieldset>;
+            })}</div>}
         </section>
+
         <section className="panel results-panel" aria-live="polite">
-          <div className="panel-heading"><div><p className="eyebrow">02 · RÉSULTATS</p><h3>Besoins de consommation</h3></div></div>
-          {!simulation ? <div className="results-placeholder"><p>Les résultats de cette île apparaîtront ici après le calcul.</p></div> : <>
+          <div className="panel-heading"><div><p className="eyebrow">02 · RÉSULTATS EN DIRECT</p><h3>Ressources nécessaires</h3></div></div>
+          {!simulation ? <div className="results-placeholder"><p>Les résultats apparaîtront dès que la saisie sera valide.</p></div> : <>
             <div className="population-total"><span>Population totale calculée</span><strong>{simulation.totalPopulation.toLocaleString("fr-FR")}</strong><small>habitants</small></div>
-            {simulation.goods.length === 0 ? <p className="subtle">Aucun flux de consommation n'est défini pour les paliers sélectionnés.</p> : <div className="table-wrap"><table className="results-table">
-              <thead><tr><th>Bien</th><th>Besoin par minute</th></tr></thead><tbody>{simulation.goods.map((balance) => <tr key={balance.good}><td>{resourceNames.get(balance.good) ?? balance.good}</td><td className="numeric">{String(balance.demandPerMinute)}</td></tr>)}</tbody>
+            <div className="table-wrap"><table className="results-table">
+              <thead><tr><th>Ressource / service</th><th>Quantité nécessaire</th></tr></thead>
+              <tbody>{theoreticalNeeds.filter((row) => row.houses > 0 && row.selectedNeedId).map((row) => {
+                const selected = row.options.find((option) => option.id === row.selectedNeedId)!;
+                return <tr key={row.tierId + row.groupId}>
+                  <td>{resourceNames.get(selected.goodId) ?? selected.goodId}</td>
+                  <td className="numeric">{row.requiredPerMinute === null ? "À quantifier" : row.requiredPerMinute.toLocaleString("fr-FR", { maximumFractionDigits: 3 }) + " / min"}</td>
+                </tr>;
+              })}</tbody>
+            </table></div>
+            {theoreticalNeeds.every((row) => row.houses === 0 || !row.selectedNeedId) && <p className="subtle">Sélectionnez les biens et services que vous souhaitez fournir à vos habitants.</p>}
+            {simulation.goods.length > 0 && <div className="table-wrap measured-flow-table"><h4>Demande calculée à partir des taux renseignés</h4><table className="results-table">
+              <thead><tr><th>Ressource</th><th>Débit demandé</th></tr></thead>
+              <tbody>{simulation.goods.map((balance) => <tr key={balance.good}><td>{resourceNames.get(balance.good) ?? balance.good}</td><td className="numeric">{balance.demandPerMinute.toLocaleString("fr-FR", { maximumFractionDigits: 3 })} / min</td></tr>)}</tbody>
             </table></div>}
-            {simulation.unresolvedAllocations.length > 0 && <div className="diagnostic-list"><h4>Diagnostics du moteur</h4><ul>{simulation.unresolvedAllocations.map((message) => <li key={message}>{message}</li>)}</ul></div>}
-            <p className="subtle result-note">Les résultats sont calculés à partir des flux du catalogue. Les stocks et le dimensionnement des bâtiments ne sont pas encore pris en compte.</p>
+            {selectedBuildingIds.length > 0 && <div className="recommended-buildings"><h4>Bâtiments associés</h4><ul>{selectedBuildingIds.map((id) => <li key={id}>{buildingNames.get(id) ?? id}</li>)}</ul></div>}
+            <p className="subtle result-note">Les relations besoin/ressource sont encore au statut candidat. Les quantités restent « à quantifier » tant que les taux de consommation par maison n'ont pas été relevés et validés en jeu. Les rendements de production seront intégrés dans une étape distincte.</p>
           </>}
         </section>
       </div> : null}
