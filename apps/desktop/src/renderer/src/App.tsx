@@ -79,8 +79,8 @@ function getPopulationTiers(repository: DataRepository, regionId: RegionId): Pop
 export default function App() {
   const catalogResult = useMemo(loadRepository, []);
   const repository = catalogResult.repository;
-  const populationTiers = useMemo(() => repository ? getPopulationTiers(repository, session.activeRegion) : [], [repository, session.activeRegion]);
   const [session, setSession] = useState<PlannerSession>(() => readSession());
+  const populationTiers = useMemo(() => repository ? getPopulationTiers(repository, session.activeRegion) : [], [repository, session.activeRegion]);
   const [savedAt, setSavedAt] = useState<string | null>(() => {
     try { return JSON.parse(localStorage.getItem(SESSION_KEY) ?? "null")?.savedAt ?? null; } catch { return null; }
   });
