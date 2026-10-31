@@ -1,1 +1,5 @@
-[]
+[
+  {"id":"latium-fishing-hut","name":"Fishing Hut","status":"to-observe","evidenceIds":[],"regionId":"latium","recipeIds":[]},
+  {"id":"latium-oat-farm","name":"Oat Farm","status":"to-observe","evidenceIds":[],"regionId":"latium","recipeIds":[]},
+  {"id":"latium-porridge-stand","name":"Porridge Stand","status":"to-observe","evidenceIds":[],"regionId":"latium","recipeIds":[]}
+]
