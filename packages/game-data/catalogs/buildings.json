@@ -1,5 +1,112 @@
 [
-  {"id":"latium-fishing-hut","name":"Fishing Hut","status":"to-observe","evidenceIds":[],"regionId":"latium","recipeIds":[]},
-  {"id":"latium-oat-farm","name":"Oat Farm","status":"to-observe","evidenceIds":[],"regionId":"latium","recipeIds":[]},
-  {"id":"latium-porridge-stand","name":"Porridge Stand","status":"to-observe","evidenceIds":[],"regionId":"latium","recipeIds":[]}
+  {
+    "id": "latium-woodcutter",
+    "name": "Woodcutter",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Récolte le Wood dans une zone forestière. Le rendement dépend de la densité forestière.",
+    "sourceRefs": ["SRC-001"]
+  },
+  {
+    "id": "latium-sawmill",
+    "name": "Sawmill",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Transforme le Wood en Timber. Le guide officiel indique un cycle de 30 secondes.",
+    "sourceRefs": ["SRC-001"]
+  },
+  {
+    "id": "latium-fishing-hut",
+    "name": "Fishing Hut",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Bâtiment de pêche du Latium associé à la fourniture de Sardines.",
+    "sourceRefs": ["SRC-002"]
+  },
+  {
+    "id": "latium-oat-farm",
+    "name": "Oat Farm",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Produit les Oats utilisés dans la chaîne du Porridge.",
+    "sourceRefs": ["SRC-002", "SRC-009"]
+  },
+  {
+    "id": "latium-porridge-stand",
+    "name": "Porridge Stand",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Bâtiment de transformation associé à la fourniture de Porridge aux Liberti.",
+    "sourceRefs": ["SRC-002", "SRC-009"]
+  },
+  {
+    "id": "latium-hemp-farm",
+    "name": "Hemp Farm",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Produit le Hemp utilisé dans la chaîne des Tunics.",
+    "sourceRefs": ["SRC-002", "SRC-009"]
+  },
+  {
+    "id": "latium-spinner",
+    "name": "Spinner",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Bâtiment de transformation associé à la production de Tunics.",
+    "sourceRefs": ["SRC-002", "SRC-009"]
+  },
+  {
+    "id": "latium-sheep-farm",
+    "name": "Sheep Farm",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Bâtiment amont de la chaîne des Pileus, à confirmer dans le jeu.",
+    "sourceRefs": ["SRC-009"]
+  },
+  {
+    "id": "latium-pileus-hatter",
+    "name": "Pileus Hatter",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Bâtiment aval de la chaîne des Pileus, dénomination issue d'une source communautaire à confirmer.",
+    "sourceRefs": ["SRC-009"]
+  },
+  {
+    "id": "latium-market",
+    "name": "Market",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Service public cité pour satisfaire une option du besoin Public Services des Liberti.",
+    "sourceRefs": ["SRC-002"]
+  },
+  {
+    "id": "latium-tavern",
+    "name": "Tavern",
+    "status": "candidate",
+    "evidenceIds": [],
+    "regionId": "latium",
+    "recipeIds": [],
+    "description": "Service public cité comme alternative au Market pour les Liberti.",
+    "sourceRefs": ["SRC-002"]
+  }
 ]
