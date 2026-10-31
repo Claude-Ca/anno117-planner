@@ -1,7 +1,7 @@
 # Anno 117 Planner — Plan de développement par lots
 
-**Version :** 1.4
-**Date :** 30 octobre 2026
+**Version :** 1.5
+**Date :** 31 octobre 2026
 **Statut :** Référence de reconstruction et de réalisation — audit des données en cours
 **Branche d’intégration :** `develop`
 **Technologies cibles :** Electron, React, TypeScript, Vite, pnpm, Vitest
@@ -659,29 +659,31 @@ Le dossier `docs/` contient les documents nécessaires pour comprendre et recons
 - `anno117-planner-audit-catalogue.md` : synthèse et axes de travail de l'audit ;
 - `installation_environnement.md` et `guide_de_demarrage.md` : procédures de préparation et de travail, à vérifier et actualiser au besoin.
 
-### 10.3. État Git vérifié et prochaine action — 30 octobre 2026
+### 10.3. État Git vérifié et prochaine action — 31 octobre 2026
 
-L'état du dépôt a été contrôlé sur GitHub le 30 octobre 2026 :
+L'état du dépôt a été contrôlé sur GitHub le 31 octobre 2026 :
 
 - le lot 1 (stabilisation du moteur) est intégré dans `develop` via la PR #2 ;
 - le lot 2 (socle Electron) est intégré via la PR #3 ;
 - le lot 3 (cas d'usage produit) est intégré via la PR #5 ;
 - le premier socle du lot 4 (catalogue de données) est intégré via la PR #6 ;
 - l'évolution du moteur de calcul relative au graphe de production est intégrée via la PR #7 ;
-- l'étape documentaire est intégrée via la PR #8 ;
+- l'étape documentaire initiale est intégrée via la PR #8 ;
 - le raccordement du référentiel modulaire `DataRepository` à la couche `product` est intégré via la PR #9 (squash merge).
 
 La PR #9 a été validée localement avec 54 tests réussis, le typecheck des cinq projets et le build Electron. Le workflow GitHub Actions « Tests, typecheck and build » a également réussi.
 
-Au moment de ce relevé, `develop` pointe sur le commit `2b1438952ca00a2efbd3b32a0cf3f0bc003cd198`. `main` pointe encore sur le commit initial `7450549f5e84f6df4cf8fac88bf98f7198c5c691` ; aucune release ni aucun tag Git n'ont encore été publiés. Le lot 4 reste ouvert pour la constitution et la validation des données réelles du jeu. Le lot 5 n'est pas encore commencé.
+Au dernier contrôle, `develop` pointe sur le commit `2b1438952ca00a2efbd3b32a0cf3f0bc003cd198`. `main` pointe encore sur le commit initial `7450549f5e84f6df4cf8fac88bf98f7198c5c691` ; aucune release stable ni aucun tag Git n'ont été publiés. Le lot 4 reste ouvert pour la constitution et la validation des données réelles du jeu. Le lot 5 n'est pas encore commencé.
 
-La branche courante de configuration est `feature/configuration-rules`, créée depuis `develop`. Elle porte le plan de gestion de configuration, le Ruleset importable et l'extension du workflow CI à `main` et `develop`. Ces changements restent à valider par PR.
+La branche `feature/configuration-rules`, créée depuis `develop`, porte le plan de gestion de configuration, le Ruleset importable, ainsi que l'extension du workflow CI à `main` et `develop`. La PR #10 est ouverte vers `develop`. Sa CI a réussi sur le commit `9afc4b01370d52d503db4ee3a745eb71c43c0dce`. Le propriétaire du dépôt a confirmé l'import et l'activation du Ruleset le 31 octobre 2026 ; l'effectivité du blocage de fusion doit encore être vérifiée sur les branches protégées.
+
+La politique de versionnement retient `0.1.0` comme version de développement courante. La première release stable visée est `1.0.0), éventuellement précédée de candidates `1.0.0-rc.N). Le tag stable `v1.0.0) sera créé uniquement après réussite du build, des tests, de l'installation et de la validation fonctionnelle sur le commit exact de `main).
 
 ### Prochaine action
 
-Finaliser et intégrer le [Plan de gestion de configuration](plan-gestion-configuration.md), importer le Ruleset défini dans `.github/rulesets/protect-main-develop.json`, puis vérifier le déclenchement et le caractère bloquant de la CI sur les PR vers les deux branches permanentes.
+Finaliser et intégrer le [Plan de gestion de configuration](plan-gestion-configuration.md), puis vérifier que le Ruleset importé bloque effectivement les fusions non conformes vers `develop) et `main). La procédure de release et de pose du tag stable est désormais explicitée ; aucune release n'est engagée à ce stade.
 
-Une fois ce socle de gestion de configuration en place, le lot 5 (première interface de planification) pourra être préparé conformément à ses critères. Les ajustements graphiques et ergonomiques de l'IHM seront traités dans un cycle distinct.
+Une fois ce socle de gestion de configuration validé et intégré, le lot 5 (première interface de planification) pourra être préparé conformément à ses critères. Les ajustements graphiques et ergonomiques de l'IHM seront traités dans un cycle distinct.
 
 ### 10.4. Règle de continuité
 
