@@ -5,6 +5,7 @@
 - [Audit du catalogue de données](audit-catalogue-donnees.md)
 - [Stratégie de validation en jeu](strategie-validation-en-jeu.md)
 - [Matrice de preuves — premier lot de données de population](matrice-preuves-population.md)
+- [Fiche de relevé — population et besoins des Liberti](fiche-releve-population-liberti.md)
 - [Registre des sources et provenance](registre-sources-donnees.md)
 - [Licences et réutilisation des données](licences-et-reutilisation.md)
 
