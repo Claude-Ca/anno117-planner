@@ -54,8 +54,18 @@ export type PopulationNeedCategory = "food" | "public-service" | "fashion" | "ho
 export interface PopulationNeed {
   id: string;
   category: PopulationNeedCategory;
-  /** Resource or service required to fulfil this need. */
+  /** Resource or service offered as one way to satisfy this need. */
   goodId: string;
+  /** Groups mutually exclusive options (e.g. one food or one fashion good). */
+  choiceGroupId?: string;
+  /** Candidate/observed/verified state applies to this relationship, not only the tier. */
+  status?: VerificationStatus;
+  /** Documentary source identifiers for this specific relationship. */
+  sourceRefs?: string[];
+  /** Number of houses required before this option becomes available, once verified. */
+  unlockAtHouses?: number;
+  /** Buildings directly associated with providing this good or service. */
+  buildingIds?: string[];
   /** Consumption rate per residence, when measured. */
   consumptionPerHousePerMinute?: number;
   /** Effects applied while the need is fulfilled. */
