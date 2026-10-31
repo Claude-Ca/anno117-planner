@@ -50,6 +50,39 @@ describe("validateModularCatalog", () => {
     c.modules.evidence[0]!.method = "derived";
     expect(validateModularCatalog(c).some((d) => d.code === "DERIVATION_UNGROUNDED")).toBe(true);
   });
+  it("accepts residence-level need effects and an optional consumption rate", () => {
+    const c = fixture();
+    c.modules.population.push({
+      id: "liberti", name: "Liberti", residentsPerHouse: 10,
+      consumptionPerResident: [], status: "to-observe", evidenceIds: [],
+      needs: [{
+        id: "sardines", category: "food", goodId: "wood",
+        effects: { population: 1, income: 1 },
+      }],
+    });
+    expect(validateModularCatalog(c)).toEqual([]);
+  });
+  it("rejects an invalid residence-level consumption modifier", () => {
+    const c = fixture();
+    c.modules.population.push({
+      id: "liberti", name: "Liberti", residentsPerHouse: 10,
+      consumptionPerResident: [], status: "to-observe", evidenceIds: [],
+      needs: [{
+        id: "sardines", category: "food", goodId: "wood",
+        consumptionModifier: 0,
+      }],
+    });
+    expect(validateModularCatalog(c).some((d) => d.code === "NEED_MODIFIER_INVALID")).toBe(true);
+  });
+  it("rejects unknown resources referenced by population needs", () => {
+    const c = fixture();
+    c.modules.population.push({
+      id: "liberti", name: "Liberti", residentsPerHouse: 10,
+      consumptionPerResident: [], status: "to-observe", evidenceIds: [],
+      needs: [{ id: "sardines", category: "food", goodId: "missing" }],
+    });
+    expect(validateModularCatalog(c).some((d) => d.code === "RESOURCE_UNKNOWN")).toBe(true);
+  });
   it("rejects a date that is syntactically valid but impossible", () => {
     const c = fixture();
     c.modules.evidence[0]!.observedAt = "2026-02-30";

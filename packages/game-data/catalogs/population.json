@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "latium-liberti",
+    "name": "Liberti",
+    "status": "to-observe",
+    "evidenceIds": [],
+    "residentsPerHouse": 10,
+    "consumptionPerResident": [],
+    "needs": []
+  }
+]
