@@ -106,10 +106,11 @@ Il impose :
 - l'interdiction des force pushes ;
 - l'interdiction de supprimer les branches protégées ;
 - la fusion Squash comme seule méthode autorisée ;
-- aucun acteur de contournement déclaré dans le Ruleset ;
-- format des messages de commit contrôlé par une règle `commit_message_pattern` conforme à la nomenclature du chapitre 6.
+- aucun acteur de contournement déclaré dans le Ruleset.
 
-La règle de commit impose le format du type et du scope, tout en autorisant le marqueur de rupture `!`. Les titres de Squash Merge doivent donc suivre la même convention.
+Le Ruleset effectivement enregistré dans GitHub a été relu après son import le 31 octobre 2026. Il contient les règles `deletion`, `non_fast_forward`, `pull_request` et `required_status_checks`. La règle `commit_message_pattern` présente dans le JSON fourni n'apparaît pas dans la configuration active retournée par GitHub : **la convention de commit du chapitre 6 est donc documentée, mais elle n'est pas encore bloquante côté GitHub**.
+
+Pour activer cette dernière contrainte, ouvrir le Ruleset dans **Settings → Rules → Rulesets → Protect main and develop**, ajouter une restriction de métadonnées de commit, choisir `Restrict commit metadata`, puis `Must match a given regex pattern` et renseigner le motif Conventional Commits du fichier JSON. Enregistrer, puis relire la configuration effective pour confirmer que `commit_message_pattern` apparaît bien dans les règles actives.
 
 Aucune approbation humaine obligatoire n'est imposée à ce stade : le dépôt a un contributeur principal et la revue du diff reste réalisée dans le processus de PR. Cette règle pourra être renforcée si d'autres contributeurs réguliers rejoignent le projet.
 
@@ -293,16 +294,19 @@ Pour une PR `fix/*` vers `main`, la PR de merge-back vers `develop` doit être o
 - aucun tag Git de release n'est actuellement présent ;
 - le workflow CI cible les PR et les pushes sur `main` et `develop` ;
 - le Ruleset `Protect main and develop` a été importé et activé manuellement par le propriétaire du dépôt le 31 octobre 2026 ;
+- la lecture de sa configuration effective confirme les protections PR, CI, suppression et force push sur `main` et `develop` ;
+- la règle `commit_message_pattern` n'a pas été conservée lors de l'import et reste à ajouter manuellement dans les restrictions de métadonnées ;
 - la PR #10 porte le plan de gestion de configuration et reste ouverte pour intégrer ces règles documentaires ;
 - la CI de la PR #10 a été observée en réussite sur le commit `9afc4b01370d52d503db4ee3a745eb71c43c0dce`.
 
 Actions restantes :
 
 1. Vérifier que le Ruleset importé cible bien uniquement `main` et `develop`, et qu'il reste en état **Active**.
-2. Vérifier que le check CI obligatoire bloque effectivement une PR vers chacune des branches permanentes.
-3. Conserver la version de développement `0.1.0` jusqu'à la préparation d'une release candidate.
-4. Pour la première release, préparer une candidate `1.0.0-rc.N`, la construire et la valider sur le contenu de `main`.
-5. Ne créer le tag stable `v1.0.0` qu'après réussite du build, des tests, de l'installation et de la validation fonctionnelle.
+2. Ajouter manuellement la restriction `commit_message_pattern`, puis vérifier qu'elle apparaît dans la configuration effective.
+3. Vérifier que le check CI obligatoire bloque effectivement une PR vers chacune des branches permanentes.
+4. Conserver la version de développement `0.1.0` jusqu'à la préparation d'une release candidate.
+5. Pour la première release, préparer une candidate `1.0.0-rc.N`, la construire et la valider sur le contenu de `main`.
+6. Ne créer le tag stable `v1.0.0` qu'après réussite du build, des tests, de l'installation et de la validation fonctionnelle.
 
 ## 9. Révision du plan
 
