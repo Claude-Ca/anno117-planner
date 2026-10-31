@@ -128,6 +128,33 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
     const p = `modules.population[${i}]`;
     if (!Number.isFinite(t.residentsPerHouse) || t.residentsPerHouse <= 0) add("POPULATION_INVALID", `${p}.residentsPerHouse`, "Nombre de résidents invalide.");
     checkFlows(t.consumptionPerResident, `${p}.consumptionPerResident`);
+    const seenNeeds = new Set<string>();
+    (t.needs ?? []).forEach((need, j) => {
+      const np = `${p}.needs[${j}]`;
+      if (!need.id?.trim()) add("NEED_ID_REQUIRED", `${np}.id`, "Identifiant de besoin obligatoire.");
+      if (seenNeeds.has(need.id)) add("NEED_DUPLICATE", `${np}.id`, `Besoin dupliqué : ${need.id}.`);
+      seenNeeds.add(need.id);
+      if (!["food", "public-service", "fashion", "household"].includes(need.category)) {
+        add("NEED_CATEGORY_INVALID", `${np}.category`, "Catégorie de besoin inconnue.");
+      }
+      if (!resourceIds.has(need.goodId)) {
+        add("RESOURCE_UNKNOWN", `${np}.goodId`, `Ressource inconnue : ${need.goodId}.`);
+      }
+      if (need.consumptionPerHousePerMinute !== undefined &&
+          (!Number.isFinite(need.consumptionPerHousePerMinute) || need.consumptionPerHousePerMinute <= 0)) {
+        add("NEED_RATE_INVALID", `${np}.consumptionPerHousePerMinute`, "Le taux par résidence doit être fini et strictement positif.");
+      }
+      if (need.consumptionModifier !== undefined &&
+          (!Number.isFinite(need.consumptionModifier) || need.consumptionModifier <= 0)) {
+        add("NEED_MODIFIER_INVALID", `${np}.consumptionModifier`, "Le modificateur de consommation doit être fini et strictement positif.");
+      }
+      for (const effect of ["population", "income"] as const) {
+        const value = need.effects?.[effect];
+        if (value !== undefined && !Number.isFinite(value)) {
+          add("NEED_EFFECT_INVALID", `${np}.effects.${effect}`, "L'effet doit être un nombre fini.");
+        }
+      }
+    });
   });
   modules.islandAvailability.forEach((a, i) => {
     const p = `modules.islandAvailability[${i}]`;
