@@ -185,3 +185,24 @@ button, input { font: inherit; }
   .workbench-actions { justify-content: flex-start; }
   .workbench-summary span { flex-basis: 100%; margin-left: 0; }
 }
+
+
+.session-toolbar { display: grid; grid-template-columns: minmax(180px, 1fr) auto; gap: 8px 20px; align-items: center; margin-bottom: 18px; padding: 18px 22px; }
+.session-info { display: flex; flex-direction: column; gap: 5px; }
+.session-info strong { font-size: 13px; }
+.session-info small { color: #929cab; font-size: 11px; }
+.session-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.session-actions .secondary-button { min-height: 36px; }
+.session-toolbar .save-message { grid-column: 1 / -1; margin: 0; }
+.region-tabs { display: flex; gap: 8px; margin: 0 0 20px; border-bottom: 1px solid #363c48; }
+.region-tab { display: flex; align-items: flex-start; flex-direction: column; gap: 5px; min-width: 150px; padding: 13px 18px 12px; border: 1px solid transparent; border-bottom: 2px solid transparent; border-radius: 8px 8px 0 0; color: #aab4c2; background: transparent; font-size: 14px; font-weight: 700; cursor: pointer; }
+.region-tab small { color: #8995a6; font-size: 10px; font-weight: 400; }
+.region-tab:hover { background: #222832; color: #e8ebf1; }
+.region-tab.is-active { border-color: #394657; border-bottom-color: #b3c8e5; color: #f0f4fa; background: #202b38; }
+.region-tab:focus-visible, .session-actions .secondary-button:focus-visible { outline: 2px solid #b3c8e5; outline-offset: 2px; }
+@media (max-width: 760px) {
+  .session-toolbar { grid-template-columns: 1fr; }
+  .session-toolbar .save-message { grid-column: 1; }
+  .session-actions { justify-content: flex-start; }
+  .region-tab { flex: 1; min-width: 0; padding-inline: 12px; }
+}
