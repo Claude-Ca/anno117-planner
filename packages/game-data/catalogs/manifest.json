@@ -1,7 +1,7 @@
 {
   "id": "anno117-base",
   "catalogVersion": "0.0.1-draft",
-  "schemaVersion": "1",
+  "schemaVersion": "2",
   "gameVersion": "à renseigner pendant la campagne de référence",
   "scope": { "edition": "base-game", "regions": ["latium", "albion"] },
   "modules": ["resources", "buildings", "production", "population", "regions", "islandAvailability", "evidence"]
