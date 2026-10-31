@@ -6,7 +6,9 @@
     "evidenceIds": [],
     "category": "raw",
     "description": "Ressource récoltée par le Woodcutter et utilisée par la scierie pour produire du Timber.",
-    "sourceRefs": ["SRC-001"]
+    "sourceRefs": [
+      "SRC-001"
+    ]
   },
   {
     "id": "timber",
@@ -15,7 +17,9 @@
     "evidenceIds": [],
     "category": "intermediate",
     "description": "Matériau de construction issu de la transformation du Wood par la Sawmill.",
-    "sourceRefs": ["SRC-001"]
+    "sourceRefs": [
+      "SRC-001"
+    ]
   },
   {
     "id": "sardines",
@@ -24,7 +28,9 @@
     "evidenceIds": [],
     "category": "final",
     "description": "Bien alimentaire associé au besoin Food des Liberti du Latium.",
-    "sourceRefs": ["SRC-002"]
+    "sourceRefs": [
+      "SRC-002"
+    ]
   },
   {
     "id": "oats",
@@ -33,7 +39,9 @@
     "evidenceIds": [],
     "category": "raw",
     "description": "Matière première de la chaîne du Porridge.",
-    "sourceRefs": ["SRC-002"]
+    "sourceRefs": [
+      "SRC-002"
+    ]
   },
   {
     "id": "porridge",
@@ -42,7 +50,9 @@
     "evidenceIds": [],
     "category": "final",
     "description": "Bien alimentaire associé au besoin Food des Liberti du Latium.",
-    "sourceRefs": ["SRC-002"]
+    "sourceRefs": [
+      "SRC-002"
+    ]
   },
   {
     "id": "hemp",
@@ -51,7 +61,9 @@
     "evidenceIds": [],
     "category": "raw",
     "description": "Matière première de la chaîne de confection des Tunics.",
-    "sourceRefs": ["SRC-002"]
+    "sourceRefs": [
+      "SRC-002"
+    ]
   },
   {
     "id": "tunics",
@@ -60,7 +72,9 @@
     "evidenceIds": [],
     "category": "final",
     "description": "Bien d'habillement associé au besoin Fashion des Liberti du Latium.",
-    "sourceRefs": ["SRC-002"]
+    "sourceRefs": [
+      "SRC-002"
+    ]
   },
   {
     "id": "pileus",
@@ -69,6 +83,31 @@
     "evidenceIds": [],
     "category": "final",
     "description": "Bien d'habillement alternatif cité pour les Liberti du Latium ; chaîne et dénomination du bâtiment à confirmer.",
-    "sourceRefs": ["SRC-002", "SRC-009"]
+    "sourceRefs": [
+      "SRC-002",
+      "SRC-009"
+    ]
+  },
+  {
+    "id": "market-service",
+    "name": "Market",
+    "status": "candidate",
+    "evidenceIds": [],
+    "category": "service",
+    "description": "Service public cité pour répondre à une option du besoin Public Services des Liberti.",
+    "sourceRefs": [
+      "SRC-002"
+    ]
+  },
+  {
+    "id": "tavern-service",
+    "name": "Tavern",
+    "status": "candidate",
+    "evidenceIds": [],
+    "category": "service",
+    "description": "Service public cité comme alternative au Market pour les Liberti.",
+    "sourceRefs": [
+      "SRC-002"
+    ]
   }
 ]
