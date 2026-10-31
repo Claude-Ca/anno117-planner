@@ -1,7 +1,7 @@
 # Plan de gestion de configuration — Anno 117 Planner
 
 **Version :** 1.1  
-**Date :** 30 octobre 2026  
+**Date :** 31 octobre 2026  
 **Statut :** proposition de référence — à valider par PR et à appliquer dans les paramètres GitHub  
 **Dépôt :** `Claude-Ca/anno117-planner`
 
@@ -57,7 +57,7 @@ Les branches `fix/*` sont réservées aux correctifs urgents ou correctifs de ma
 - Une première Pull Request cible `main`.
 - Après intégration dans `main`, une seconde Pull Request doit proposer le même correctif vers `develop` (merge-back).
 - La branche `fix/*` est conservée jusqu'à la fusion de la PR de merge-back.
-- Le correctif intégré à `main` donne lieu à une nouvelle version de type PATCH et à un nouveau tag.
+- Le correctif intégré à `main` donne lieu à une nouvelle version de type PATCH. Le tag stable `vX.Y.Z` n'est posé qu'après réussite du build, des tests, de l'installation et de la validation fonctionnelle de cette version.
 
 Exemple de séquence :
 
