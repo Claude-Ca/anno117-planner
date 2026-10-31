@@ -1,6 +1,6 @@
 # Anno 117 Planner — Plan de développement par lots
 
-**Version :** 1.5
+**Version :** 1.6
 **Date :** 31 octobre 2026
 **Statut :** Référence de reconstruction et de réalisation — audit des données en cours
 **Branche d’intégration :** `develop`
@@ -675,13 +675,13 @@ La PR #9 a été validée localement avec 54 tests réussis, le typecheck des ci
 
 Au dernier contrôle, `develop` pointe sur le commit `2b1438952ca00a2efbd3b32a0cf3f0bc003cd198`. `main` pointe encore sur le commit initial `7450549f5e84f6df4cf8fac88bf98f7198c5c691` ; aucune release stable ni aucun tag Git n'ont été publiés. Le lot 4 reste ouvert pour la constitution et la validation des données réelles du jeu. Le lot 5 n'est pas encore commencé.
 
-La branche `feature/configuration-rules`, créée depuis `develop`, porte le plan de gestion de configuration, le Ruleset importable, ainsi que l'extension du workflow CI à `main` et `develop`. La PR #10 est ouverte vers `develop`. Sa CI a réussi sur le commit `9afc4b01370d52d503db4ee3a745eb71c43c0dce`. Le propriétaire du dépôt a confirmé l'import et l'activation du Ruleset le 31 octobre 2026 ; l'effectivité du blocage de fusion doit encore être vérifiée sur les branches protégées.
+La branche `feature/configuration-rules`, créée depuis `develop`, porte le plan de gestion de configuration, le Ruleset importable et l'extension du workflow CI à `main` et `develop`. La PR #10 est ouverte vers `develop` et sa CI est verte sur le commit courant contrôlé. Le Ruleset `Protect main and develop` a été importé et activé par le propriétaire du dépôt. Sa configuration effective confirme les règles de PR obligatoire, de check CI, de protection contre la suppression et de force push, sans acteur de contournement. En revanche, GitHub n'a pas repris la restriction `commit_message_pattern` depuis le JSON importé ; la convention Conventional Commits reste donc une règle documentaire tant que cette restriction n'a pas été ajoutée manuellement au Ruleset.
 
-La politique de versionnement retient `0.1.0` comme version de développement courante. La première release stable visée est `1.0.0`, éventuellement précédée de candidates `1.0.0-rc.N`. Le tag stable `v1.0.0` sera créé uniquement après réussite du build, des tests, de l'installation et de la validation fonctionnelle sur le commit exact de `main`.
+La politique de versionnement retient `0.1.0` comme version de développement courante. La première release stable visée est `1.0.0`, éventuellement précédée de candidates `1.0.0-rc.N`. Le tag stable `v1.0.0` sera créé uniquement après réussite du build, des tests, de l'installation et de la validation fonctionnelle sur le commit exact de `main`. Aucun tag stable n'est posé au simple merge de `develop` vers `main`.
 
 ### Prochaine action
 
-Finaliser et intégrer le [Plan de gestion de configuration](plan-gestion-configuration.md), puis vérifier que le Ruleset importé bloque effectivement les fusions non conformes vers `develop` et `main`. La procédure de release et de pose du tag stable est désormais explicitée ; aucune release n'est engagée à ce stade.
+Finaliser et intégrer le [Plan de gestion de configuration](plan-gestion-configuration.md). Compléter la restriction de métadonnées des commits dans le Ruleset GitHub et vérifier la configuration effective, puis conserver la CI verte comme condition de fusion vers les branches permanentes.
 
 Une fois ce socle de gestion de configuration validé et intégré, le lot 5 (première interface de planification) pourra être préparé conformément à ses critères. Les ajustements graphiques et ergonomiques de l'IHM seront traités dans un cycle distinct.
 
