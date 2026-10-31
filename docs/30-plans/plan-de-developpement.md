@@ -1,6 +1,6 @@
 # Anno 117 Planner — Plan de développement par lots
 
-**Version :** 1.9
+**Version :** 2.0
 **Date :** 31 octobre 2026
 **Statut :** Référence de reconstruction et de réalisation — audit des données en cours
 **Branche d’intégration :** `develop`
@@ -690,11 +690,16 @@ La politique de versionnement retient `0.1.0` comme version de développement co
 
 ### Prochaine action
 
-Préparer le lot 5 (première interface de planification) sur la branche `feature/planner-ui-gpt`, créée depuis `develop` au commit `ee27d0d7df505dd9337e9798cc452f2ba2aead88`. Avant de développer les formulaires et le flux de simulation, formaliser les décisions fonctionnelles qui conditionnent les entrées du scénario et les résultats affichés.
+Le propriétaire du projet a retenu le parcours **A — objectifs de population** pour le lot 5. La saisie se fait par nombre de maisons pour chaque palier de population ; ces deux décisions sont validées dans DEC-001 et DEC-002 du registre de gouvernance.
 
-Le catalogue embarqué est actuellement un squelette : les modules biens, bâtiments, recettes, population, disponibilités insulaires et preuves sont vides ; les deux régions Latium et Albion sont au statut `to-observe`. Le moteur de calcul ne dispose donc pas encore de données de jeu validées pour une simulation réelle. Les tests peuvent continuer à utiliser des données synthétiques clairement identifiées, sans les intégrer au catalogue livré.
+La première tranche du lot 5 doit permettre de :
+- saisir un nom d'île ;
+- saisir le nombre de maisons pour chaque palier disponible dans le catalogue exploitable ;
+- appeler `simulateCatalogProduction` avec ces données ;
+- afficher la population totale et les besoins de consommation renvoyés par le moteur ;
+- afficher explicitement l'absence de données lorsqu'aucun palier validé n'est disponible.
 
-Le cadrage du lot 5 doit en particulier traiter les décisions DEC-001 à DEC-003 (mode d'entrée et représentation de la population), DEC-005 et DEC-006 (unités de consommation et précision), DEC-012 et DEC-013 (erreurs, résultats partiels, bâtiments existants et stocks). Il doit également expliciter la limite actuelle du contrat : le moteur reçoit les affectations de recettes et de bâtiments existants, puis retourne des bilans ; il ne retourne pas encore de dimensionnement automatique des bâtiments requis. Aucune règle non arbitrée ne doit être implémentée par défaut.
+Les besoins en biens directs, la sélection des besoins optionnels, les stocks, les bâtiments existants et le dimensionnement automatique restent hors de cette tranche tant que les décisions ou contrats correspondants ne sont pas validés et disponibles. Le lot 4 reste ouvert : le catalogue embarqué ne contient pas encore de données de production ou de population vérifiées.
 
 ### 10.4. Règle de continuité
 
