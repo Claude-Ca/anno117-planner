@@ -33,29 +33,7 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          pattern='^(feat|fix|docs|refactor|test|build|ci|chore|perf|style|revert)(\\([a-z0-9][a-z0-9._/-]*\\))?(!)?: .+
-        uses: pnpm/action-setup@v4
-        with:
-          version: 12.15.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run tests
-        run: pnpm test
-
-      - name: Typecheck all packages
-        run: pnpm -r typecheck
-
-      - name: Build desktop application
-        run: pnpm --filter @anno117/desktop build
-
+          pattern='^(feat|fix|docs|refactor|test|build|ci|chore|perf|style|revert)(\([a-z0-9][a-z0-9._/-]*\))?(!)?: .+$'
           if [[ ! "$PR_TITLE" =~ $pattern ]]; then
             echo "::error title must follow Conventional Commits (for example: docs(config): clarify release process)"
             exit 1
