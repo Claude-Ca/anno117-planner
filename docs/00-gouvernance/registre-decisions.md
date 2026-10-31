@@ -16,11 +16,11 @@ Statuts :
 
 Aucune proposition ou hypothèse ne doit être codée comme une règle validée. Lorsqu'une décision est prise, consigner sa date, sa justification, les documents impactés et les tests de référence à ajouter.
 
-## 2. Décisions ouvertes
+## 2. Décisions suivies
 
 | ID | Sujet | Question à trancher | Dépendances | Statut |
 |---|---|---|---|---|
-| DEC-001 | Entrée de planification | La V1 démarre à partir d'objectifs de population. Les besoins en biens directs ne constituent pas un mode d'entrée dans le premier parcours. | Expression de besoin, cas d'usage, UI | **Validée — population en premier** |
+| DEC-001 | Entrée de planification | Le premier parcours du lot 5 démarre à partir d'objectifs de population. La saisie directe de besoins en biens est exclue de cette première tranche, sans préjuger d'une évolution ultérieure. | Expression de besoin, cas d'usage, UI | **Validée — population en premier** |
 | DEC-002 | Population | La saisie se fait par nombre de maisons pour chaque palier de population. Le nombre d'habitants est calculé à partir de `residentsPerHouse`. | Consommation, catalogue | **Validée — maisons par palier** |
 | DEC-003 | Besoins des habitants | Comment sélectionner les besoins par niveau et catégorie, y compris besoins optionnels et effets de progression ? | Consommation, données | À arbitrer |
 | DEC-004 | Unité de temps | Quelle unité commune est utilisée pour les débits internes ? | Moteur, catalogue, tests | **Validée — minute** |
@@ -85,7 +85,7 @@ Les options doivent présenter les conséquences concrètes sans imposer une pr�
 
 ## 5. Lien avec le contrat du moteur
 
-Les décisions DEC-004 à DEC-012 sont directement liées à docs/contrat-moteur-calcul.md et doivent être résolues avant de figer l'API publique du lot 1.
+Les décisions DEC-004 à DEC-012 sont directement liées à docs/20-technique/contrats/contrat-moteur-calcul.md et doivent être résolues avant de figer l'API publique du lot 1.
 
 Les décisions DEC-001 à DEC-003 influencent le contrat des cas d'usage et la manière dont les besoins finaux sont fournis au moteur. DEC-013 et DEC-014 doivent être traitées avant de figer le lot 3 et le modèle de données correspondant. DEC-015 relève de la spécification multi-îles. DEC-016 relève du contrat de persistance.
 
