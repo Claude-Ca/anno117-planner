@@ -87,11 +87,11 @@ Séquence de release :
 6. Tant que tous les contrôles ne sont pas concluants, ne pas créer le tag stable et ne pas annoncer la version comme publiée.
 7. Après validation complète, poser le tag stable sur le commit exact de `main` qui a été testé et validé, puis publier les notes de version et la GitHub Release.
 
-Si une validation échoue, aucun tag stable n'est créé. La correction est apportée dans le flux normal de développement, intégrée à `develop), puis une nouvelle PR de release vers `main) est préparée et le cycle de validation est rejoué. Il n'est pas permis de déplacer un tag déjà publié pour corriger une release.
+Si une validation échoue, aucun tag stable n'est créé. La correction est apportée dans le flux normal de développement, intégrée à `develop`,  puis une nouvelle PR de release vers `main` est préparée et le cycle de validation est rejoué. Il n'est pas permis de déplacer un tag déjà publié pour corriger une release.
 
-Les Release Candidates peuvent être identifiées par des tags de préversion, par exemple `v1.0.0-rc.1`, `v1.0.0-rc.2`. Ces tags identifient des candidats explicitement non stables ; ils ne remplacent pas le tag stable et ne sont pas créés pour une version qui n'a pas au minimum passé les contrôles de build et de tests. Le tag stable `v1.0.0) n'est posé qu'après la validation complète, installation comprise.
+Les Release Candidates peuvent être identifiées par des tags de préversion, par exemple `v1.0.0-rc.1`, `v1.0.0-rc.2`. Ces tags identifient des candidats explicitement non stables ; ils ne remplacent pas le tag stable et ne sont pas créés pour une version qui n'a pas au minimum passé les contrôles de build et de tests. Le tag stable `v1.0.0` n'est posé qu'après la validation complète, installation comprise.
 
-La branche `main) peut donc contenir temporairement un candidat non encore publié. Seuls les tags stables identifient les versions officiellement publiées.
+La branche `main` peut donc contenir temporairement un candidat non encore publié. Seuls les tags stables identifient les versions officiellement publiées.
 
 ## 3. Règles de protection GitHub
 
@@ -185,11 +185,11 @@ Une ou plusieurs versions candidates peuvent être produites avant la première 
 
 Leur numérotation respecte la syntaxe de préversion SemVer :
 
-- `1.0.0-rc.1) : première candidate de la release `1.0.0) ;
-- `1.0.0-rc.2) : candidate suivante après correction ;
-- `1.0.0) : version stable, uniquement après validation complète.
+- `1.0.0-rc.1` : première candidate de la release `1.0.0` ;
+- `1.0.0-rc.2` : candidate suivante après correction ;
+- `1.0.0` : version stable, uniquement après validation complète.
 
-Les tags de candidat utilisent le préfixe `v`, par exemple `v1.0.0-rc.1). Ils doivent être déclarés comme préversions dans GitHub Releases lorsqu'une release est publiée pour test. Ils ne doivent jamais être présentés comme la version stable.
+Les tags de candidat utilisent le préfixe `v`, par exemple `v1.0.0-rc.1`. Ils doivent être déclarés comme préversions dans GitHub Releases lorsqu'une release est publiée pour test. Ils ne doivent jamais être présentés comme la version stable.
 
 La validation de release doit au minimum attester les points suivants :
 
@@ -293,16 +293,16 @@ Pour une PR `fix/*` vers `main`, la PR de merge-back vers `develop` doit être o
 - aucun tag Git de release n'est actuellement présent ;
 - le workflow CI cible les PR et les pushes sur `main` et `develop` ;
 - le Ruleset `Protect main and develop` a été importé et activé manuellement par le propriétaire du dépôt le 31 octobre 2026 ;
-- la PR #10 porte le plan de gestion de configuration et reste le véhicule de validation documentaire de ces règles.
+- la PR #10 porte le plan de gestion de configuration et reste ouverte pour intégrer ces règles documentaires ;
+- la CI de la PR #10 a été observée en réussite sur le commit `9afc4b01370d52d503db4ee3a745eb71c43c0dce`.
 
-Ordre de mise en place :
+Actions restantes :
 
-1. Importer `.github/rulesets/protect-main-develop.json` dans **Settings → Rules → Rulesets**.
-2. Vérifier que le Ruleset cible bien uniquement `main` et `develop`, et qu'il est en état **Active**.
-3. Ouvrir la PR de `feature/configuration-rules` vers `develop` et vérifier que la CI obligatoire s'exécute.
-4. Conserver la version de développement `0.1.0` jusqu'à la préparation d'une release candidate.
-5. Pour la première release, préparer une candidate `1.0.0-rc.N`, la construire et la valider sur le contenu de `main`.
-6. Ne créer le tag stable `v1.0.0` qu'après réussite du build, des tests, de l'installation et de la validation fonctionnelle.
+1. Vérifier que le Ruleset importé cible bien uniquement `main` et `develop`, et qu'il reste en état **Active**.
+2. Vérifier que le check CI obligatoire bloque effectivement une PR vers chacune des branches permanentes.
+3. Conserver la version de développement `0.1.0` jusqu'à la préparation d'une release candidate.
+4. Pour la première release, préparer une candidate `1.0.0-rc.N`, la construire et la valider sur le contenu de `main`.
+5. Ne créer le tag stable `v1.0.0` qu'après réussite du build, des tests, de l'installation et de la validation fonctionnelle.
 
 ## 9. Révision du plan
 
