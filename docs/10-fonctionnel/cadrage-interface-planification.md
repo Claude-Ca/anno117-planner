@@ -1,8 +1,8 @@
 # Cadrage fonctionnel — première interface de planification
 
-**Version :** 0.1
+**Version :** 0.2
 **Date :** 31 octobre 2026
-**Statut :** proposition de cadrage — décisions métier à valider
+**Statut :** cadrage initial validé pour le parcours population — décisions complémentaires ouvertes
 **Lot :** 5 — première interface de planification
 **Branche :** `feature/planner-ui-gpt`
 
@@ -74,46 +74,52 @@ Le plan de développement prévoit de présenter les besoins calculés, les bât
 
 Ces écarts doivent être traités dans les contrats métier ou les lots concernés. L'interface ne doit pas calculer elle-même les valeurs manquantes ni interpréter les affectations existantes comme un dimensionnement optimal.
 
-## 5. Décisions fonctionnelles à arbitrer
+## 5. Décisions fonctionnelles et statut
 
-Les décisions restent centralisées dans `docs/00-gouvernance/registre-decisions.md`. Pour le lot 5, les plus directement concernées sont :
+Les décisions restent centralisées dans `docs/00-gouvernance/registre-decisions.md`.
+
+Les décisions suivantes sont maintenant validées :
+
+- **DEC-001 :** le premier parcours démarre par les objectifs de population (option A).
+- **DEC-002 :** l'utilisateur saisit un nombre de maisons par palier ; le nombre d'habitants est calculé par le moteur à partir de `residentsPerHouse`.
+
+Les points suivants restent à arbitrer :
 
 | Décision | Sujet | Conséquence pour l'interface |
 |---|---|---|
-| DEC-001 | Population, besoins en biens ou les deux comme point d'entrée | Détermine le parcours principal et le contrat d'entrée |
-| DEC-002 | Saisie de la population : habitants, maisons ou maisons par palier | Détermine les champs et leur validation |
+| DEC-001 | Entrée par objectifs de population | **Validée — option A** |
+| DEC-002 | Saisie par nombre de maisons pour chaque palier | **Validée — maisons par palier** |
 | DEC-003 | Sélection des besoins par palier, catégorie ou option | Détermine la granularité des objectifs |
 | DEC-005 | Unité et période des taux de consommation | Détermine les libellés et les conversions présentées |
 | DEC-006 | Précision numérique et arrondis d'affichage | Détermine les valeurs affichées et leur format |
 | DEC-012 | Erreurs et résultats partiels | Détermine les états d'erreur et les diagnostics visibles |
 | DEC-013 | Stocks et bâtiments existants | Détermine les données saisissables et l'interprétation des résultats |
 
-Les décisions concernant les recettes à sorties multiples (DEC-009), la productivité (DEC-010) et la disponibilité locale des ressources (DEC-014) doivent aussi être respectées par le parcours, selon leur statut dans le registre. Le présent lot ne doit pas élargir implicitement le périmètre du moteur.
+Les décisions concernant la sélection des besoins par niveau/catégorie (DEC-003), les unités de consommation (DEC-005), la précision numérique et les arrondis d'affichage (DEC-006), les erreurs et résultats partiels (DEC-012) ainsi que les stocks et bâtiments existants (DEC-013) restent ouvertes. Le premier écran ne propose donc pas de filtre optionnel par besoin, de stock initial ni d'affectation de bâtiments. Il présente les flux de consommation effectivement définis dans les paliers validés, sans prétendre régler la classification des besoins optionnels.
 
-## 6. Options de point d'entrée du premier parcours
+Les décisions concernant les recettes à sorties multiples (DEC-009), la productivité (DEC-010) et la disponibilité locale des ressources (DEC-014) doivent aussi être respectées par le parcours, selon leur statut dans le registre.
 
-Les options suivantes sont soumises à arbitrage ; aucune n'est retenue dans ce document.
+## 6. Parcours retenu pour la première tranche
 
-### Option A — Objectifs de population en premier
+Le premier écran suit le parcours population (option A) :
 
-L'utilisateur définit le nombre de maisons par palier. Les besoins associés sont calculés à partir du catalogue de population, puis le bilan est présenté selon les bâtiments et recettes affectés.
+1. L'utilisateur donne un nom à l'île qu'il planifie.
+2. L'interface présente les paliers de population présents dans la projection validée du catalogue.
+3. L'utilisateur saisit un nombre entier de maisons pour chaque palier ; la valeur initiale est zéro.
+4. Le cas d'usage `simulateCatalogProduction` reçoit le nom de l'île et la répartition des maisons par palier. Les bâtiments construits et les affectations de recettes ne sont pas saisis dans cette première tranche.
+5. L'interface restitue la population totale et les besoins de consommation renvoyés par le moteur, exprimés dans l'unité interne par minute.
+6. Les erreurs de saisie ou de calcul sont présentées sans interrompre l'application.
 
-- Avantage : correspond au modèle d'entrée `IslandInput.houses` déjà exposé par le moteur.
-- Limites : suppose que les besoins par palier et les taux de consommation soient définis et que le catalogue soit suffisamment alimenté ; ne couvre pas une demande arbitraire de biens.
+L'interface ne calcule pas elle-même les taux de consommation, les besoins ou les capacités de production. Elle utilise les valeurs des paliers de population validés et le résultat du cas d'usage.
 
-### Option B — Besoins en biens en premier
+### Limites du premier parcours
 
-L'utilisateur saisit directement des quantités ou débits à produire.
-
-- Avantage : permet de planifier une chaîne de production sans devoir définir une population.
-- Limites : nécessite un contrat d'entrée et un cas d'usage qui ne sont pas présents dans le modèle actuel.
-
-### Option C — Les deux modes
-
-L'utilisateur peut démarrer soit par la population, soit par une liste de besoins en biens.
-
-- Avantage : couvre les deux usages.
-- Limites : augmente le périmètre initial et nécessite de définir deux parcours, leurs validations et la convergence vers un modèle de scénario cohérent.
+- Aucun besoin en bien n'est saisi directement.
+- Aucun choix individuel de besoin optionnel ou de catégorie n'est proposé tant que DEC-003 n'est pas arbitrée et représentée dans le modèle.
+- Aucun stock initial ni bâtiment existant n'est saisi tant que DEC-013 n'est pas arbitrée.
+- Aucun dimensionnement automatique des bâtiments n'est affiché : le contrat actuel ne fournit pas ce résultat.
+- Aucun transfert ou approvisionnement inter-îles n'est simulé.
+- Les paliers doivent être présents dans `coreCatalog.tiers`, donc être exploitables selon les règles de validation du catalogue. Les niveaux non vérifiés ou incomplets ne sont pas proposés à la saisie.
 
 ## 7. Proposition de séquencement du lot 5
 
@@ -134,8 +140,8 @@ L'utilisateur peut démarrer soit par la population, soit par une liste de besoi
 - Aucune donnée synthétique n'est confondue avec le catalogue du jeu.
 - Aucune règle non validée n'est implémentée par défaut.
 
-## 9. Arbitrage attendu
+## 9. Décision actée et suite
 
-Pour choisir le premier parcours à implémenter, le propriétaire du projet doit retenir l'une des options de la section 6 : **A — population**, **B — besoins en biens**, ou **C — les deux modes**.
+Le propriétaire du projet a retenu **A — population** le 31 octobre 2026. DEC-001 et DEC-002 sont consignées comme validées dans le registre de gouvernance.
 
-Cette décision déterminera la prochaine tranche de code du lot 5.
+La première tranche peut donc implémenter la saisie des maisons par palier et la restitution de la population totale et des besoins calculés. Les données réelles du catalogue restent un prérequis à l'exécution d'une simulation Anno 117 ; en leur absence, l'interface doit afficher un état vide explicite plutôt que des données fictives.
