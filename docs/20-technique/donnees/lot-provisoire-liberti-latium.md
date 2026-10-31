@@ -20,9 +20,11 @@ Le catalogue commence à contenir des données même lorsque leur précision n'e
 | Oat Farm | bâtiment Latium | `to-observe` | Bâtiment amont indiqué par les calculateurs communautaires ; à confirmer |
 | Porridge Stand | bâtiment Latium | `to-observe` | Bâtiment de production du porridge indiqué par les calculateurs communautaires ; à confirmer |
 
-Les effets +1 Population pour les sardines et +2 Population pour le porridge sont des **attributs de besoin par résidence**, pas des valeurs de consommation. Le schéma actuel de `PopulationTier` ne modélise pas encore les attributs associés aux besoins ; ils restent documentés ici en attendant l'évolution du modèle.
+Les effets +1 Population pour les sardines et +2 Population pour le porridge sont des **attributs de besoin par résidence**, pas des valeurs de consommation. Le modèle modulaire `PopulationTier` distingue désormais les besoins (`needs`) des taux de consommation historiques par habitant. Chaque besoin peut référencer un bien/service, une catégorie, un taux par résidence lorsqu'il est mesuré, des effets (population, revenu) et un modificateur multiplicatif facultatif. Le tableau `needs` de Liberti reste vide dans ce lot : les effets mentionnés ici ne sont pas encore injectés comme données tant qu'ils n'ont pas été observés et associés à une preuve interne.
 
 ## Consommation : décision de ne pas inventer de conversion
+
+Le schéma modulaire sépare maintenant deux niveaux : `consumptionPerResident` (compatibilité avec le moteur actuel) et `needs[].consumptionPerHousePerMinute` (mesure par résidence, propre à un besoin). Aucun convertisseur automatique n'est appliqué entre ces unités. Le champ `consumptionModifier` permet de conserver un facteur multiplicatif documenté lorsqu'il sera observé ; il ne modifie pas encore le calcul du moteur `core`.
 
 Le calculateur communautaire `anno-mods/anno-117-calculator` distingue :
 - un `needConsumptionRate` attaché à chaque besoin de résidence ;
