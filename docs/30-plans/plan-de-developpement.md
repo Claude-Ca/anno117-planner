@@ -1,6 +1,6 @@
 # Anno 117 Planner — Plan de développement par lots
 
-**Version :** 1.7
+**Version :** 1.8
 **Date :** 31 octobre 2026
 **Statut :** Référence de reconstruction et de réalisation — audit des données en cours
 **Branche d’intégration :** `develop`
@@ -675,7 +675,7 @@ La PR #9 a été validée localement avec 54 tests réussis, le typecheck des ci
 
 Au dernier contrôle, `develop` pointe sur le commit `2b1438952ca00a2efbd3b32a0cf3f0bc003cd198`. `main` pointe encore sur le commit initial `7450549f5e84f6df4cf8fac88bf98f7198c5c691` ; aucune release stable ni aucun tag Git n'ont été publiés. Le lot 4 reste ouvert pour la constitution et la validation des données réelles du jeu. Le lot 5 n'est pas encore commencé.
 
-La branche `feature/configuration-rules`, créée depuis `develop`, porte le plan de gestion de configuration, le Ruleset importable et l'extension du workflow CI à `main` et `develop`. La PR #10 est ouverte vers `develop` et sa CI est verte sur le commit courant contrôlé. Le Ruleset `Protect main and develop` a été importé et activé par le propriétaire du dépôt. Sa configuration effective confirme les règles de PR obligatoire, de check CI, de protection contre la suppression et de force push, sans acteur de contournement. La restriction native des métadonnées de commit (expression régulière sur les messages) est réservée par GitHub aux offres Enterprise et n'est pas disponible sur l'offre actuelle du dépôt. Le JSON du Ruleset ne contient donc plus cette règle. La convention Conventional Commits reste définie dans le plan de gestion de configuration ; un contrôle CI du titre de PR pourra être ajouté pour la faire respecter dans les messages Squash.
+La branche `feature/configuration-rules`, créée depuis `develop`, porte le plan de gestion de configuration, le Ruleset importable et l'extension du workflow CI à `main` et `develop`. La PR #10 est ouverte vers `develop`. Le Ruleset `Protect main and develop` a été importé et activé par le propriétaire du dépôt ; sa configuration effective confirme les règles de PR obligatoire, de check CI, de protection contre la suppression et de force push, sans acteur de contournement. La restriction native des métadonnées de commit n'étant pas disponible sur l'offre GitHub actuelle, le workflow CI vérifie désormais le titre des Pull Requests selon Conventional Commits. Le contrôle ne parcourt pas les commits individuels de la branche source : les anciens messages qui ne respectent pas le format ne sont pas bloquants. Le titre contrôlé est repris comme message du commit de Squash.
 
 La politique de versionnement retient `0.1.0` comme version de développement courante. La première release stable visée est `1.0.0`, éventuellement précédée de candidates `1.0.0-rc.N`. Le tag stable `v1.0.0` sera créé uniquement après réussite du build, des tests, de l'installation et de la validation fonctionnelle sur le commit exact de `main`. Aucun tag stable n'est posé au simple merge de `develop` vers `main`.
 
