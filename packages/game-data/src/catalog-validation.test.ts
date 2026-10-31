@@ -44,7 +44,8 @@ describe("validateModularCatalog", () => {
     c.modules.resources[0]!.status = "candidate";
     c.modules.resources[0]!.evidenceIds = [];
     expect(validateModularCatalog(c)).toEqual([]);
-  });\n  it("allows to-observe candidates without evidence", () => {
+  });
+  it("allows to-observe candidates without evidence", () => {
     const c = fixture();
     c.modules.resources[0]!.status = "to-observe";
     c.modules.resources[0]!.evidenceIds = [];
