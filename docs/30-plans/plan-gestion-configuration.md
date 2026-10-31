@@ -1,6 +1,6 @@
 # Plan de gestion de configuration — Anno 117 Planner
 
-**Version :** 1.2  
+**Version :** 1.3  
 **Date :** 31 octobre 2026  
 **Statut :** proposition de référence — à valider par PR et à appliquer dans les paramètres GitHub  
 **Dépôt :** `Claude-Ca/anno117-planner`
@@ -110,9 +110,11 @@ Il impose :
 
 Le Ruleset effectivement enregistré dans GitHub a été relu après son import le 31 octobre 2026. Il contient les règles `deletion`, `non_fast_forward`, `pull_request` et `required_status_checks`.
 
-**Limitation d'offre :** selon la documentation GitHub, les restrictions de métadonnées des commits (dont l'application d'une expression régulière aux messages de commit) font partie des règles additionnelles réservées à GitHub Enterprise. Elles ne sont donc pas disponibles dans l'interface du dépôt sur l'offre actuelle. Le JSON importable ne contient volontairement pas cette règle afin de rester fidèle à la configuration prise en charge et effectivement appliquée.
+**Limitation d'offre :** les restrictions natives de métadonnées des commits ne sont pas disponibles dans l'interface du dépôt sur l'offre GitHub actuelle. Le JSON importable ne contient donc pas de règle `commit_message_pattern`.
 
-La nomenclature Conventional Commits du chapitre 6 reste la convention documentaire du projet. Une automatisation par CI pourra contrôler le titre de Pull Request, qui sert de titre au commit de Squash dans le flux standard. Ce contrôle de titre ne doit pas être présenté comme une restriction native des messages de tous les commits individuels.
+Le workflow CI applique à la place un contrôle du titre de Pull Request, uniquement pour les événements `pull_request`. Le titre doit respecter la nomenclature Conventional Commits du chapitre 6. En cas de Squash Merge, ce titre devient le message du commit d'intégration dans `develop` ou `main`.
+
+Ce contrôle **ne parcourt pas les commits individuels de la branche source**. Les commits historiques ou les commits de travail déjà présents qui n'ont pas le bon format ne sont donc pas bloquants. Les messages de commits individuels conformes restent recommandés pour la lisibilité de l'historique, mais seule la convention du titre de PR est vérifiée automatiquement sur l'offre actuelle.
 
 Aucune approbation humaine obligatoire n'est imposée à ce stade : le dépôt a un contributeur principal et la revue du diff reste réalisée dans le processus de PR. Cette règle pourra être renforcée si d'autres contributeurs réguliers rejoignent le projet.
 
@@ -128,7 +130,9 @@ Le job requis porte exactement le nom :
 Tests, typecheck and build
 ```
 
-Il exécute :
+Sur les événements `pull_request`, le job commence par vérifier le titre de la PR avec le motif Conventional Commits décrit au chapitre 6. Le contrôle utilise uniquement `github.event.pull_request.title` ; il ne lit ni ne réécrit l'historique des commits de la branche source. Sur les événements `push`, cette étape est ignorée.
+
+Il exécute ensuite :
 
 1. `pnpm install --frozen-lockfile`
 2. `pnpm test`
@@ -266,7 +270,7 @@ feat(product)!: replace the scenario input contract
 BREAKING CHANGE: existing scenario files require migration to the new input format.
 ```
 
-Les titres des Pull Requests et les messages de Squash Merge doivent respecter la même convention afin que l'historique de `develop` et `main` reste homogène.
+Le titre de chaque Pull Request est contrôlé par le workflow CI. Il doit respecter cette convention. Le Squash Merge reprend le titre de la PR comme message de commit d'intégration. Les messages individuels antérieurs de la branche source ne sont pas évalués par ce contrôle.
 
 ## 7. Critères avant fusion
 
