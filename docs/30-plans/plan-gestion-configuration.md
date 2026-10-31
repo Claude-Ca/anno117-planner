@@ -1,6 +1,6 @@
 # Plan de gestion de configuration — Anno 117 Planner
 
-**Version :** 1.1  
+**Version :** 1.2  
 **Date :** 31 octobre 2026  
 **Statut :** proposition de référence — à valider par PR et à appliquer dans les paramètres GitHub  
 **Dépôt :** `Claude-Ca/anno117-planner`
@@ -108,9 +108,11 @@ Il impose :
 - la fusion Squash comme seule méthode autorisée ;
 - aucun acteur de contournement déclaré dans le Ruleset.
 
-Le Ruleset effectivement enregistré dans GitHub a été relu après son import le 31 octobre 2026. Il contient les règles `deletion`, `non_fast_forward`, `pull_request` et `required_status_checks`. La règle `commit_message_pattern` présente dans le JSON fourni n'apparaît pas dans la configuration active retournée par GitHub : **la convention de commit du chapitre 6 est donc documentée, mais elle n'est pas encore bloquante côté GitHub**.
+Le Ruleset effectivement enregistré dans GitHub a été relu après son import le 31 octobre 2026. Il contient les règles `deletion`, `non_fast_forward`, `pull_request` et `required_status_checks`.
 
-Pour activer cette dernière contrainte, ouvrir le Ruleset dans **Settings → Rules → Rulesets → Protect main and develop**, ajouter une restriction de métadonnées de commit, choisir `Restrict commit metadata`, puis `Must match a given regex pattern` et renseigner le motif Conventional Commits du fichier JSON. Enregistrer, puis relire la configuration effective pour confirmer que `commit_message_pattern` apparaît bien dans les règles actives.
+**Limitation d'offre :** selon la documentation GitHub, les restrictions de métadonnées des commits (dont l'application d'une expression régulière aux messages de commit) font partie des règles additionnelles réservées à GitHub Enterprise. Elles ne sont donc pas disponibles dans l'interface du dépôt sur l'offre actuelle. Le JSON importable ne contient volontairement pas cette règle afin de rester fidèle à la configuration prise en charge et effectivement appliquée.
+
+La nomenclature Conventional Commits du chapitre 6 reste la convention documentaire du projet. Une automatisation par CI pourra contrôler le titre de Pull Request, qui sert de titre au commit de Squash dans le flux standard. Ce contrôle de titre ne doit pas être présenté comme une restriction native des messages de tous les commits individuels.
 
 Aucune approbation humaine obligatoire n'est imposée à ce stade : le dépôt a un contributeur principal et la revue du diff reste réalisée dans le processus de PR. Cette règle pourra être renforcée si d'autres contributeurs réguliers rejoignent le projet.
 
@@ -295,14 +297,14 @@ Pour une PR `fix/*` vers `main`, la PR de merge-back vers `develop` doit être o
 - le workflow CI cible les PR et les pushes sur `main` et `develop` ;
 - le Ruleset `Protect main and develop` a été importé et activé manuellement par le propriétaire du dépôt le 31 octobre 2026 ;
 - la lecture de sa configuration effective confirme les protections PR, CI, suppression et force push sur `main` et `develop` ;
-- la règle `commit_message_pattern` n'a pas été conservée lors de l'import et reste à ajouter manuellement dans les restrictions de métadonnées ;
+- la restriction native des métadonnées de commit n'est pas disponible sur l'offre GitHub actuelle ; le Ruleset JSON a été nettoyé pour ne contenir que les règles prises en charge ;
 - la PR #10 porte le plan de gestion de configuration et reste ouverte pour intégrer ces règles documentaires ;
 - la CI de la PR #10 a été observée en réussite sur le commit `9afc4b01370d52d503db4ee3a745eb71c43c0dce`.
 
 Actions restantes :
 
 1. Vérifier que le Ruleset importé cible bien uniquement `main` et `develop`, et qu'il reste en état **Active**.
-2. Ajouter manuellement la restriction `commit_message_pattern`, puis vérifier qu'elle apparaît dans la configuration effective.
+2. Décider si un contrôle CI du titre des PR doit être ajouté pour faire respecter la convention Conventional Commits dans les commits Squash.
 3. Vérifier que le check CI obligatoire bloque effectivement une PR vers chacune des branches permanentes.
 4. Conserver la version de développement `0.1.0` jusqu'à la préparation d'une release candidate.
 5. Pour la première release, préparer une candidate `1.0.0-rc.N`, la construire et la valider sur le contenu de `main`.
