@@ -120,6 +120,22 @@ function validateCatalog(catalog: Catalog): void {
     tier.consumptionPerResident.forEach((flow, i) =>
       validateFlow(flow, `tier « ${tier.id} ».consumptionPerResident[${i}]`),
     );
+    const needIds = new Set<string>();
+    for (const need of tier.needs ?? []) {
+      assertNonEmptyString(need.id, `need.id pour « ${tier.id} »`);
+      if (needIds.has(need.id)) throw new Error(`Besoin dupliqué pour « ${tier.id} » : « ${need.id} »`);
+      needIds.add(need.id);
+      assertNonEmptyString(need.goodId, `need.goodId pour « ${need.id} »`);
+      if (need.consumptionPerHousePerMinute !== undefined) {
+        assertPositiveNumber(need.consumptionPerHousePerMinute, `Consommation par maison pour « ${need.id} »`);
+      }
+      if (need.consumptionModifier !== undefined) {
+        assertPositiveNumber(need.consumptionModifier, `Modificateur de consommation pour « ${need.id} »`);
+      }
+      for (const value of [need.effects?.population, need.effects?.income]) {
+        if (value !== undefined) assertFiniteNumber(value, `Effet du besoin « ${need.id} »`);
+      }
+    }
   }
 }
 
@@ -141,6 +157,7 @@ function validateIsland(catalog: Catalog, island: IslandInput): void {
   for (const [field, value] of [
     ["productivity", island.productivity],
     ["recipeAssignments", island.recipeAssignments],
+    ["fulfilledNeeds", island.fulfilledNeeds],
   ] as const) {
     if (value !== undefined && (value === null || typeof value !== "object" || Array.isArray(value))) {
       throw new TypeError(`${field} doit être un objet valide`);
@@ -152,6 +169,20 @@ function validateIsland(catalog: Catalog, island: IslandInput): void {
     if (!tierIds.has(id)) throw new Error(`Palier de population inconnu : « ${id} »`);
     assertNonNegativeNumber(count, `Nombre de maisons pour « ${id} »`);
     if (!Number.isSafeInteger(count)) throw new RangeError(`Le nombre de maisons pour « ${id} » doit être un entier`);
+  }
+
+  for (const [tierId, needIds] of Object.entries(island.fulfilledNeeds ?? {})) {
+    const tier = catalog.tiers.find((item) => item.id === tierId);
+    if (!tier) throw new Error(`Palier de population inconnu pour les besoins satisfaits : « ${tierId} »`);
+    if (!Array.isArray(needIds)) throw new TypeError(`Les besoins satisfaits de « ${tierId} » doivent être un tableau`);
+    const knownNeeds = new Set((tier.needs ?? []).map((need) => need.id));
+    const seen = new Set<string>();
+    for (const needId of needIds) {
+      assertNonEmptyString(needId, `Besoin satisfait de « ${tierId} »`);
+      if (!knownNeeds.has(needId)) throw new Error(`Besoin inconnu pour « ${tierId} » : « ${needId} »`);
+      if (seen.has(needId)) throw new Error(`Besoin satisfait dupliqué pour « ${tierId} » : « ${needId} »`);
+      seen.add(needId);
+    }
   }
 
   const buildingIds = new Set(catalog.buildings.map((building) => building.id));
@@ -294,17 +325,36 @@ export function computeIsland(catalog: Catalog, island: IslandInput): IslandRepo
   validateIsland(catalog, island);
 
   let totalPopulation = 0;
+  let totalIncomeBonus = 0;
   const demand = new Map<GoodId, number>();
-
-  for (const tier of catalog.tiers) {
-    const residents = (island.houses[tier.id] ?? 0) * tier.residentsPerHouse;
-    totalPopulation += residents;
-    if (!Number.isFinite(totalPopulation)) {
-      throw new RangeError("La population totale calculée dépasse les limites numériques autorisées");
+  const populationByTier = catalog.tiers.map((tier) => {
+    const houses = island.houses[tier.id] ?? 0;
+    const basePopulation = houses * tier.residentsPerHouse;
+    const fulfilled = new Set(island.fulfilledNeeds?.[tier.id] ?? []);
+    let bonusPopulation = 0;
+    let incomeBonus = 0;
+    for (const need of tier.needs ?? []) {
+      if (!fulfilled.has(need.id)) continue;
+      bonusPopulation += houses * (need.effects?.population ?? 0);
+      incomeBonus += houses * (need.effects?.income ?? 0);
+      if (need.consumptionPerHousePerMinute !== undefined) {
+        addTo(demand, need.goodId, houses * need.consumptionPerHousePerMinute * (need.consumptionModifier ?? 1));
+      }
     }
+    const residents = basePopulation + bonusPopulation;
+    if (!Number.isFinite(residents) || !Number.isFinite(incomeBonus)) {
+      throw new RangeError(`Le calcul de population ou de revenu pour « ${tier.id} » dépasse les limites numériques`);
+    }
+    totalPopulation += residents;
+    totalIncomeBonus += incomeBonus;
     for (const flow of tier.consumptionPerResident) {
       addTo(demand, flow.good, residents * flow.perMinute);
     }
+    return { tierId: tier.id, houses, basePopulation, bonusPopulation, totalPopulation: residents,
+      fulfilledNeeds: [...fulfilled], incomeBonus };
+  });
+  if (!Number.isFinite(totalPopulation) || !Number.isFinite(totalIncomeBonus)) {
+    throw new RangeError("Le calcul de population ou de revenu dépasse les limites numériques autorisées");
   }
 
   const assignments = island.recipeAssignments ?? {};
@@ -392,6 +442,8 @@ export function computeIsland(catalog: Catalog, island: IslandInput): IslandRepo
 
   return {
     totalPopulation,
+    totalIncomeBonus,
+    populationByTier,
     recipes: recipeReports,
     goods,
     unresolvedAllocations: [...new Set(unresolvedAllocations)],
