@@ -1,6 +1,6 @@
 # Anno 117 Planner — Plan de développement par lots
 
-**Version :** 1.8
+**Version :** 2.0
 **Date :** 31 octobre 2026
 **Statut :** Référence de reconstruction et de réalisation — audit des données en cours
 **Branche d’intégration :** `develop`
@@ -16,7 +16,7 @@ Le développement d’Anno 117 Planner est organisé en étapes documentaires, l
 
 Le projet vise à fournir un outil de planification de production pour Anno 117: Pax Romana, avec une architecture indépendante du moteur de calcul, un catalogue de données structuré et une application de bureau.
 
-Le périmètre fonctionnel de référence est défini dans `docs/expression_de_besoin.md` et précisé par `docs/catalog-scope.md`. Le catalogue doit être documenté, audité et validé avant que son intégration complète soit engagée. Les documents de référence doivent permettre à une équipe de comprendre le produit attendu, ses règles métier, ses données, ses limites et les critères d'acceptation sans dépendre de l'historique des conversations ou de l'état actuel du code.
+Le périmètre fonctionnel de référence est défini dans `docs/10-fonctionnel/expression-de-besoin.md` et précisé par `docs/20-technique/donnees/perimetre-catalogue.md`. Le catalogue doit être documenté, audité et validé avant que son intégration complète soit engagée. Les documents de référence doivent permettre à une équipe de comprendre le produit attendu, ses règles métier, ses données, ses limites et les critères d'acceptation sans dépendre de l'historique des conversations ou de l'état actuel du code.
 
 Le développement suit un cycle Git commun :
 
@@ -167,12 +167,12 @@ La mise à jour documentaire initiale a été commitée sur `feature/update-docu
 
 Les documents de référence du catalogue sont :
 
-- `docs/catalog-scope.md` ;
-- `docs/data-catalog-audit.md` ;
-- `docs/data-sources.md` ;
-- `docs/data-licensing.md`.
+- `docs/20-technique/donnees/perimetre-catalogue.md` ;
+- `docs/20-technique/donnees/audit-catalogue-donnees.md` ;
+- `docs/20-technique/donnees/registre-sources-donnees.md` ;
+- `docs/20-technique/donnees/licences-et-reutilisation.md`.
 
-Le document complémentaire `docs/anno117-planner-audit-catalogue.md` synthétise le cadrage de l'audit. Le plan de développement est `docs/plan_de_developpement.md`. Les documents historiques conservés sont `docs/expression_de_besoin.md`, `docs/guide_de_demarrage.md` et `docs/installation_environnement.md`.
+Le document complémentaire `docs/20-technique/donnees/audit-catalogue-preparatoire.md` synthétise le cadrage de l'audit. Le plan de développement est `docs/30-plans/plan-de-developpement.md`. Les documents historiques conservés sont `docs/10-fonctionnel/expression-de-besoin.md`, `docs/40-manuel/guide-demarrage-developpeur.md` et `docs/40-manuel/installation-environnement-developpement.md`.
 
 Les corrections documentaires ultérieures doivent être enregistrées dans de nouveaux commits. L'état réel de la branche et son intégration dans `develop` doivent être vérifiés dans GitHub ; ne pas déduire qu'une étape est intégrée du seul fait qu'elle est commitée ou poussée.
 
@@ -189,7 +189,16 @@ Les corrections documentaires ultérieures doivent être enregistrées dans de n
 - Le diff confirme que seuls les changements documentaires prévus sont présents.
 - Les modifications sont relues, commités et intégrées dans `develop` après validation.
 
-### 4.6. Documents ajoutés après la première revue\n\nLa revue de complétude documentaire a identifié des décisions métier à prendre avant de figer les contrats techniques. Deux documents complémentaires sont maintenant présents sur cette branche :\n\n- `docs/contrat-moteur-calcul.md` décrit le contrat conceptuel du moteur, les responsabilités, les cas de référence et les sujets encore ouverts ;\n- `docs/registre-decisions-fonctionnelles.md` centralise les décisions à arbitrer et leurs dépendances.\n\nCes documents sont des bases de travail, pas des spécifications fonctionnelles approuvées. Le lot 1 ne doit pas être considéré comme complètement spécifié tant que les décisions nécessaires et les résultats attendus des cas de référence ne sont pas validés.\n\n### 4.7. Condition de passage aux travaux sur le catalogue
+### 4.6. Documents ajoutés après la première revue
+
+La revue de complétude documentaire a identifié des décisions métier à prendre avant de figer les contrats techniques. Deux documents complémentaires sont maintenant présents sur cette branche :
+
+- `docs/20-technique/contrats/contrat-moteur-calcul.md` décrit le contrat conceptuel du moteur, les responsabilités, les cas de référence et les sujets encore ouverts ;
+- `docs/00-gouvernance/registre-decisions.md` centralise les décisions à arbitrer et leurs dépendances.
+
+Ces documents sont des bases de travail, pas des spécifications fonctionnelles approuvées. Le lot 1 ne doit pas être considéré comme complètement spécifié tant que les décisions nécessaires et les résultats attendus des cas de référence ne sont pas validés.
+
+### 4.7. Condition de passage aux travaux sur le catalogue
 
 La fin de cette étape autorise la poursuite du travail d'audit et de préparation du catalogue. Elle ne vaut pas autorisation de redistribuer les données.
 
@@ -205,13 +214,13 @@ Cette procédure s'applique si le dépôt est vide, si l'implémentation actuell
 
 Lire dans cet ordre :
 
-1. `docs/expression_de_besoin.md` : objectifs, utilisateurs, fonctionnalités et limites du produit ;
-2. `docs/catalog-scope.md` : périmètre des données, régions, catégories et exclusions ;
-3. `docs/data-sources.md` : provenance, versions et statut des sources ;
-4. `docs/data-catalog-audit.md` et `docs/anno117-planner-audit-catalogue.md` : constats, anomalies, limites et travaux d'audit ;
-5. `docs/data-licensing.md` : conditions de réutilisation et décisions ouvertes ;
+1. `docs/10-fonctionnel/expression-de-besoin.md` : objectifs, utilisateurs, fonctionnalités et limites du produit ;
+2. `docs/20-technique/donnees/perimetre-catalogue.md` : périmètre des données, régions, catégories et exclusions ;
+3. `docs/20-technique/donnees/registre-sources-donnees.md` : provenance, versions et statut des sources ;
+4. `docs/20-technique/donnees/audit-catalogue-donnees.md` et `docs/20-technique/donnees/audit-catalogue-preparatoire.md` : constats, anomalies, limites et travaux d'audit ;
+5. `docs/20-technique/donnees/licences-et-reutilisation.md` : conditions de réutilisation et décisions ouvertes ;
 6. le présent plan : architecture cible, séquence des lots et critères de sortie ;
-7. `docs/installation_environnement.md` et `docs/guide_de_demarrage.md` : environnement et procédures de travail, à actualiser si les outils ont évolué.
+7. `docs/40-manuel/installation-environnement-developpement.md` et `docs/40-manuel/guide-demarrage-developpeur.md` : environnement et procédures de travail, à actualiser si les outils ont évolué.
 
 En cas de contradiction, ne pas choisir silencieusement une version. Consigner l'écart, déterminer quel document porte la décision concernée, puis mettre à jour les documents liés avant de coder.
 
@@ -601,12 +610,12 @@ Chaque étape doit mettre à jour la documentation affectée par ses changements
 
 Les documents de référence comprennent notamment :
 
-- `docs/expression_de_besoin.md` : référence fonctionnelle ;
-- `docs/plan_de_developpement.md` : séquencement des lots ;
-- `docs/catalog-scope.md` : périmètre du catalogue ;
-- `docs/data-catalog-audit.md` : inventaire, couverture et contrôles ;
-- `docs/data-sources.md` : sources et provenance ;
-- `docs/data-licensing.md` : licences et conditions de réutilisation ;
+- `docs/10-fonctionnel/expression-de-besoin.md` : référence fonctionnelle ;
+- `docs/30-plans/plan-de-developpement.md` : séquencement des lots ;
+- `docs/20-technique/donnees/perimetre-catalogue.md` : périmètre du catalogue ;
+- `docs/20-technique/donnees/audit-catalogue-donnees.md` : inventaire, couverture et contrôles ;
+- `docs/20-technique/donnees/registre-sources-donnees.md` : sources et provenance ;
+- `docs/20-technique/donnees/licences-et-reutilisation.md` : licences et conditions de réutilisation ;
 - le README et la documentation de développement ;
 - les documents d’architecture et de décisions techniques, à compléter au fil du projet.
 
@@ -673,17 +682,24 @@ L'état du dépôt a été contrôlé sur GitHub le 31 octobre 2026 :
 
 La PR #9 a été validée localement avec 54 tests réussis, le typecheck des cinq projets et le build Electron. Le workflow GitHub Actions « Tests, typecheck and build » a également réussi.
 
-Au dernier contrôle, `develop` pointe sur le commit `2b1438952ca00a2efbd3b32a0cf3f0bc003cd198`. `main` pointe encore sur le commit initial `7450549f5e84f6df4cf8fac88bf98f7198c5c691` ; aucune release stable ni aucun tag Git n'ont été publiés. Le lot 4 reste ouvert pour la constitution et la validation des données réelles du jeu. Le lot 5 n'est pas encore commencé.
+Au dernier contrôle, le 31 octobre 2026, `develop` pointe sur le commit `ee27d0d7df505dd9337e9798cc452f2ba2aead88`, qui intègre le Squash Merge du PR #10. `main` pointe encore sur le commit initial `7450549f5e84f6df4cf8fac88bf98f7198c5c691` ; aucune release stable ni aucun tag Git n'ont été publiés. Le lot 4 reste ouvert pour la constitution et la validation des données réelles du jeu.
 
-La branche `feature/configuration-rules`, créée depuis `develop`, porte le plan de gestion de configuration, le Ruleset importable et l'extension du workflow CI à `main` et `develop`. La PR #10 est ouverte vers `develop`. Le Ruleset `Protect main and develop` a été importé et activé par le propriétaire du dépôt ; sa configuration effective confirme les règles de PR obligatoire, de check CI, de protection contre la suppression et de force push, sans acteur de contournement. La restriction native des métadonnées de commit n'étant pas disponible sur l'offre GitHub actuelle, le workflow CI vérifie désormais le titre des Pull Requests selon Conventional Commits. Le contrôle ne parcourt pas les commits individuels de la branche source : les anciens messages qui ne respectent pas le format ne sont pas bloquants. Le titre contrôlé est repris comme message du commit de Squash.
+Le PR #10 (`docs(config): formalize GitFlow and release conventions`) est fusionné dans `develop`. Le Ruleset `Protect main and develop` est actif sur les deux branches permanentes. Le workflow CI s'exécute sur les Pull Requests et les pushes vers `main` et `develop`, et vérifie le titre des Pull Requests selon Conventional Commits. Le run GitHub Actions `41172803618` associé au PR #10 est terminé avec succès : validation du titre, installation, tests, typecheck et build desktop. Le contrôle du titre ne parcourt pas les messages de commits individuels de la branche source ; les anciens messages non conformes ne sont pas bloquants. Le titre contrôlé sert de message au Squash Merge.
 
 La politique de versionnement retient `0.1.0` comme version de développement courante. La première release stable visée est `1.0.0`, éventuellement précédée de candidates `1.0.0-rc.N`. Le tag stable `v1.0.0` sera créé uniquement après réussite du build, des tests, de l'installation et de la validation fonctionnelle sur le commit exact de `main`. Aucun tag stable n'est posé au simple merge de `develop` vers `main`.
 
 ### Prochaine action
 
-Finaliser et intégrer le [Plan de gestion de configuration](plan-gestion-configuration.md). Compléter la restriction de métadonnées des commits dans le Ruleset GitHub et vérifier la configuration effective, puis conserver la CI verte comme condition de fusion vers les branches permanentes.
+Le propriétaire du projet a retenu le parcours **A — objectifs de population** pour le lot 5. La saisie se fait par nombre de maisons pour chaque palier de population ; ces deux décisions sont validées dans DEC-001 et DEC-002 du registre de gouvernance.
 
-Une fois ce socle de gestion de configuration validé et intégré, le lot 5 (première interface de planification) pourra être préparé conformément à ses critères. Les ajustements graphiques et ergonomiques de l'IHM seront traités dans un cycle distinct.
+La première tranche du lot 5 doit permettre de :
+- saisir un nom d'île ;
+- saisir le nombre de maisons pour chaque palier disponible dans le catalogue exploitable ;
+- appeler `simulateCatalogProduction` avec ces données ;
+- afficher la population totale et les besoins de consommation renvoyés par le moteur ;
+- afficher explicitement l'absence de données lorsqu'aucun palier validé n'est disponible.
+
+Les besoins en biens directs, la sélection des besoins optionnels, les stocks, les bâtiments existants et le dimensionnement automatique restent hors de cette tranche tant que les décisions ou contrats correspondants ne sont pas validés et disponibles. Le lot 4 reste ouvert : le catalogue embarqué ne contient pas encore de données de production ou de population vérifiées.
 
 ### 10.4. Règle de continuité
 
