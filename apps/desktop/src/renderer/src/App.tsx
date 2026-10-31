@@ -143,7 +143,7 @@ export default function App() {
     [populationTiers, island.houseCounts, selectedNeeds],
   );
   const selectedBuildingIds = [...new Set(populationTiers.flatMap((tier) =>
-    (tier.needs ?? []).filter((need) => selectedNeeds[need.choiceGroupId ?? need.id] === need.id)
+    (tier.needs ?? []).filter((need) => selectedNeeds[tier.id + ":" + (need.choiceGroupId ?? need.id)] === need.id)
       .flatMap((need) => need.buildingIds ?? []),
   ))];
 
@@ -205,8 +205,8 @@ export default function App() {
                 <legend>{tier.name} · {CATEGORY_LABELS[row.category]}</legend>
                 {availableOptions.length === 0 ? <small className="need-hint">Aucune option débloquée pour ce nombre de maisons.</small>
                   : availableOptions.map((option) => <label className="need-option" key={option.id}>
-                    <input type="radio" name={groupKey} checked={selectedNeeds[row.groupId] === option.id}
-                      onChange={() => updateSelectedNeed(row.groupId, option.id)} />
+                    <input type="radio" name={groupKey} checked={selectedNeeds[groupKey] === option.id}
+                      onChange={() => updateSelectedNeed(groupKey, option.id)} />
                     <span><strong>{resourceNames.get(option.goodId) ?? option.goodId}</strong>
                       <small>{option.buildingIds?.map((id) => buildingNames.get(id) ?? id).join(" → ") ?? "Chaîne de fourniture à préciser"}</small></span>
                   </label>)}
