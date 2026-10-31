@@ -43,15 +43,6 @@
         ],
         "strict_required_status_checks_policy": true
       }
-    },
-    {
-      "type": "commit_message_pattern",
-      "parameters": {
-        "name": "Conventional Commits",
-        "negate": false,
-        "pattern": "^(feat|fix|docs|refactor|test|build|ci|chore|perf|style|revert)(\\([a-z0-9][a-z0-9._/-]*\\))?(!)?: .+",
-        "operator": "regex"
-      }
     }
   ],
   "bypass_actors": []
