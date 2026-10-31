@@ -6,7 +6,7 @@ import type {
 } from "./catalog-types";
 
 const STATUSES: readonly VerificationStatus[] = [
-  "to-observe", "observed", "verified", "derived", "disputed", "excluded",
+  "candidate", "to-observe", "observed", "verified", "derived", "disputed", "excluded",
 ];
 const MODULE_NAMES = [
   "resources", "buildings", "production", "population", "regions",
@@ -85,7 +85,7 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
   entities.forEach(({ x, p }) => {
     if (!x || typeof x.name !== "string" || !x.name.trim()) add("NAME_REQUIRED", `${p}.name`, "Libellé obligatoire.");
     if (!STATUSES.includes(x.status)) add("STATUS_INVALID", `${p}.status`, "Statut de vérification inconnu.");
-    if (x.status !== "to-observe" && x.status !== "excluded") checkEvidence(x.evidenceIds, `${p}.evidenceIds`);
+    if (x.status !== "candidate" && x.status !== "to-observe" && x.status !== "excluded") checkEvidence(x.evidenceIds, `${p}.evidenceIds`);
   });
 
   const resourceIds = ids.get("resources")!;
