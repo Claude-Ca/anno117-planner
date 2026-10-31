@@ -561,4 +561,61 @@ it("ignore une recette inactive même si sa productivité provoque un dépasseme
   ).not.toThrow();
 });
 
+  it("applique les bonus et la consommation des besoins effectivement satisfaits", () => {
+    const needsCatalog: Catalog = {
+      buildings: [], recipes: [],
+      tiers: [{
+        id: "liberti", residentsPerHouse: 10,
+        consumptionPerResident: [{ good: "water", perMinute: 0.1 }],
+        needs: [
+          { id: "sardines", category: "food", goodId: "sardines", consumptionPerHousePerMinute: 0.5, effects: { population: 1, income: 1 } },
+          { id: "porridge", category: "food", goodId: "porridge", consumptionPerHousePerMinute: 0.25, effects: { population: 2 } },
+        ],
+      }],
+    };
+    const report = computeIsland(needsCatalog, {
+      name: "Latium", houses: { liberti: 5 }, built: {},
+      fulfilledNeeds: { liberti: ["sardines", "porridge"] },
+    });
+    expect(report.totalPopulation).toBe(65);
+    expect(report.totalIncomeBonus).toBe(5);
+    expect(report.populationByTier[0]).toMatchObject({
+      tierId: "liberti", houses: 5, basePopulation: 50, bonusPopulation: 15,
+      totalPopulation: 65, incomeBonus: 5,
+    });
+    expect(findGood(report, "water").demandPerMinute).toBeCloseTo(6.5);
+    expect(findGood(report, "sardines").demandPerMinute).toBeCloseTo(2.5);
+    expect(findGood(report, "porridge").demandPerMinute).toBeCloseTo(1.25);
+  });
+
+  it("ne compte aucun bonus ni consommation de besoin non satisfait", () => {
+    const needsCatalog: Catalog = {
+      buildings: [], recipes: [],
+      tiers: [{
+        id: "liberti", residentsPerHouse: 10, consumptionPerResident: [],
+        needs: [{ id: "sardines", category: "food", goodId: "sardines",
+          consumptionPerHousePerMinute: 0.5, effects: { population: 1, income: 1 } }],
+      }],
+    };
+    const report = computeIsland(needsCatalog, {
+      name: "Latium", houses: { liberti: 3 }, built: {},
+    });
+    expect(report.totalPopulation).toBe(30);
+    expect(report.totalIncomeBonus).toBe(0);
+    expect(report.goods).toEqual([]);
+  });
+
+  it("rejette un besoin satisfait inconnu ou dupliqué", () => {
+    for (const fulfilledNeeds of [{ liberti: ["unknown"] }, { liberti: ["sardines", "sardines"] }]) {
+      const needsCatalog: Catalog = {
+        buildings: [], recipes: [],
+        tiers: [{ id: "liberti", residentsPerHouse: 10, consumptionPerResident: [],
+          needs: [{ id: "sardines", category: "food", goodId: "sardines" }] }],
+      };
+      expect(() => computeIsland(needsCatalog, {
+        name: "Latium", houses: { liberti: 1 }, built: {}, fulfilledNeeds,
+      })).toThrow();
+    }
+  });
+
 });
