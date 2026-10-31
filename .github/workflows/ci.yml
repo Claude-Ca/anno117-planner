@@ -4,9 +4,11 @@ name: CI
 on:
   pull_request:
     branches:
+      - main
       - develop
   push:
     branches:
+      - main
       - develop
 
 permissions:
@@ -25,6 +27,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Validate pull request title
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|refactor|test|build|ci|chore|perf|style|revert)(\([a-z0-9][a-z0-9._/-]*\))?(!)?: .+$'
+          if [[ ! "$PR_TITLE" =~ $pattern ]]; then
+            echo "::error title must follow Conventional Commits (for example: docs(config): clarify release process)"
+            exit 1
+          fi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
