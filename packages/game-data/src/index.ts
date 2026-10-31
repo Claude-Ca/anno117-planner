@@ -2,7 +2,7 @@ export { validateModularCatalog } from "./catalog-validation";
 export type {
   Building, CatalogDiagnostic, CatalogEntity, CatalogManifest, CatalogModules,
   CoreCatalogProjection, EvidenceMethod, EvidenceRecord, IslandAvailability,
-  ModularGameCatalog, PopulationTier, ProductionRecipe, Region, Resource,
+  ModularGameCatalog, PopulationNeed, PopulationNeedCategory, PopulationTier, ProductionRecipe, Region, Resource,
   VerificationStatus,
 } from "./catalog-types";
 
