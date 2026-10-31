@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { loadGameData } from "@anno117/data-engine";
 import { simulateCatalogProduction, type ProductionSimulationResult } from "@anno117/product";
-import type { PopulationTier } from "@anno117/game-data";
+import type { PopulationTier, ModularGameCatalog } from "@anno117/game-data";
 import type { DataRepository } from "@anno117/data-engine";
 import manifest from "../../../../../packages/game-data/catalogs/manifest.json";
 import resources from "../../../../../packages/game-data/catalogs/resources.json";
@@ -11,8 +11,8 @@ import population from "../../../../../packages/game-data/catalogs/population.js
 import regions from "../../../../../packages/game-data/catalogs/regions.json";
 import islandAvailability from "../../../../../packages/game-data/catalogs/island-availability.json";
 import evidence from "../../../../../packages/game-data/catalogs/evidence.json";
-import type { ModularGameCatalog } from "@anno117/game-data";
 import { createPopulationIslandInput } from "./population-planning";
+import { CatalogWorkbench } from "./CatalogWorkbench";
 
 interface PopulationTierOption {
   id: string;
@@ -25,22 +25,14 @@ interface CatalogLoadResult {
   error: string | null;
 }
 
+const initialCatalog = {
+  manifest,
+  modules: { resources, buildings, production, population, regions, islandAvailability, evidence },
+} as ModularGameCatalog;
+
 function loadRepository(): CatalogLoadResult {
   try {
-    const catalog = {
-      manifest,
-      modules: {
-        resources,
-        buildings,
-        production,
-        population,
-        regions,
-        islandAvailability,
-        evidence,
-      },
-    } as ModularGameCatalog;
-
-    return { repository: loadGameData(catalog), error: null };
+    return { repository: loadGameData(initialCatalog), error: null };
   } catch (error) {
     return {
       repository: null,
@@ -51,19 +43,12 @@ function loadRepository(): CatalogLoadResult {
 
 function getPopulationTiers(repository: DataRepository): PopulationTierOption[] {
   const usableIds = new Set(repository.coreCatalog.tiers.map((tier) => tier.id));
-
   return repository.modules.population
     .filter((tier: PopulationTier) => usableIds.has(tier.id))
-    .map((tier) => ({
-      id: tier.id,
-      name: tier.name,
-      residentsPerHouse: tier.residentsPerHouse,
-    }));
+    .map((tier) => ({ id: tier.id, name: tier.name, residentsPerHouse: tier.residentsPerHouse }));
 }
 
 function formatFlow(value: number): string {
-  // Preserve the numeric result as returned by the engine; display rounding
-  // remains open in DEC-006.
   return String(value);
 }
 
@@ -74,7 +59,6 @@ export default function App() {
     () => (repository ? getPopulationTiers(repository) : []),
     [repository],
   );
-
   const [islandName, setIslandName] = useState("Nouvelle île");
   const [houseCounts, setHouseCounts] = useState<Record<string, string>>({});
   const [simulation, setSimulation] = useState<ProductionSimulationResult | null>(null);
@@ -84,16 +68,13 @@ export default function App() {
     event.preventDefault();
     setSimulation(null);
     setSimulationError(null);
-
     if (!repository) {
       setSimulationError("Le catalogue n'est pas disponible.");
       return;
     }
-
     try {
       const island = createPopulationIslandInput(islandName, populationTiers, houseCounts);
-      const result = simulateCatalogProduction({ repository, island });
-      setSimulation(result);
+      setSimulation(simulateCatalogProduction({ repository, island }));
     } catch (error) {
       setSimulationError(error instanceof Error ? error.message : String(error));
     }
@@ -159,18 +140,10 @@ export default function App() {
                   <h3>Population de l'île</h3>
                 </div>
               </div>
-
               <form onSubmit={handleCalculate}>
                 <label className="field-label" htmlFor="island-name">Nom de l'île</label>
-                <input
-                  id="island-name"
-                  className="text-input"
-                  value={islandName}
-                  onChange={(event) => setIslandName(event.target.value)}
-                  maxLength={80}
-                  required
-                />
-
+                <input id="island-name" className="text-input" value={islandName}
+                  onChange={(event) => setIslandName(event.target.value)} maxLength={80} required />
                 <div className="section-heading">
                   <div>
                     <h4>Maisons par palier</h4>
@@ -178,7 +151,6 @@ export default function App() {
                   </div>
                   <span className="unit-label">Maisons</span>
                 </div>
-
                 <div className="tier-list">
                   {populationTiers.map((tier) => (
                     <label className="tier-row" key={tier.id}>
@@ -186,26 +158,13 @@ export default function App() {
                         <strong>{tier.name}</strong>
                         <small>{tier.residentsPerHouse} habitants par maison</small>
                       </span>
-                      <input
-                        className="number-input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputMode="numeric"
-                        aria-label={`Nombre de maisons — ${tier.name}`}
-                        value={houseCounts[tier.id] ?? "0"}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          setHouseCounts((current) => ({ ...current, [tier.id]: value }));
-                        }}
-                      />
+                      <input className="number-input" type="number" min="0" step="1" inputMode="numeric"
+                        aria-label={`Nombre de maisons — ${tier.name}`} value={houseCounts[tier.id] ?? "0"}
+                        onChange={(event) => setHouseCounts((current) => ({ ...current, [tier.id]: event.target.value }))} />
                     </label>
                   ))}
                 </div>
-
-                <button className="primary-button" type="submit">
-                  Calculer les besoins
-                </button>
+                <button className="primary-button" type="submit">Calculer les besoins</button>
                 {simulationError && <p className="feedback-error" role="alert">{simulationError}</p>}
               </form>
             </section>
@@ -217,7 +176,6 @@ export default function App() {
                   <h3>Besoins de consommation</h3>
                 </div>
               </div>
-
               {!simulation ? (
                 <div className="results-placeholder">
                   <p>Les résultats de votre île apparaîtront ici après le calcul.</p>
@@ -229,20 +187,12 @@ export default function App() {
                     <strong>{simulation.totalPopulation.toLocaleString("fr-FR")}</strong>
                     <small>habitants</small>
                   </div>
-
                   {simulation.goods.length === 0 ? (
-                    <p className="subtle">
-                      Aucun flux de consommation n'est défini pour les paliers sélectionnés.
-                    </p>
+                    <p className="subtle">Aucun flux de consommation n'est défini pour les paliers sélectionnés.</p>
                   ) : (
                     <div className="table-wrap">
                       <table className="results-table">
-                        <thead>
-                          <tr>
-                            <th>Bien</th>
-                            <th>Besoin par minute</th>
-                          </tr>
-                        </thead>
+                        <thead><tr><th>Bien</th><th>Besoin par minute</th></tr></thead>
                         <tbody>
                           {simulation.goods.map((balance) => (
                             <tr key={balance.good}>
@@ -254,13 +204,10 @@ export default function App() {
                       </table>
                     </div>
                   )}
-
                   {simulation.unresolvedAllocations.length > 0 && (
                     <div className="diagnostic-list">
                       <h4>Diagnostics du moteur</h4>
-                      <ul>
-                        {simulation.unresolvedAllocations.map((message) => <li key={message}>{message}</li>)}
-                      </ul>
+                      <ul>{simulation.unresolvedAllocations.map((message) => <li key={message}>{message}</li>)}</ul>
                     </div>
                   )}
                   <p className="subtle result-note">
@@ -273,6 +220,8 @@ export default function App() {
             </section>
           </div>
         ) : null}
+
+        <CatalogWorkbench initialCatalog={initialCatalog} />
       </div>
     </main>
   );

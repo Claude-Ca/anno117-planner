@@ -39,6 +39,12 @@ describe("validateModularCatalog", () => {
     c.modules.resources[0]!.evidenceIds = [];
     expect(validateModularCatalog(c).some((d) => d.code === "EVIDENCE_REQUIRED")).toBe(true);
   });
+  it("allows candidate records without evidence", () => {
+    const c = fixture();
+    c.modules.resources[0]!.status = "candidate";
+    c.modules.resources[0]!.evidenceIds = [];
+    expect(validateModularCatalog(c)).toEqual([]);
+  });
   it("allows to-observe candidates without evidence", () => {
     const c = fixture();
     c.modules.resources[0]!.status = "to-observe";

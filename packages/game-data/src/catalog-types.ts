@@ -1,6 +1,7 @@
 import type { Flow } from "@anno117/core";
 
 export type VerificationStatus =
+  | "candidate"
   | "to-observe"
   | "observed"
   | "verified"
