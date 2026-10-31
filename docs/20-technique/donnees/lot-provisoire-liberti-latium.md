@@ -63,3 +63,16 @@ Après observation, remplacer les hypothèses, renseigner la version exacte du j
 ## Limites du lot
 
 Ce lot n'est pas encore un catalogue de production complet. Les recettes, quantités par cycle, besoins non alimentaires, services publics, habillement, coûts et consommation par habitant restent à intégrer. L'objectif de ce premier lot est d'amorcer le calculateur et de rendre visibles les hypothèses à tester, sans transformer les inconnues en zéros.
+
+## Exploitation par le moteur de calcul
+
+Le moteur exploite désormais les besoins résidentiels lorsqu'ils sont explicitement marqués comme satisfaits dans les paramètres de l'île.
+
+Pour chaque palier et chaque besoin satisfait :
+- le bonus de population est ajouté par maison au socle du palier ;
+- le bonus de revenu est agrégé par maison (valeur abstraite, sans unité monétaire ni simulation économique) ;
+- la demande associée est calculée à partir du taux mesuré par maison et par minute, multiplié par le nombre de maisons et par le modificateur de consommation éventuel.
+
+Les flux historiques exprimés par habitant sont calculés sur la population totale après bonus. Les besoins non satisfaits ne génèrent ni bonus ni demande. Le moteur ne déduit pas automatiquement qu'un besoin est satisfait à partir d'une production suffisante : la satisfaction est une donnée d'entrée explicite, car l'allocation entre plusieurs besoins et la disponibilité réelle des biens ne sont pas encore simulées.
+
+Les bonus et taux restent facultatifs. Tant qu'ils ne sont pas observés, ils doivent rester absents du catalogue. Le moteur n'utilise pas les enregistrements au statut to-observe par simple présence : la projection vers core doit continuer à filtrer les données non validées.

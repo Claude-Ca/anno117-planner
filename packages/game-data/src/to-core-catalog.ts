@@ -60,6 +60,7 @@ export function toCoreCatalog(gameCatalog: GameCatalog): Catalog {
       id: tier.id,
       residentsPerHouse: tier.residentsPerHouse,
       consumptionPerResident: tier.consumptionPerResident,
+      needs: tier.needs,
     })),
   };
 }

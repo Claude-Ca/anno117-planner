@@ -23,11 +23,23 @@ export interface Recipe {
   outputs: Flow[];
 }
 
-/** Un palier de population et sa consommation par habitant. */
+export type PopulationNeedCategory = "food" | "public-service" | "fashion" | "household";
+
+export interface PopulationNeed {
+  id: string;
+  category: PopulationNeedCategory;
+  goodId: GoodId;
+  consumptionPerHousePerMinute?: number;
+  effects?: { population?: number; income?: number };
+  consumptionModifier?: number;
+}
+
+/** Un palier de population, sa consommation historique et ses besoins résidentiels. */
 export interface PopulationTier {
   id: TierId;
   residentsPerHouse: number;
   consumptionPerResident: Flow[];
+  needs?: PopulationNeed[];
 }
 
 /** Catalogue exploitable par le moteur de calcul. */
@@ -49,6 +61,8 @@ export interface IslandInput {
   productivity?: Record<BuildingId, number>;
   /** Nombre de bâtiments affectés manuellement à chaque recette. */
   recipeAssignments?: Record<RecipeId, number>;
+  /** Besoins effectivement satisfaits, par palier de population. */
+  fulfilledNeeds?: Record<TierId, string[]>;
 }
 
 /** Bilan d'une marchandise dans l'île. */
@@ -72,8 +86,21 @@ export interface RecipeReport {
 }
 
 /** Rapport de calcul d'une île. */
+export interface PopulationTierReport {
+  tierId: TierId;
+  houses: number;
+  basePopulation: number;
+  bonusPopulation: number;
+  totalPopulation: number;
+  fulfilledNeeds: string[];
+  incomeBonus: number;
+}
+
+/** Rapport de calcul d'une île. */
 export interface IslandReport {
   totalPopulation: number;
+  totalIncomeBonus: number;
+  populationByTier: PopulationTierReport[];
   recipes: RecipeReport[];
   goods: GoodBalance[];
   unresolvedAllocations: string[];

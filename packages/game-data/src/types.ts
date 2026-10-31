@@ -1,4 +1,4 @@
-﻿import type { Flow } from "@anno117/core";
+import type { Flow, PopulationNeed } from "@anno117/core";
 
 export interface DataSource {
   id: string;
@@ -33,6 +33,8 @@ export interface GamePopulationTier {
   name: string;
   residentsPerHouse: number;
   consumptionPerResident: Flow[];
+  /** Residence-level needs forwarded to the core calculation model. */
+  needs?: PopulationNeed[];
   sourceId: string;
 }
 
