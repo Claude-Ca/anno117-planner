@@ -46,7 +46,7 @@ export function createPopulationIslandInput(
     }
     houses[tier.id] = count;
     fulfilledNeeds[tier.id] = (tier.needs ?? [])
-      .filter((need) => selectedNeeds[need.choiceGroupId ?? need.id] === need.id)
+      .filter((need) => selectedNeeds[tier.id + ":" + (need.choiceGroupId ?? need.id)] === need.id)
       .map((need) => need.id);
   }
   return { name, houses, built: {}, fulfilledNeeds };
@@ -67,7 +67,7 @@ export function calculateTheoreticalNeeds(
       groups.set(groupId, [...(groups.get(groupId) ?? []), need]);
     }
     return [...groups.entries()].map(([groupId, options]) => {
-      const selectedNeedId = selectedNeeds[groupId] ?? null;
+      const selectedNeedId = selectedNeeds[tier.id + ":" + groupId] ?? null;
       const selected = options.find((option) => option.id === selectedNeedId);
       const unlocked = houses > 0 && options.some((option) =>
         option.unlockAtHouses === undefined || houses >= option.unlockAtHouses);
