@@ -15,7 +15,7 @@ Les fichiers JSON de ce répertoire sont les données versionnées livrées avec
 
 Chaque fichier de domaine contient un tableau d'entités correspondant au module TypeScript. Les identifiants sont stables et les relations entre fichiers utilisent ces identifiants.
 
-Les régions Latium et Albion sont initialisées au statut `to-observe`. Le premier lot ajoute des ressources, bâtiments et le palier Liberti du Latium, également au statut `to-observe`. Il s'agit de données provisoires destinées à être confrontées au jeu, pas de valeurs de référence validées. Voir [le lot provisoire Liberti du Latium](../../../docs/20-technique/donnees/lot-provisoire-liberti-latium.md).
+Les régions Latium et Albion sont initialisées au statut `to-observe`. Le premier lot Liberti ajoute des ressources et bâtiments du Latium au statut `candidate`, avec une description et des références documentaires `sourceRefs`. Ces entrées sont consultables dans le catalogue personnel mais ne sont pas projetées vers le moteur. Voir [le premier inventaire fonctionnel du Latium](../../../docs/20-technique/donnees/premier-inventaire-liberti-latium.md) et [le lot provisoire Liberti](../../../docs/20-technique/donnees/lot-provisoire-liberti-latium.md).
 
 Les statuts `to-observe` et `excluded` peuvent ne pas avoir de preuve. Les statuts `observed`, `verified`, `derived` et `disputed` doivent référencer des preuves internes. Seuls les éléments `verified` et `derived` peuvent alimenter la projection destinée au `core`, sous réserve de références cohérentes.
 
