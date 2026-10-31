@@ -1,6 +1,6 @@
 # Plan de gestion de configuration — Anno 117 Planner
 
-**Version :** 1.0  
+**Version :** 1.1  
 **Date :** 30 octobre 2026  
 **Statut :** proposition de référence — à valider par PR et à appliquer dans les paramètres GitHub  
 **Dépôt :** `Claude-Ca/anno117-planner`
@@ -73,19 +73,25 @@ Le merge-back est obligatoire, même si le correctif semble également présent 
 
 ### 2.3. Release — `develop` vers `main`
 
-Aucune branche `release/*` dédiée n'est imposée dans ce GitFlow simplifié.
+Aucune branche `integration/*` ou `release/*` dédiée n'est créée. Le flux de release utilise uniquement les deux branches permanentes : `develop` pour l'intégration et `main` pour le candidat de release puis la version stable.
 
-Lorsqu'un état de `develop` satisfait les critères de sortie des lots concernés et est jugé publiable :
+Le passage de `develop` vers `main` ne constitue pas à lui seul une publication. Il prépare un candidat qui doit encore passer la validation de release. **Le tag stable n'est posé qu'après la réussite de l'ensemble des contrôles de release.**
 
-1. Mettre `develop` à jour et vérifier son état.
-2. Ouvrir une Pull Request de `develop` vers `main`.
-3. Décrire le périmètre de la release et la version proposée.
-4. Vérifier la réussite du contrôle CI obligatoire et relire le diff.
-5. Fusionner en Squash.
-6. Créer le tag de version sur le commit de `main` issu de la fusion.
-7. Rédiger les notes de version et publier une GitHub Release si une distribution est réalisée.
+Séquence de release :
 
-La branche `main` représente ainsi le dernier état publié, et non l'espace d'intégration des développements en cours.
+1. Vérifier que `develop` est à jour et que les critères de sortie des lots prévus sont satisfaits.
+2. Ouvrir une Pull Request de `develop` vers `main`, avec la version cible, le périmètre et les notes de version.
+3. Obtenir une CI verte et relire le diff, puis fusionner en Squash.
+4. Construire le candidat depuis le commit désormais présent sur `main`.
+5. Exécuter et consigner la checklist de validation : build de production, tests automatisés, installation sur l'environnement cible, démarrage et validation fonctionnelle/recette.
+6. Tant que tous les contrôles ne sont pas concluants, ne pas créer le tag stable et ne pas annoncer la version comme publiée.
+7. Après validation complète, poser le tag stable sur le commit exact de `main` qui a été testé et validé, puis publier les notes de version et la GitHub Release.
+
+Si une validation échoue, aucun tag stable n'est créé. La correction est apportée dans le flux normal de développement, intégrée à `develop), puis une nouvelle PR de release vers `main) est préparée et le cycle de validation est rejoué. Il n'est pas permis de déplacer un tag déjà publié pour corriger une release.
+
+Les Release Candidates peuvent être identifiées par des tags de préversion, par exemple `v1.0.0-rc.1`, `v1.0.0-rc.2`. Ces tags identifient des candidats explicitement non stables ; ils ne remplacent pas le tag stable et ne sont pas créés pour une version qui n'a pas au minimum passé les contrôles de build et de tests. Le tag stable `v1.0.0) n'est posé qu'après la validation complète, installation comprise.
+
+La branche `main) peut donc contenir temporairement un candidat non encore publié. Seuls les tags stables identifient les versions officiellement publiées.
 
 ## 3. Règles de protection GitHub
 
@@ -165,11 +171,38 @@ Principes complémentaires :
 - Une version MINOR ou MAJOR est publiée depuis une PR de release `develop` vers `main`.
 - Le contenu exact associé à un tag est immuable ; une correction ultérieure donne lieu à un nouveau numéro de version.
 
-### 5.3. Version de référence actuelle
+### 5.3. Version de développement et première release stable
 
-La version de référence produit retenue à ce stade est **1.0.0**. Aucun tag Git de release n'a été trouvé lors de la préparation de ce plan ; le premier tag devra être créé lors de la première publication effective.
+La version de développement actuelle reste **`0.1.0`**. Il n'est pas nécessaire de l'incrémenter à chaque lot ou à chaque fusion de fonctionnalité.
 
-Un écart de métadonnées est également présent : les fichiers `package.json` de `apps/desktop` et de `packages/product` indiquent actuellement `0.1.0`. Leur alignement avec la version de release devra être traité explicitement dans la préparation de la première publication, sans modification implicite au cours d'un lot documentaire.
+La première release stable visée est **`1.0.0`**. Ce numéro ne devient la version publiée qu'après validation complète de la release et pose du tag stable `v1.0.0`.
+
+Les métadonnées actuellement examinées de `apps/desktop` et `packages/product` sont en `0.1.0`. Elles peuvent rester à cette valeur pendant le développement. Leur évolution vers la version candidate puis la version stable sera décidée lors de la préparation de la release, sans modification anticipée pendant les lots fonctionnels.
+
+### 5.4. Release Candidates et validation avant tag stable
+
+Une ou plusieurs versions candidates peuvent être produites avant la première release stable.
+
+Leur numérotation respecte la syntaxe de préversion SemVer :
+
+- `1.0.0-rc.1) : première candidate de la release `1.0.0) ;
+- `1.0.0-rc.2) : candidate suivante après correction ;
+- `1.0.0) : version stable, uniquement après validation complète.
+
+Les tags de candidat utilisent le préfixe `v`, par exemple `v1.0.0-rc.1). Ils doivent être déclarés comme préversions dans GitHub Releases lorsqu'une release est publiée pour test. Ils ne doivent jamais être présentés comme la version stable.
+
+La validation de release doit au minimum attester les points suivants :
+
+| Contrôle | Résultat attendu |
+|---|---|
+| Build de production | Build terminé sans erreur depuis le commit candidat |
+| Tests automatisés | Tous les tests prévus passent |
+| Typecheck | Tous les projets concernés passent |
+| Installation | L'application s'installe sur l'environnement cible |
+| Démarrage et validation fonctionnelle | L'application démarre et les parcours de recette retenus sont validés |
+| Identification du contenu | Le commit de `main` testé est précisément identifié |
+
+Le tag stable est créé **après** réussite de cette checklist et pointe sur le commit exact ayant été testé. Si une correction modifie le contenu, le candidat est reconstruit et les contrôles concernés sont rejoués ; le tag stable n'est pas posé sur l'ancien commit.
 
 ## 6. Convention de nommage des commits
 
@@ -257,17 +290,19 @@ Pour une PR `fix/*` vers `main`, la PR de merge-back vers `develop` doit être o
 - branche par défaut GitHub : `develop` ;
 - `develop` contient le commit de fusion de la PR #9 ;
 - `main` pointe encore sur le commit initial du dépôt et n'a pas encore reçu de release issue de `develop` ;
-- aucun tag Git n'est actuellement présent ;
-- le workflow CI existant a été étendu pour cibler `main` et `develop` ;
-- le Ruleset de protection est fourni sous forme de JSON importable, mais doit encore être importé et activé dans les paramètres GitHub du dépôt.
+- aucun tag Git de release n'est actuellement présent ;
+- le workflow CI cible les PR et les pushes sur `main` et `develop` ;
+- le Ruleset `Protect main and develop` a été importé et activé manuellement par le propriétaire du dépôt le 31 octobre 2026 ;
+- la PR #10 porte le plan de gestion de configuration et reste le véhicule de validation documentaire de ces règles.
 
 Ordre de mise en place :
 
 1. Importer `.github/rulesets/protect-main-develop.json` dans **Settings → Rules → Rulesets**.
 2. Vérifier que le Ruleset cible bien uniquement `main` et `develop`, et qu'il est en état **Active**.
 3. Ouvrir la PR de `feature/configuration-rules` vers `develop` et vérifier que la CI obligatoire s'exécute.
-4. Après fusion de la configuration dans `develop`, préparer ultérieurement une première PR de release de `develop` vers `main`, avec décision explicite sur le passage à la version publiée `1.0.0` et l'alignement des métadonnées de packages.
-5. Après cette première intégration sur `main`, vérifier une PR ciblant `main` pour confirmer que le check CI est bien disponible et obligatoire.
+4. Conserver la version de développement `0.1.0` jusqu'à la préparation d'une release candidate.
+5. Pour la première release, préparer une candidate `1.0.0-rc.N`, la construire et la valider sur le contenu de `main`.
+6. Ne créer le tag stable `v1.0.0` qu'après réussite du build, des tests, de l'installation et de la validation fonctionnelle.
 
 ## 9. Révision du plan
 
