@@ -49,6 +49,18 @@ describe("loadGameData", () => {
     expect(loadGameData(input).coreCatalog.recipes).toEqual([]);
   });
 
+  it("keeps candidate population tiers available to the UI without exposing them to the core", () => {
+    const input = fixture();
+    input.modules.population.push({
+      id: "latium-liberti", name: "Liberti", regionId: "latium",
+      status: "to-observe", evidenceIds: [], residentsPerHouse: 10,
+      consumptionPerResident: [], needs: [],
+    });
+    const result = loadGameData(input);
+    expect(result.modules.population.map((tier) => tier.id)).toContain("latium-liberti");
+    expect(result.coreCatalog.tiers.map((tier) => tier.id)).not.toContain("latium-liberti");
+  });
+
   it("provides a projection directly consumable by the core", () => {
     const result = loadGameData(fixture());
     const report = computeIsland(result.coreCatalog, {

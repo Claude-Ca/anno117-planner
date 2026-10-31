@@ -78,6 +78,8 @@ export interface PopulationNeed {
 }
 
 export interface PopulationTier extends CatalogEntity {
+  /** Region in which this population tier is available. */
+  regionId?: string;
   /** Base residents per house, before fulfilled-need effects. */
   residentsPerHouse: number;
   /** Legacy core-compatible rate, expressed per resident. */

@@ -66,9 +66,10 @@ function loadRepository(): CatalogLoadResult {
   try { return { repository: loadGameData(initialCatalog), error: null }; }
   catch (error) { return { repository: null, error: error instanceof Error ? error.message : String(error) }; }
 }
-function getPopulationTiers(repository: DataRepository): PopulationTierOption[] {
-  const ids = new Set(repository.coreCatalog.tiers.map((tier) => tier.id));
-  return repository.modules.population.filter((tier: PopulationTier) => ids.has(tier.id))
+function getPopulationTiers(repository: DataRepository, regionId: RegionId): PopulationTierOption[] {
+  // L'interface présente les données candidates et à observer. Le moteur de
+  // production conserve son propre filtre verified/derived.
+  return repository.modules.population.filter((tier: PopulationTier) => tier.regionId === regionId)
     .map((tier) => ({
       id: tier.id, name: tier.name, residentsPerHouse: tier.residentsPerHouse,
       needs: tier.needs ?? [],
@@ -78,8 +79,8 @@ function getPopulationTiers(repository: DataRepository): PopulationTierOption[] 
 export default function App() {
   const catalogResult = useMemo(loadRepository, []);
   const repository = catalogResult.repository;
-  const populationTiers = useMemo(() => repository ? getPopulationTiers(repository) : [], [repository]);
   const [session, setSession] = useState<PlannerSession>(() => readSession());
+  const populationTiers = useMemo(() => repository ? getPopulationTiers(repository, session.activeRegion) : [], [repository, session.activeRegion]);
   const [savedAt, setSavedAt] = useState<string | null>(() => {
     try { return JSON.parse(localStorage.getItem(SESSION_KEY) ?? "null")?.savedAt ?? null; } catch { return null; }
   });
@@ -131,7 +132,13 @@ export default function App() {
   const planning = useMemo<PlanningResult>(() => {
     if (!repository) return { simulation: null, error: "Le catalogue n'est pas disponible." };
     try {
-      const input = createPopulationIslandInput(island.name, populationTiers, island.houseCounts, selectedNeeds);
+      // Seuls les paliers validés sont transmis au moteur de production.
+      // Les paliers candidats restent visibles et saisissables dans le Planner.
+      const validatedTiers = repository.coreCatalog.tiers.map((tier) => ({ id: tier.id }));
+      const validatedHouseCounts = Object.fromEntries(
+        validatedTiers.map((tier) => [tier.id, island.houseCounts[tier.id] ?? "0"]),
+      );
+      const input = createPopulationIslandInput(island.name, validatedTiers, validatedHouseCounts);
       return { simulation: simulateCatalogProduction({ repository, island: input }), error: null };
     } catch (error) {
       return { simulation: null, error: error instanceof Error ? error.message : String(error) };
@@ -217,7 +224,7 @@ export default function App() {
         <section className="panel results-panel" aria-live="polite">
           <div className="panel-heading"><div><p className="eyebrow">02 · RÉSULTATS EN DIRECT</p><h3>Ressources nécessaires</h3></div></div>
           {!simulation ? <div className="results-placeholder"><p>Les résultats apparaîtront dès que la saisie sera valide.</p></div> : <>
-            <div className="population-total"><span>Population totale calculée</span><strong>{simulation.totalPopulation.toLocaleString("fr-FR")}</strong><small>habitants</small></div>
+            <div className="population-total"><span>Population de base estimée</span><strong>{populationTiers.reduce((total, tier) => total + (Number(island.houseCounts[tier.id] ?? 0) || 0) * tier.residentsPerHouse, 0).toLocaleString("fr-FR")}</strong><small>habitants</small></div>
             <div className="table-wrap"><table className="results-table">
               <thead><tr><th>Ressource / service</th><th>Quantité nécessaire</th></tr></thead>
               <tbody>{theoreticalNeeds.filter((row) => row.houses > 0 && row.selectedNeedId).map((row) => {

@@ -126,6 +126,9 @@ export function validateModularCatalog(catalog: ModularGameCatalog): CatalogDiag
   });
   modules.population.forEach((t, i) => {
     const p = `modules.population[${i}]`;
+    if (t.regionId !== undefined && !regionIds.has(t.regionId)) {
+      add("REGION_UNKNOWN", `${p}.regionId`, `Région inconnue : ${t.regionId}.`);
+    }
     if (!Number.isFinite(t.residentsPerHouse) || t.residentsPerHouse <= 0) add("POPULATION_INVALID", `${p}.residentsPerHouse`, "Nombre de résidents invalide.");
     checkFlows(t.consumptionPerResident, `${p}.consumptionPerResident`);
     const seenNeeds = new Set<string>();
