@@ -6,6 +6,88 @@
     "evidenceIds": [],
     "residentsPerHouse": 10,
     "consumptionPerResident": [],
-    "needs": []
+    "needs": [
+      {
+        "id": "liberti-food-sardines",
+        "category": "food",
+        "goodId": "sardines",
+        "choiceGroupId": "liberti-food",
+        "status": "candidate",
+        "sourceRefs": [
+          "SRC-002"
+        ],
+        "buildingIds": [
+          "latium-fishing-hut"
+        ]
+      },
+      {
+        "id": "liberti-food-porridge",
+        "category": "food",
+        "goodId": "porridge",
+        "choiceGroupId": "liberti-food",
+        "status": "candidate",
+        "sourceRefs": [
+          "SRC-002"
+        ],
+        "buildingIds": [
+          "latium-oat-farm",
+          "latium-porridge-stand"
+        ]
+      },
+      {
+        "id": "liberti-fashion-tunics",
+        "category": "fashion",
+        "goodId": "tunics",
+        "choiceGroupId": "liberti-fashion",
+        "status": "candidate",
+        "sourceRefs": [
+          "SRC-002"
+        ],
+        "buildingIds": [
+          "latium-hemp-farm",
+          "latium-spinner"
+        ]
+      },
+      {
+        "id": "liberti-fashion-pileus",
+        "category": "fashion",
+        "goodId": "pileus",
+        "choiceGroupId": "liberti-fashion",
+        "status": "candidate",
+        "sourceRefs": [
+          "SRC-009"
+        ],
+        "buildingIds": [
+          "latium-sheep-farm",
+          "latium-pileus-hatter"
+        ]
+      },
+      {
+        "id": "liberti-public-services-market",
+        "category": "public-service",
+        "goodId": "market-service",
+        "choiceGroupId": "liberti-public-services",
+        "status": "candidate",
+        "sourceRefs": [
+          "SRC-002"
+        ],
+        "buildingIds": [
+          "latium-market"
+        ]
+      },
+      {
+        "id": "liberti-public-services-tavern",
+        "category": "public-service",
+        "goodId": "tavern-service",
+        "choiceGroupId": "liberti-public-services",
+        "status": "candidate",
+        "sourceRefs": [
+          "SRC-002"
+        ],
+        "buildingIds": [
+          "latium-tavern"
+        ]
+      }
+    ]
   }
 ]
