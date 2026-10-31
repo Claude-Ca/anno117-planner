@@ -26,6 +26,10 @@ export interface CatalogEntity {
   name: string;
   status: VerificationStatus;
   evidenceIds: string[];
+  /** Concise functional description; not a substitute for an in-game observation. */
+  description?: string;
+  /** IDs from the documentary source register (e.g. SRC-001). */
+  sourceRefs?: string[];
 }
 
 export interface Resource extends CatalogEntity {
