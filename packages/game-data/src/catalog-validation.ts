@@ -6,7 +6,7 @@ import type {
 } from "./catalog-types";
 
 const STATUSES: readonly VerificationStatus[] = [
-  "to-observe", "observed", "verified", "derived", "disputed", "excluded",
+  "candidate", "to-observe", "observed", "verified", "derived", "disputed", "excluded",
 ];
 const MODULE_NAMES = [
   "resources", "buildings", "production", "population", "regions",
