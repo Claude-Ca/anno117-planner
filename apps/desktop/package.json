@@ -16,7 +16,8 @@
     "@anno117/game-data": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "@anno117/product": "workspace:*"
+    "@anno117/product": "workspace:*",
+    "@anno117/core": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
